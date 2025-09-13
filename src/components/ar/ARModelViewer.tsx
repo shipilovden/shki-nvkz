@@ -27,7 +27,13 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
         const models = JSON.parse(storedModels);
         const model = models.find((m: any) => m.id === modelId);
         if (model && model.fileUrl) {
-          setModelUrl(model.fileUrl);
+          // Проверяем, является ли fileUrl base64 данными
+          if (model.fileUrl.startsWith('data:')) {
+            setModelUrl(model.fileUrl);
+          } else {
+            // Если это обычная ссылка, используем её
+            setModelUrl(model.fileUrl);
+          }
         } else {
           // Если модель не найдена, используем тестовую модель
           setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
@@ -164,6 +170,10 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
         
         <Text variant="body-default-m" onBackground="neutral-weak">
           Модель ID: {modelId}
+        </Text>
+        
+        <Text variant="body-default-s" onBackground="neutral-medium">
+          URL модели: {modelUrl ? (modelUrl.length > 50 ? modelUrl.substring(0, 50) + '...' : modelUrl) : 'Не загружена'}
         </Text>
 
         {isARSupported ? (

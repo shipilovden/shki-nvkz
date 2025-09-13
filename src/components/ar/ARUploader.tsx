@@ -53,8 +53,13 @@ export function ARUploader({ onModelUpload, ngrokUrl }: ARUploaderProps) {
     setIsUploading(true);
 
     try {
-      // Создаем URL для файла
-      const fileUrl = URL.createObjectURL(file);
+      // Конвертируем файл в base64 для постоянного хранения
+      const fileUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
       
       // Генерируем уникальный ID
       const modelId = `ar-model-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
