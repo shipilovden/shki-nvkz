@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Column, Row, Text, Button, Input, Icon, useToast } from "@once-ui-system/core";
 import { ARUploader } from "./ARUploader";
 import { ARViewer } from "./ARViewer";
@@ -13,6 +13,19 @@ export function ARGallery() {
   const [selectedModel, setSelectedModel] = useState<ARModel | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [ngrokUrl, setNgrokUrl] = useState("");
+
+  // Загружаем модели из localStorage при инициализации
+  useEffect(() => {
+    try {
+      const storedModels = localStorage.getItem('arModels');
+      if (storedModels) {
+        const models = JSON.parse(storedModels);
+        setArModels(models);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки моделей из localStorage:', error);
+    }
+  }, []);
 
   // Фильтруем модели по поисковому запросу
   const filteredModels = arModels.filter(model =>

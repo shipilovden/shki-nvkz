@@ -20,9 +20,27 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
       });
     }
 
-    // Здесь можно загрузить модель по ID из localStorage или API
-    // Пока используем заглушку
-    setModelUrl("/models/astronaut.glb");
+    // Загружаем модель по ID из localStorage
+    try {
+      const storedModels = localStorage.getItem('arModels');
+      if (storedModels) {
+        const models = JSON.parse(storedModels);
+        const model = models.find((m: any) => m.id === modelId);
+        if (model && model.fileUrl) {
+          setModelUrl(model.fileUrl);
+        } else {
+          // Если модель не найдена, используем тестовую модель
+          setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
+        }
+      } else {
+        // Если нет сохраненных моделей, используем тестовую модель
+        setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки модели:', error);
+      // В случае ошибки используем тестовую модель
+      setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
+    }
   }, [modelId]);
 
   const startAR = async () => {

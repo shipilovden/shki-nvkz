@@ -79,6 +79,16 @@ export function ARUploader({ onModelUpload, ngrokUrl }: ARUploaderProps) {
         fileType: file.type || (isGLB ? 'model/gltf-binary' : 'model/gltf+json')
       };
 
+      // Сохраняем модель в localStorage
+      try {
+        const existingModels = localStorage.getItem('arModels');
+        const models = existingModels ? JSON.parse(existingModels) : [];
+        models.push(model);
+        localStorage.setItem('arModels', JSON.stringify(models));
+      } catch (error) {
+        console.error('Ошибка сохранения в localStorage:', error);
+      }
+
       onModelUpload(model);
 
       addToast({
