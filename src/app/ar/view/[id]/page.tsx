@@ -2,13 +2,13 @@ import { notFound } from "next/navigation";
 import { ARModelViewer } from "@/components/ar/ARModelViewer";
 
 interface ARViewPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function ARViewPage({ params }: ARViewPageProps) {
-  const { id } = params;
+export default async function ARViewPage({ params }: ARViewPageProps) {
+  const { id } = await params;
 
   if (!id) {
     notFound();
