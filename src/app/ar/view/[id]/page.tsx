@@ -1,25 +1,38 @@
+"use client";
+
 import { notFound } from "next/navigation";
 import { ARModelViewer } from "@/components/ar/ARModelViewer";
-import { Metadata } from "next";
+import { useEffect, useState } from "react";
 
 interface ARViewPageProps {
-  params: Promise<{
+  params: {
     id: string;
-  }>;
-}
-
-export async function generateMetadata({ params }: ARViewPageProps): Promise<Metadata> {
-  const { id } = await params;
-  
-  return {
-    title: `AR Модель ${id} - Новокузнецкая школа креативных индустрий`,
-    description: "Просмотр 3D модели в дополненной реальности",
-    robots: "noindex, nofollow", // Не индексируем отдельные модели
   };
 }
 
-export default async function ARViewPage({ params }: ARViewPageProps) {
-  const { id } = await params;
+export default function ARViewPage({ params }: ARViewPageProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div style={{ 
+        width: '100vw', 
+        height: '100vh', 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f5f5f5'
+      }}>
+        <div>Загрузка...</div>
+      </div>
+    );
+  }
+
+  const { id } = params;
 
   if (!id) {
     notFound();

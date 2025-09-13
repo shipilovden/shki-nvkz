@@ -5,10 +5,7 @@ let modelsCache: Map<string, any> = new Map();
 
 // Добавляем тестовую модель для проверки
 if (modelsCache.size === 0) {
-  // Получаем текущий домен из переменных окружения
-  const baseUrl = process.env.VERCEL_URL 
-    ? `https://${process.env.VERCEL_URL}` 
-    : 'https://magic-portfolio-idaz5ijpc-shipilovdens-projects.vercel.app';
+  const baseUrl = 'https://shki-nvkz.vercel.app';
     
   modelsCache.set('test-model', {
     id: 'test-model',
