@@ -49,3 +49,28 @@ export async function POST(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    
+    if (!id) {
+      return NextResponse.json({ error: 'Model ID is required' }, { status: 400 });
+    }
+
+    // Удаляем модель из кэша
+    const deleted = modelsCache.delete(id);
+    
+    if (!deleted) {
+      return NextResponse.json({ error: 'Model not found' }, { status: 404 });
+    }
+    
+    return NextResponse.json({ success: true, id });
+  } catch (error) {
+    console.error('Error deleting model:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

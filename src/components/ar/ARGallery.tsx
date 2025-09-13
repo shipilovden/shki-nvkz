@@ -73,15 +73,47 @@ export function ARGallery() {
   const isLocalhost = typeof window !== 'undefined' && 
     (window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'));
 
-  const handleModelDelete = (modelId: string) => {
-    setArModels(prev => prev.filter(model => model.id !== modelId));
-    if (selectedModel?.id === modelId) {
-      setSelectedModel(null);
+  const handleModelDelete = async (modelId: string) => {
+    try {
+      // Удаляем из IndexedDB
+      if (arStorage.isSupported()) {
+        await arStorage.deleteModel(modelId);
+      } else {
+        // Fallback к localStorage
+        const storedModels = localStorage.getItem('arModels');
+        if (storedModels) {
+          const models = JSON.parse(storedModels);
+          const filteredModels = models.filter((model: any) => model.id !== modelId);
+          localStorage.setItem('arModels', JSON.stringify(filteredModels));
+        }
+      }
+
+      // Удаляем с сервера
+      try {
+        await fetch(`/api/ar/models/${modelId}`, {
+          method: 'DELETE',
+        });
+      } catch (serverError) {
+        console.warn('Не удалось удалить модель с сервера:', serverError);
+      }
+
+      // Обновляем локальное состояние
+      setArModels(prev => prev.filter(model => model.id !== modelId));
+      if (selectedModel?.id === modelId) {
+        setSelectedModel(null);
+      }
+      
+      addToast({
+        variant: "success",
+        message: "Модель удалена",
+      });
+    } catch (error) {
+      console.error('Ошибка удаления модели:', error);
+      addToast({
+        variant: "danger",
+        message: "Ошибка удаления модели",
+      });
     }
-    addToast({
-      variant: "success",
-      message: "Модель удалена",
-    });
   };
 
   return (

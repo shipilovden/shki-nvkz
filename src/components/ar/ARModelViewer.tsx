@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Column, Row, Text, Button, Icon } from "@once-ui-system/core";
+import { useState, useEffect, useRef } from "react";
+import { Column, Row, Text, Button, Icon, Badge } from "@once-ui-system/core";
 import { arStorage } from "@/utils/arStorage";
 
 interface ARModelViewerProps {
@@ -9,15 +9,25 @@ interface ARModelViewerProps {
 }
 
 export function ARModelViewer({ modelId }: ARModelViewerProps) {
+  const modelViewerRef = useRef<any>(null);
   const [isARSupported, setIsARSupported] = useState(false);
+  const [isVRAvailable, setIsVRAvailable] = useState(false);
   const [isARActive, setIsARActive] = useState(false);
+  const [isVRActive, setIsVRActive] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [modelUrl, setModelUrl] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [modelInfo, setModelInfo] = useState<any>(null);
 
   useEffect(() => {
-    // Проверяем поддержку WebXR
+    // Проверяем поддержку WebXR для AR и VR
     if ('xr' in navigator) {
       navigator.xr?.isSessionSupported('immersive-ar').then((supported) => {
         setIsARSupported(supported);
+      });
+      navigator.xr?.isSessionSupported('immersive-vr').then((supported) => {
+        setIsVRAvailable(supported);
       });
     }
 
@@ -31,6 +41,8 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
             const model = await response.json();
             if (model && model.fileUrl) {
               setModelUrl(model.fileUrl);
+              setModelInfo(model);
+              setIsLoading(false);
               return;
             }
           }
@@ -76,16 +88,53 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
     }
 
     try {
-      // Здесь будет логика запуска AR сессии
-      setIsARActive(true);
+      if (modelViewerRef.current) {
+        await modelViewerRef.current.activateAR();
+        setIsARActive(true);
+      }
     } catch (error) {
       console.error('Ошибка запуска AR:', error);
       alert('Не удалось запустить AR');
     }
   };
 
+  const startVR = async () => {
+    if (!isVRAvailable) {
+      alert('VR не поддерживается в вашем браузере');
+      return;
+    }
+
+    try {
+      if (modelViewerRef.current) {
+        await modelViewerRef.current.activateVR();
+        setIsVRActive(true);
+      }
+    } catch (error) {
+      console.error('Ошибка запуска VR:', error);
+      alert('Не удалось запустить VR');
+    }
+  };
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    } catch (error) {
+      console.error('Ошибка переключения полноэкранного режима:', error);
+    }
+  };
+
   const exitAR = () => {
     setIsARActive(false);
+  };
+
+  const exitVR = () => {
+    setIsVRActive(false);
   };
 
   if (isARActive) {
@@ -168,87 +217,181 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
     );
   }
 
-  return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
+  if (isLoading) {
+    return (
+      <div style={{ 
+        width: '100%', 
+        height: '400px', 
+        display: 'flex', 
+        alignItems: 'center', 
         justifyContent: 'center',
-        backgroundColor: '#f0f0f0',
         flexDirection: 'column',
         gap: '20px'
-      }}
-    >
-      <Column gap="l" align="center" style={{ textAlign: 'center' }}>
-        <Icon name="rocket" size="l" onBackground="neutral-medium" style={{ fontSize: '64px' }} />
-        
-        <Text variant="heading-strong-l">
-          AR Просмотр
+      }}>
+        <Icon name="package" size="l" onBackground="neutral-medium" style={{ fontSize: '48px' }} />
+        <Text variant="body-default-m" onBackground="neutral-medium">
+          Загрузка модели...
         </Text>
-        
-        <Text variant="body-default-m" onBackground="neutral-weak">
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div style={{ 
+        width: '100%', 
+        height: '400px', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '20px'
+      }}>
+        <Icon name="warning" size="l" onBackground="danger-medium" style={{ fontSize: '48px' }} />
+        <Text variant="body-default-m" onBackground="danger-medium">
+          Ошибка загрузки модели
+        </Text>
+        <Text variant="body-default-s" onBackground="neutral-medium">
           Модель ID: {modelId}
         </Text>
-        
-        <Text variant="body-default-s" onBackground="neutral-medium">
-          URL модели: {modelUrl ? (modelUrl.length > 50 ? modelUrl.substring(0, 50) + '...' : modelUrl) : 'Не загружена'}
-        </Text>
+      </div>
+    );
+  }
 
-        {isARSupported ? (
-          <Column gap="m" align="center">
-            <Text variant="body-default-s" onBackground="neutral-medium">
-              AR поддерживается в вашем браузере
-            </Text>
-            <Button
-              variant="primary"
-              size="l"
-              onClick={startAR}
-              prefixIcon="rocket"
-            >
-              Запустить AR
-            </Button>
-          </Column>
-        ) : (
-          <Column gap="m" align="center">
-            <Text variant="body-default-s" onBackground="neutral-medium">
-              AR не поддерживается в вашем браузере
-            </Text>
+  return (
+    <Column gap="l" style={{ width: '100%' }}>
+      {/* Информация о модели */}
+      {modelInfo && (
+        <Row gap="m" align="center" style={{ 
+          padding: '16px', 
+          backgroundColor: 'var(--color-neutral-alpha-weak)', 
+          borderRadius: '8px' 
+        }}>
+          <Column flex={1}>
+            <Text variant="heading-strong-s">{modelInfo.name}</Text>
             <Text variant="body-default-xs" onBackground="neutral-weak">
-              Используйте Chrome или Edge на мобильном устройстве
+              {modelInfo.description}
             </Text>
+            <Row gap="s" align="center" style={{ marginTop: '8px' }}>
+              <Badge variant="neutral" size="s">
+                {(modelInfo.fileSize / 1024 / 1024).toFixed(1)} МБ
+              </Badge>
+              <Badge variant="neutral" size="s">
+                {new Date(modelInfo.createdAt).toLocaleDateString('ru-RU')}
+              </Badge>
+            </Row>
           </Column>
-        )}
+        </Row>
+      )}
 
-        {/* Предпросмотр модели */}
-        {modelUrl && (
-          <div
+      {/* 3D Viewer */}
+      <div
+        style={{
+          width: '100%',
+          height: '500px',
+          border: '1px solid var(--color-neutral-alpha-strong)',
+          borderRadius: '12px',
+          backgroundColor: 'var(--color-neutral-alpha-weak)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        {modelUrl ? (
+          <model-viewer
+            ref={modelViewerRef}
+            src={modelUrl}
+            alt={modelInfo?.name || "AR Model"}
+            auto-rotate
+            camera-controls
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            vr
             style={{
-              width: '300px',
-              height: '300px',
-              border: '1px solid var(--color-neutral-alpha-strong)',
-              borderRadius: '8px',
-              backgroundColor: 'white',
-              marginTop: '20px'
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'transparent'
             }}
-          >
-            <model-viewer
-              src={modelUrl}
-              alt="Model Preview"
-              auto-rotate
-              camera-controls
-              style={{
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'transparent'
-              }}
-              camera-orbit="0deg 75deg 1.5m"
-              field-of-view="30deg"
-            />
+            camera-orbit="0deg 75deg 1.5m"
+            field-of-view="30deg"
+            onLoad={() => setIsLoading(false)}
+            onError={() => setHasError(true)}
+          />
+        ) : (
+          <div style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            gap: '16px'
+          }}>
+            <Icon name="package" size="l" onBackground="neutral-medium" style={{ fontSize: '48px' }} />
+            <Text variant="body-default-m" onBackground="neutral-medium">
+              Модель не найдена
+            </Text>
           </div>
         )}
-      </Column>
-    </div>
+      </div>
+
+      {/* Панель управления */}
+      <Row gap="m" align="center" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
+        {isARSupported && (
+          <Button
+            variant="primary"
+            size="m"
+            onClick={startAR}
+            prefixIcon="rocket"
+          >
+            Запустить AR
+          </Button>
+        )}
+        
+        {isVRAvailable && (
+          <Button
+            variant="secondary"
+            size="m"
+            onClick={startVR}
+            prefixIcon="3d"
+          >
+            Запустить VR
+          </Button>
+        )}
+        
+        <Button
+          variant="tertiary"
+          size="m"
+          onClick={toggleFullscreen}
+          prefixIcon={isFullscreen ? "close" : "expand"}
+        >
+          {isFullscreen ? "Выйти из полноэкранного" : "Полноэкранный"}
+        </Button>
+      </Row>
+
+      {/* Информация о поддержке */}
+      <Row gap="l" align="center" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
+        <Row gap="s" align="center">
+          <Icon 
+            name={isARSupported ? "check" : "close"} 
+            size="s" 
+            onBackground={isARSupported ? "success-medium" : "danger-medium"} 
+          />
+          <Text variant="body-default-xs" onBackground="neutral-medium">
+            AR: {isARSupported ? "Поддерживается" : "Не поддерживается"}
+          </Text>
+        </Row>
+        
+        <Row gap="s" align="center">
+          <Icon 
+            name={isVRAvailable ? "check" : "close"} 
+            size="s" 
+            onBackground={isVRAvailable ? "success-medium" : "danger-medium"} 
+          />
+          <Text variant="body-default-xs" onBackground="neutral-medium">
+            VR: {isVRAvailable ? "Поддерживается" : "Не поддерживается"}
+          </Text>
+        </Row>
+      </Row>
+    </Column>
   );
 }
