@@ -21,16 +21,29 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
       });
     }
 
-    // Загружаем модель по ID из IndexedDB
+    // Загружаем модель по ID с сервера
     const loadModel = async () => {
       try {
+        // Сначала пробуем загрузить с сервера (для QR кодов)
+        try {
+          const response = await fetch(`/api/ar/models/${modelId}`);
+          if (response.ok) {
+            const model = await response.json();
+            if (model && model.fileUrl) {
+              setModelUrl(model.fileUrl);
+              return;
+            }
+          }
+        } catch (serverError) {
+          console.warn('Не удалось загрузить модель с сервера:', serverError);
+        }
+
+        // Fallback к IndexedDB для локального использования
         if (arStorage.isSupported()) {
           const model = await arStorage.getModel(modelId);
           if (model && model.fileUrl) {
             setModelUrl(model.fileUrl);
-          } else {
-            // Если модель не найдена, используем тестовую модель
-            setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
+            return;
           }
         } else {
           // Fallback к localStorage для старых браузеров
@@ -40,13 +53,13 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
             const model = models.find((m: any) => m.id === modelId);
             if (model && model.fileUrl) {
               setModelUrl(model.fileUrl);
-            } else {
-              setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
+              return;
             }
-          } else {
-            setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
           }
         }
+
+        // Если модель не найдена нигде, используем тестовую модель
+        setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
       } catch (error) {
         console.error('Ошибка загрузки модели:', error);
         setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");

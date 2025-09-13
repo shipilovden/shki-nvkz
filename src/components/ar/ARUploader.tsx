@@ -95,20 +95,22 @@ export function ARUploader({ onModelUpload, ngrokUrl }: ARUploaderProps) {
         fileType: file.type || (isGLB ? 'model/gltf-binary' : 'model/gltf+json')
       };
 
-      // Сохраняем модель в IndexedDB
+      // Сохраняем модель в IndexedDB и на сервер
       try {
+        const modelData: ARModelData = {
+          id: model.id,
+          name: model.name,
+          description: model.description,
+          fileUrl: model.fileUrl,
+          qrCodeUrl: model.qrCodeUrl,
+          arUrl: model.arUrl,
+          createdAt: model.createdAt.toISOString(),
+          fileSize: model.fileSize,
+          fileType: model.fileType
+        };
+
+        // Сохраняем в IndexedDB для локального использования
         if (arStorage.isSupported()) {
-          const modelData: ARModelData = {
-            id: model.id,
-            name: model.name,
-            description: model.description,
-            fileUrl: model.fileUrl,
-            qrCodeUrl: model.qrCodeUrl,
-            arUrl: model.arUrl,
-            createdAt: model.createdAt.toISOString(),
-            fileSize: model.fileSize,
-            fileType: model.fileType
-          };
           await arStorage.saveModel(modelData);
         } else {
           // Fallback к localStorage для старых браузеров
@@ -117,6 +119,25 @@ export function ARUploader({ onModelUpload, ngrokUrl }: ARUploaderProps) {
           models.push(model);
           localStorage.setItem('arModels', JSON.stringify(models));
         }
+
+        // Сохраняем на сервер для доступа через QR код
+        try {
+          const response = await fetch(`/api/ar/models/${model.id}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(modelData),
+          });
+
+          if (!response.ok) {
+            console.warn('Не удалось сохранить модель на сервер:', response.statusText);
+          }
+        } catch (serverError) {
+          console.warn('Ошибка сохранения на сервер:', serverError);
+          // Не блокируем процесс, если сервер недоступен
+        }
+
       } catch (error) {
         console.error('Ошибка сохранения модели:', error);
         addToast({
