@@ -6,6 +6,7 @@ import { ARUploader } from "./ARUploader";
 import { ARViewer } from "./ARViewer";
 import { ARCard } from "./ARCard";
 import type { ARModel } from "@/types/ar.types";
+import { arStorage, type ARModelData } from "@/utils/arStorage";
 
 export function ARGallery() {
   const { addToast } = useToast();
@@ -14,22 +15,44 @@ export function ARGallery() {
   const [searchQuery, setSearchQuery] = useState("");
   const [ngrokUrl, setNgrokUrl] = useState("");
 
-  // Загружаем модели из localStorage при инициализации
+  // Загружаем модели из IndexedDB при инициализации
   useEffect(() => {
-    try {
-      const storedModels = localStorage.getItem('arModels');
-      if (storedModels) {
-        const models = JSON.parse(storedModels);
-        // Восстанавливаем Date объекты
-        const restoredModels = models.map((model: any) => ({
-          ...model,
-          createdAt: new Date(model.createdAt)
-        }));
-        setArModels(restoredModels);
+    const loadModels = async () => {
+      try {
+        if (arStorage.isSupported()) {
+          const models = await arStorage.getAllModels();
+          // Конвертируем ARModelData в ARModel
+          const convertedModels: ARModel[] = models.map((modelData: ARModelData) => ({
+            id: modelData.id,
+            name: modelData.name,
+            description: modelData.description,
+            fileUrl: modelData.fileUrl,
+            qrCodeUrl: modelData.qrCodeUrl,
+            arUrl: modelData.arUrl,
+            createdAt: new Date(modelData.createdAt),
+            fileSize: modelData.fileSize,
+            fileType: modelData.fileType,
+            file: null // Файл не сохраняется в IndexedDB
+          }));
+          setArModels(convertedModels);
+        } else {
+          // Fallback к localStorage для старых браузеров
+          const storedModels = localStorage.getItem('arModels');
+          if (storedModels) {
+            const models = JSON.parse(storedModels);
+            const restoredModels = models.map((model: any) => ({
+              ...model,
+              createdAt: new Date(model.createdAt)
+            }));
+            setArModels(restoredModels);
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки моделей:', error);
       }
-    } catch (error) {
-      console.error('Ошибка загрузки моделей из localStorage:', error);
-    }
+    };
+
+    loadModels();
   }, []);
 
   // Фильтруем модели по поисковому запросу

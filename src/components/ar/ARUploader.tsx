@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Column, Row, Text, Button, Icon, useToast } from "@once-ui-system/core";
 import type { ARUploaderProps, ARModel } from "@/types/ar.types";
+import { arStorage, type ARModelData } from "@/utils/arStorage";
 
 export function ARUploader({ onModelUpload, ngrokUrl }: ARUploaderProps) {
   const { addToast } = useToast();
@@ -50,6 +51,16 @@ export function ARUploader({ onModelUpload, ngrokUrl }: ARUploaderProps) {
       return;
     }
 
+    // Проверяем размер файла (максимум 50 МБ)
+    const maxSize = 50 * 1024 * 1024; // 50 МБ
+    if (file.size > maxSize) {
+      addToast({
+        variant: "danger",
+        message: "Размер файла не должен превышать 50 МБ",
+      });
+      return;
+    }
+
     setIsUploading(true);
 
     try {
@@ -84,14 +95,34 @@ export function ARUploader({ onModelUpload, ngrokUrl }: ARUploaderProps) {
         fileType: file.type || (isGLB ? 'model/gltf-binary' : 'model/gltf+json')
       };
 
-      // Сохраняем модель в localStorage
+      // Сохраняем модель в IndexedDB
       try {
-        const existingModels = localStorage.getItem('arModels');
-        const models = existingModels ? JSON.parse(existingModels) : [];
-        models.push(model);
-        localStorage.setItem('arModels', JSON.stringify(models));
+        if (arStorage.isSupported()) {
+          const modelData: ARModelData = {
+            id: model.id,
+            name: model.name,
+            description: model.description,
+            fileUrl: model.fileUrl,
+            qrCodeUrl: model.qrCodeUrl,
+            arUrl: model.arUrl,
+            createdAt: model.createdAt.toISOString(),
+            fileSize: model.fileSize,
+            fileType: model.fileType
+          };
+          await arStorage.saveModel(modelData);
+        } else {
+          // Fallback к localStorage для старых браузеров
+          const existingModels = localStorage.getItem('arModels');
+          const models = existingModels ? JSON.parse(existingModels) : [];
+          models.push(model);
+          localStorage.setItem('arModels', JSON.stringify(models));
+        }
       } catch (error) {
-        console.error('Ошибка сохранения в localStorage:', error);
+        console.error('Ошибка сохранения модели:', error);
+        addToast({
+          variant: "danger",
+          message: "Ошибка сохранения модели",
+        });
       }
 
       onModelUpload(model);

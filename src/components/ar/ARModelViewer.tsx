@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Column, Row, Text, Button, Icon } from "@once-ui-system/core";
+import { arStorage } from "@/utils/arStorage";
 
 interface ARModelViewerProps {
   modelId: string;
@@ -20,33 +21,39 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
       });
     }
 
-    // Загружаем модель по ID из localStorage
-    try {
-      const storedModels = localStorage.getItem('arModels');
-      if (storedModels) {
-        const models = JSON.parse(storedModels);
-        const model = models.find((m: any) => m.id === modelId);
-        if (model && model.fileUrl) {
-          // Проверяем, является ли fileUrl base64 данными
-          if (model.fileUrl.startsWith('data:')) {
+    // Загружаем модель по ID из IndexedDB
+    const loadModel = async () => {
+      try {
+        if (arStorage.isSupported()) {
+          const model = await arStorage.getModel(modelId);
+          if (model && model.fileUrl) {
             setModelUrl(model.fileUrl);
           } else {
-            // Если это обычная ссылка, используем её
-            setModelUrl(model.fileUrl);
+            // Если модель не найдена, используем тестовую модель
+            setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
           }
         } else {
-          // Если модель не найдена, используем тестовую модель
-          setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
+          // Fallback к localStorage для старых браузеров
+          const storedModels = localStorage.getItem('arModels');
+          if (storedModels) {
+            const models = JSON.parse(storedModels);
+            const model = models.find((m: any) => m.id === modelId);
+            if (model && model.fileUrl) {
+              setModelUrl(model.fileUrl);
+            } else {
+              setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
+            }
+          } else {
+            setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
+          }
         }
-      } else {
-        // Если нет сохраненных моделей, используем тестовую модель
+      } catch (error) {
+        console.error('Ошибка загрузки модели:', error);
         setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
       }
-    } catch (error) {
-      console.error('Ошибка загрузки модели:', error);
-      // В случае ошибки используем тестовую модель
-      setModelUrl("https://modelviewer.dev/shared-assets/models/Astronaut.glb");
-    }
+    };
+
+    loadModel();
   }, [modelId]);
 
   const startAR = async () => {
