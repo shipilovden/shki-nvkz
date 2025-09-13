@@ -51,12 +51,12 @@ export function ARUploader({ onModelUpload, ngrokUrl }: ARUploaderProps) {
       return;
     }
 
-    // Проверяем размер файла (максимум 50 МБ)
-    const maxSize = 50 * 1024 * 1024; // 50 МБ
+    // Проверяем размер файла (максимум 10 МБ)
+    const maxSize = 10 * 1024 * 1024; // 10 МБ
     if (file.size > maxSize) {
       addToast({
         variant: "danger",
-        message: "Размер файла не должен превышать 50 МБ",
+        message: "Размер файла не должен превышать 10 МБ",
       });
       return;
     }
@@ -214,6 +214,10 @@ export function ARUploader({ onModelUpload, ngrokUrl }: ARUploaderProps) {
         
         <Text variant="body-default-s" onBackground="neutral-weak" align="center">
           Перетащите файл GLB или GLTF сюда, или нажмите кнопку для выбора
+        </Text>
+        
+        <Text variant="body-default-xs" onBackground="neutral-medium" align="center">
+          Максимальный размер файла: 10 МБ
         </Text>
       </Column>
 
