@@ -53,9 +53,9 @@ export function ARCard({ model, isSelected, onSelect, onDelete }: ARCardProps) {
           border: '1px solid var(--color-neutral-alpha-strong)'
         }}
       >
-        {model.src ? (
+        {model.fileUrl ? (
           <model-viewer
-            src={model.src}
+            src={model.fileUrl}
             alt={model.name}
             disable-zoom
             disable-pan
