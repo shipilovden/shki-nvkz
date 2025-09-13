@@ -57,20 +57,28 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
         }
 
         // Fallback к IndexedDB для локального использования
+        console.log('Пробуем загрузить из IndexedDB...');
         if (arStorage.isSupported()) {
           const model = await arStorage.getModel(modelId);
+          console.log('Модель из IndexedDB:', model);
           if (model && model.fileUrl) {
             setModelUrl(model.fileUrl);
+            setModelInfo(model);
+            setIsLoading(false);
             return;
           }
         } else {
           // Fallback к localStorage для старых браузеров
+          console.log('Пробуем загрузить из localStorage...');
           const storedModels = localStorage.getItem('arModels');
           if (storedModels) {
             const models = JSON.parse(storedModels);
             const model = models.find((m: any) => m.id === modelId);
+            console.log('Модель из localStorage:', model);
             if (model && model.fileUrl) {
               setModelUrl(model.fileUrl);
+              setModelInfo(model);
+              setIsLoading(false);
               return;
             }
           }

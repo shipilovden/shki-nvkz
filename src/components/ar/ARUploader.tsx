@@ -122,6 +122,7 @@ export function ARUploader({ onModelUpload, ngrokUrl }: ARUploaderProps) {
 
         // Сохраняем на сервер для доступа через QR код
         try {
+          console.log('Сохраняем модель на сервер:', model.id, modelData);
           const response = await fetch(`/api/ar/models/${model.id}`, {
             method: 'POST',
             headers: {
@@ -130,12 +131,24 @@ export function ARUploader({ onModelUpload, ngrokUrl }: ARUploaderProps) {
             body: JSON.stringify(modelData),
           });
 
+          console.log('Ответ сервера при сохранении:', response.status, response.statusText);
+          
           if (!response.ok) {
-            console.warn('Не удалось сохранить модель на сервер:', response.statusText);
+            const errorText = await response.text();
+            console.error('Ошибка сохранения на сервер:', response.status, errorText);
+            addToast({
+              variant: "danger",
+              message: `Ошибка сохранения на сервер: ${response.status}`,
+            });
+          } else {
+            console.log('Модель успешно сохранена на сервер');
           }
         } catch (serverError) {
-          console.warn('Ошибка сохранения на сервер:', serverError);
-          // Не блокируем процесс, если сервер недоступен
+          console.error('Ошибка сохранения на сервер:', serverError);
+          addToast({
+            variant: "danger",
+            message: "Ошибка сохранения на сервер",
+          });
         }
 
       } catch (error) {

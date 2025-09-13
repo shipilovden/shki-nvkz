@@ -9,6 +9,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    console.log('API GET: Запрос модели с ID:', id);
+    console.log('API GET: Всего моделей в кэше:', modelsCache.size);
+    console.log('API GET: Ключи в кэше:', Array.from(modelsCache.keys()));
     
     if (!id) {
       return NextResponse.json({ error: 'Model ID is required' }, { status: 400 });
@@ -16,14 +19,17 @@ export async function GET(
 
     // Ищем модель в кэше
     const model = modelsCache.get(id);
+    console.log('API GET: Найденная модель:', model ? 'да' : 'нет');
     
     if (!model) {
+      console.log('API GET: Модель не найдена, возвращаем 404');
       return NextResponse.json({ error: 'Model not found' }, { status: 404 });
     }
 
+    console.log('API GET: Возвращаем модель:', model.name);
     return NextResponse.json(model);
   } catch (error) {
-    console.error('Error fetching model:', error);
+    console.error('API GET: Ошибка получения модели:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -35,6 +41,8 @@ export async function POST(
   try {
     const { id } = await params;
     const modelData = await request.json();
+    console.log('API POST: Сохранение модели с ID:', id);
+    console.log('API POST: Данные модели:', modelData);
     
     if (!id || !modelData) {
       return NextResponse.json({ error: 'Model ID and data are required' }, { status: 400 });
@@ -42,10 +50,11 @@ export async function POST(
 
     // Сохраняем модель в кэш
     modelsCache.set(id, modelData);
+    console.log('API POST: Модель сохранена. Всего моделей в кэше:', modelsCache.size);
     
     return NextResponse.json({ success: true, id });
   } catch (error) {
-    console.error('Error saving model:', error);
+    console.error('API POST: Ошибка сохранения модели:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
