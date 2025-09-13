@@ -1,40 +1,30 @@
-import { About, Blog, Gallery, Home, Newsletter, Person, Social, Work } from "@/types";
+import type { About, Blog, Gallery, Home, Newsletter, Person, Social, Work } from "@/types";
 import { Line, Logo, Row, Text } from "@once-ui-system/core";
 
 const person: Person = {
-  firstName: "Selene",
-  lastName: "Yu",
-  name: `Selene Yu`,
-  role: "Design Engineer",
+  firstName: "шки",
+  lastName: "нвкз",
+  name: "шки-нвкз",
+  role: "Дизайнер-разработчик",
   avatar: "/images/avatar.jpg",
   email: "example@gmail.com",
-  location: "Asia/Jakarta", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
-  languages: ["English", "Bahasa"], // optional: Leave the array empty if you don't want to display languages
+  location: "Asia/Novokuznetsk", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
+  languages: [], // optional: Leave the array empty if you don't want to display languages
 };
 
 const newsletter: Newsletter = {
-  display: true,
-  title: <>Subscribe to {person.firstName}'s Newsletter</>,
-  description: <>My weekly newsletter about creativity and engineering</>,
+  display: false,
+  title: <>Подписка на рассылку {person.firstName}</>,
+  description: <>Еженедельная рассылка о творчестве и разработке</>,
 };
 
 const social: Social = [
   // Links are automatically displayed.
   // Import new icons in /once-ui/icons.ts
   {
-    name: "GitHub",
-    icon: "github",
-    link: "https://github.com/once-ui-system",
-  },
-  {
-    name: "LinkedIn",
-    icon: "linkedin",
-    link: "https://www.linkedin.com/company/once-ui/",
-  },
-  {
-    name: "Threads",
-    icon: "threads",
-    link: "https://www.threads.com/@once_ui",
+    name: "VK",
+    icon: "vk",
+    link: "https://vk.com/denis_shipilov",
   },
   {
     name: "Email",
@@ -46,42 +36,34 @@ const social: Social = [
 const home: Home = {
   path: "/",
   image: "/images/og/home.jpg",
-  label: "Home",
-  title: `${person.name}'s Portfolio`,
-  description: `Portfolio website showcasing my work as a ${person.role}`,
-  headline: <>Building bridges between design and code</>,
+  label: "Главная",
+  title: `Портфолио ${person.name}`,
+  description: `Сайт-портфолио, демонстрирующий мою работу как ${person.role}`,
+  headline: <>Новокузнецкая школа креативных индустрий</>,
   featured: {
     display: true,
     title: (
       <Row gap="12" vertical="center">
-        <strong className="ml-4">Once UI</strong>{" "}
-        <Line background="brand-alpha-strong" vert height="20" />
         <Text marginRight="4" onBackground="brand-medium">
-          Featured work
+          Карта
         </Text>
       </Row>
     ),
-    href: "/work/building-once-ui-a-customizable-design-system",
+    href: "https://yandex.ru/maps/-/CLUzACZC",
+    target: "_blank",
   },
   subline: (
     <>
-      I'm Selene, a design engineer at{" "}
-      <Logo
-        dark
-        icon="/trademarks/wordmark-dark.svg"
-        style={{ display: "inline-flex", top: "0.25em", marginLeft: "-0.25em" }}
-      />
-      , where I craft intuitive
-      <br /> user experiences. After hours, I build my own projects.
+      Обучение современным специальностям в Новокузнецкой школе креативных индустрий
     </>
   ),
 };
 
 const about: About = {
   path: "/about",
-  label: "About",
-  title: `About – ${person.name}`,
-  description: `Meet ${person.name}, ${person.role} from ${person.location}`,
+  label: "О школе",
+  title: "О школе",
+  description: `Познакомьтесь с ${person.name}, ${person.role} из ${person.location}`,
   tableOfContent: {
     display: true,
     subItems: false,
@@ -95,38 +77,32 @@ const about: About = {
   },
   intro: {
     display: true,
-    title: "Introduction",
+    title: "Введение",
     description: (
       <>
-        Selene is a Jakarta-based design engineer with a passion for transforming complex challenges
-        into simple, elegant design solutions. Her work spans digital interfaces, interactive
-        experiences, and the convergence of design and technology.
+        шки-нвкз — дизайнер-разработчик из Москвы с страстью к превращению сложных задач
+        в простые и элегантные дизайн-решения. Его работа охватывает цифровые интерфейсы, интерактивные
+        впечатления и сближение дизайна и технологий.
       </>
     ),
   },
   work: {
     display: true, // set to false to hide this section
-    title: "Work Experience",
+    title: "Опыт работы",
     experiences: [
       {
         company: "FLY",
-        timeframe: "2022 - Present",
-        role: "Senior Design Engineer",
+        timeframe: "2022 - Настоящее время",
+        role: "Старший дизайнер-разработчик",
         achievements: [
-          <>
-            Redesigned the UI/UX for the FLY platform, resulting in a 20% increase in user
-            engagement and 30% faster load times.
-          </>,
-          <>
-            Spearheaded the integration of AI tools into design workflows, enabling designers to
-            iterate 50% faster.
-          </>,
+          "Переработал UI/UX для платформы FLY, что привело к увеличению вовлеченности пользователей на 20% и ускорению загрузки на 30%.",
+          "Возглавил интеграцию AI-инструментов в рабочие процессы дизайна, позволив дизайнерам итерироваться на 50% быстрее.",
         ],
         images: [
           // optional: leave the array empty if you don't want to display images
           {
             src: "/images/projects/project-01/cover-01.jpg",
-            alt: "Once UI Project",
+            alt: "Проект Once UI",
             width: 16,
             height: 9,
           },
@@ -135,16 +111,10 @@ const about: About = {
       {
         company: "Creativ3",
         timeframe: "2018 - 2022",
-        role: "Lead Designer",
+        role: "Ведущий дизайнер",
         achievements: [
-          <>
-            Developed a design system that unified the brand across multiple platforms, improving
-            design consistency by 40%.
-          </>,
-          <>
-            Led a cross-functional team to launch a new product line, contributing to a 15% increase
-            in overall company revenue.
-          </>,
+          "Разработал дизайн-систему, которая унифицировала бренд на нескольких платформах, улучшив консистентность дизайна на 40%.",
+          "Руководил межфункциональной командой по запуску новой продуктовой линейки, что способствовало увеличению общей выручки компании на 15%.",
         ],
         images: [],
       },
@@ -152,27 +122,25 @@ const about: About = {
   },
   studies: {
     display: true, // set to false to hide this section
-    title: "Studies",
+    title: "Образование",
     institutions: [
       {
-        name: "University of Jakarta",
-        description: <>Studied software engineering.</>,
+        name: "Московский государственный университет",
+        description: "Изучал программную инженерию.",
       },
       {
         name: "Build the Future",
-        description: <>Studied online marketing and personal branding.</>,
+        description: "Изучал онлайн-маркетинг и личный брендинг.",
       },
     ],
   },
   technical: {
     display: true, // set to false to hide this section
-    title: "Technical skills",
+    title: "Технические навыки",
     skills: [
       {
         title: "Figma",
-        description: (
-          <>Able to prototype in Figma with Once UI with unnatural speed.</>
-        ),
+        description: "Способен создавать прототипы в Figma с Once UI с неестественной скоростью.",
         tags: [
           {
             name: "Figma",
@@ -183,13 +151,13 @@ const about: About = {
         images: [
           {
             src: "/images/projects/project-01/cover-02.jpg",
-            alt: "Project image",
+            alt: "Изображение проекта",
             width: 16,
             height: 9,
           },
           {
             src: "/images/projects/project-01/cover-03.jpg",
-            alt: "Project image",
+            alt: "Изображение проекта",
             width: 16,
             height: 9,
           },
@@ -197,9 +165,7 @@ const about: About = {
       },
       {
         title: "Next.js",
-        description: (
-          <>Building next gen apps with Next.js + Once UI + Supabase.</>
-        ),
+        description: "Создаю приложения нового поколения с Next.js + Once UI + Supabase.",
         tags: [
           {
             name: "JavaScript",
@@ -218,7 +184,7 @@ const about: About = {
         images: [
           {
             src: "/images/projects/project-01/cover-04.jpg",
-            alt: "Project image",
+            alt: "Изображение проекта",
             width: 16,
             height: 9,
           },
@@ -230,71 +196,92 @@ const about: About = {
 
 const blog: Blog = {
   path: "/blog",
-  label: "Blog",
-  title: "Writing about design and tech...",
-  description: `Read what ${person.name} has been up to recently`,
+  label: "Студии",
+  title: "Пишу о дизайне и технологиях...",
+  description: `Читайте о том, чем занимался ${person.name} в последнее время`,
   // Create new blog posts by adding a new .mdx file to app/blog/posts
   // All posts will be listed on the /blog route
 };
 
 const work: Work = {
   path: "/work",
-  label: "Work",
-  title: `Projects – ${person.name}`,
-  description: `Design and dev projects by ${person.name}`,
+  label: "Проекты",
+  title: `Проекты – ${person.name}`,
+  description: `Дизайн и разработка проектов от ${person.name}`,
   // Create new project pages by adding a new .mdx file to app/blog/posts
   // All projects will be listed on the /home and /work routes
 };
 
 const gallery: Gallery = {
   path: "/gallery",
-  label: "Gallery",
-  title: `Photo gallery – ${person.name}`,
-  description: `A photo collection by ${person.name}`,
+  label: "Галерея",
+  title: `Фотогалерея – ${person.name}`,
+  description: `Коллекция фотографий от ${person.name}`,
   // Images by https://lorant.one
   // These are placeholder images, replace with your own
   images: [
     {
       src: "/images/gallery/horizontal-1.jpg",
-      alt: "image",
+      alt: "изображение",
       orientation: "horizontal",
     },
     {
       src: "/images/gallery/vertical-4.jpg",
-      alt: "image",
+      alt: "изображение",
       orientation: "vertical",
     },
     {
       src: "/images/gallery/horizontal-3.jpg",
-      alt: "image",
+      alt: "изображение",
       orientation: "horizontal",
     },
     {
       src: "/images/gallery/vertical-1.jpg",
-      alt: "image",
+      alt: "изображение",
       orientation: "vertical",
     },
     {
       src: "/images/gallery/vertical-2.jpg",
-      alt: "image",
+      alt: "изображение",
       orientation: "vertical",
     },
     {
       src: "/images/gallery/horizontal-2.jpg",
-      alt: "image",
+      alt: "изображение",
       orientation: "horizontal",
     },
     {
       src: "/images/gallery/horizontal-4.jpg",
-      alt: "image",
+      alt: "изображение",
       orientation: "horizontal",
     },
     {
       src: "/images/gallery/vertical-3.jpg",
-      alt: "image",
+      alt: "изображение",
       orientation: "vertical",
     },
   ],
 };
 
-export { person, social, newsletter, home, about, blog, work, gallery };
+const ar: Blog = {
+  path: "/ar",
+  label: "AR",
+  title: "AR - Новокузнецкая школа креативных индустрий",
+  description: "Дополненная реальность в образовании",
+};
+
+const music: Blog = {
+  path: "/music",
+  label: "",
+  title: "Музыка - Новокузнецкая школа креативных индустрий",
+  description: "Музыкальное образование и творчество",
+};
+
+const threeD: Blog = {
+  path: "/3d",
+  label: "3D",
+  title: "3D Моделирование - Новокузнецкая школа креативных индустрий",
+  description: "3D моделирование и визуализация",
+};
+
+export { person, social, newsletter, home, about, blog, work, gallery, ar, music, threeD };

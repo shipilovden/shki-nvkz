@@ -72,7 +72,7 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
       setIsAuthenticated(true);
       setError(undefined);
     } else {
-      setError("Incorrect password");
+      setError("Неверный пароль");
     }
   };
 
@@ -92,17 +92,17 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
     return (
       <Column paddingY="128" maxWidth={24} gap="24" center>
         <Heading align="center" wrap="balance">
-          This page is password protected
+          Эта страница защищена паролем
         </Heading>
         <Column fillWidth gap="8" horizontal="center">
           <PasswordInput
             id="password"
-            label="Password"
+            label="Пароль"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             errorMessage={error}
           />
-          <Button onClick={handlePasswordSubmit}>Submit</Button>
+          <Button onClick={handlePasswordSubmit}>Отправить</Button>
         </Column>
       </Column>
     );

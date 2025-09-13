@@ -23,6 +23,7 @@ export function Projects({ range, exclude }: ProjectsProps) {
     ? sortedProjects.slice(range[0] - 1, range[1] ?? sortedProjects.length)
     : sortedProjects;
 
+
   return (
     <Column fillWidth gap="xl" marginBottom="40" paddingX="l">
       {displayedProjects.map((post, index) => (
@@ -32,10 +33,6 @@ export function Projects({ range, exclude }: ProjectsProps) {
           href={`/work/${post.slug}`}
           images={post.metadata.images}
           title={post.metadata.title}
-          description={post.metadata.summary}
-          content={post.content}
-          avatars={post.metadata.team?.map((member) => ({ src: member.avatar })) || []}
-          link={post.metadata.link || ""}
         />
       ))}
     </Column>

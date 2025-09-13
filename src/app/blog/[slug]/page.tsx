@@ -135,7 +135,7 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
           <Column fillWidth gap="40" horizontal="center" marginTop="40">
             <Line maxWidth="40" />
             <Heading as="h2" variant="heading-strong-xl" marginBottom="24">
-              Recent posts
+              Последние записи
             </Heading>
             <Posts exclude={[post.slug]} range={[1, 2]} columns="2" thumbnail direction="column" />
           </Column>
@@ -159,7 +159,7 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
           textVariant="label-default-s"
         >
           <Icon name="document" size="xs" />
-          On this page
+          На этой странице
         </Row>
         <HeadingNav fitHeight />
       </Column>

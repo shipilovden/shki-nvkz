@@ -1,4 +1,4 @@
-import {
+import type {
   DataStyleConfig,
   DisplayConfig,
   EffectsConfig,
@@ -22,6 +22,9 @@ const routes: RoutesConfig = {
   "/work": true,
   "/blog": true,
   "/gallery": true,
+  "/ar": true,
+  "/music": true,
+  "/3d": true,
 };
 
 const display: DisplayConfig = {

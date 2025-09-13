@@ -1,0 +1,8 @@
+<svg width="60" height="45" viewBox="0 0 60 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="60" height="45" fill="#f3f4f6" rx="4"/>
+  <rect x="20" y="15" width="20" height="15" fill="#8b5cf6" rx="2"/>
+  <rect x="18" y="30" width="4" height="8" fill="#7c3aed"/>
+  <rect x="38" y="30" width="4" height="8" fill="#7c3aed"/>
+  <rect x="20" y="12" width="20" height="3" fill="#8b5cf6" rx="1"/>
+  <text x="30" y="42" text-anchor="middle" font-family="Arial" font-size="8" fill="#6b7280">Стул</text>
+</svg>

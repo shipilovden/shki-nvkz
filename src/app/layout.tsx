@@ -46,6 +46,11 @@ export default async function RootLayout({
     >
       <head>
         <script
+          type="module"
+          src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"
+          async
+        />
+        <script
           id="theme-init"
           dangerouslySetInnerHTML={{
             __html: `

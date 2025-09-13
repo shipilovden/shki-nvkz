@@ -1,44 +1,46 @@
 ---
-title: "Automating Design Handovers with a Figma to Code Pipeline"
+title: "Автоматизация передачи дизайна с помощью пайплайна Figma в код"
 publishedAt: "2024-04-01"
-summary: "Explore the enduring debate between using spaces and tabs for code indentation, and why this choice matters more than you might think."
+summary: "Исследование вечного спора между использованием пробелов и табов для отступов в коде, и почему этот выбор важнее, чем вы думаете."
 images:
   - "/images/projects/project-01/cover-02.jpg"
   - "/images/projects/project-01/image-03.jpg"
+  - "/images/projects/project-01/cover-01.jpg"
+  - "/images/projects/project-01/cover-04.jpg"
 team:
-  - name: "John Doe"
-    role: "Software Engineer"
+  - name: "шки-нвкз"
+    role: "Инженер-программист"
     avatar: "/images/avatar.jpg"
     linkedIn: "https://www.linkedin.com/company/once-ui/"
 link: "https://once-ui.com/"
 ---
 
-## Overview
+## Обзор
 
-In this project, I focused on automating the often tedious design handover process. The goal was to create a pipeline that converts Figma designs directly into clean, production-ready code. By integrating design tokens, component libraries, and automated workflows, this solution significantly reduced the time spent on translating design assets into code, while maintaining design consistency across the product.
+В этом проекте я сосредоточился на автоматизации часто утомительного процесса передачи дизайна. Целью было создать пайплайн, который преобразует дизайны Figma непосредственно в чистый, готовый к продакшену код. Интегрируя дизайн-токены, библиотеки компонентов и автоматизированные рабочие процессы, это решение значительно сократило время, затрачиваемое на перевод дизайн-активов в код, сохраняя при этом согласованность дизайна в продукте.
 
-## Key Features
+## Ключевые особенности
 
-- **Figma Plugin Integration**: Developed a custom Figma plugin that extracts design tokens such as colors, typography, and spacing values, and exports them in a format compatible with our codebase.
-- **Code Generation**: Integrated an automated process that translates Figma components into React code using a combination of design tokens and pre-built component templates. This allowed developers to focus more on logic and less on repetitive UI coding.
-- **Continuous Sync**: Established a CI/CD pipeline that continuously synchronizes design changes from Figma to the codebase, ensuring design updates are reflected instantly without manual intervention.
-- **Scalable Design System**: Leveraged a design system that remains the single source of truth for both designers and developers, making it easy to maintain consistency even as the product evolves.
+- **Интеграция плагина Figma**: Разработан пользовательский плагин Figma, который извлекает дизайн-токены, такие как цвета, типографика и значения отступов, и экспортирует их в формате, совместимом с нашей кодовой базой.
+- **Генерация кода**: Интегрирован автоматизированный процесс, который переводит компоненты Figma в код React, используя комбинацию дизайн-токенов и предварительно созданных шаблонов компонентов. Это позволило разработчикам больше сосредоточиться на логике и меньше на повторяющемся кодировании UI.
+- **Непрерывная синхронизация**: Установлен CI/CD пайплайн, который непрерывно синхронизирует изменения дизайна из Figma в кодовую базу, обеспечивая мгновенное отражение обновлений дизайна без ручного вмешательства.
+- **Масштабируемая дизайн-система**: Использована дизайн-система, которая остается единым источником истины как для дизайнеров, так и для разработчиков, что упрощает поддержание согласованности даже при развитии продукта.
 
-## Technologies Used
+## Используемые технологии
 
-- **Figma API**: For extracting design tokens and component data directly from the Figma designs.
-- **React and Next.js**: For building the front-end codebase with clean, reusable components.
-- **Styled-Components**: For managing styles dynamically using design tokens.
-- **GitHub Actions**: For automating the pipeline and syncing design changes to the repository.
+- **Figma API**: Для извлечения дизайн-токенов и данных компонентов непосредственно из дизайнов Figma.
+- **React и Next.js**: Для создания фронтенд кодовой базы с чистыми, переиспользуемыми компонентами.
+- **Styled-Components**: Для динамического управления стилями с использованием дизайн-токенов.
+- **GitHub Actions**: Для автоматизации пайплайна и синхронизации изменений дизайна с репозиторием.
 
-## Challenges and Learnings
+## Вызовы и уроки
 
-One of the biggest challenges was ensuring that the generated code was clean and maintainable. This involved setting up intelligent mapping between Figma components and React code structures, as well as managing edge cases like responsive design and conditional rendering. Additionally, the continuous synchronization required a robust error-handling system to prevent conflicts during development.
+Одной из самых больших задач было обеспечение того, чтобы сгенерированный код был чистым и поддерживаемым. Это включало настройку интеллектуального сопоставления между компонентами Figma и структурами кода React, а также управление крайними случаями, такими как адаптивный дизайн и условный рендеринг. Кроме того, непрерывная синхронизация требовала надежной системы обработки ошибок для предотвращения конфликтов во время разработки.
 
-## Outcome
+## Результат
 
-The automated Figma to code pipeline has streamlined the handoff process, cutting down design-to-development time by 40%. Designers now have more confidence that their designs will be accurately translated into code, and developers can focus on more complex logic and feature development. This project has proven the value of automation in bridging the gap between design and development.
+Автоматизированный пайплайн Figma в код упростил процесс передачи, сократив время от дизайна до разработки на 40%. Дизайнеры теперь имеют больше уверенности в том, что их дизайны будут точно переведены в код, а разработчики могут сосредоточиться на более сложной логике и разработке функций. Этот проект доказал ценность автоматизации в преодолении разрыва между дизайном и разработкой.
 
 ---
 
-This project demonstrates your ability to leverage automation and streamline workflows, which is highly relevant for design engineering portfolios focused on efficiency and innovation.
+Этот проект демонстрирует вашу способность использовать автоматизацию и оптимизировать рабочие процессы, что очень актуально для портфолио дизайн-инженерии, ориентированных на эффективность и инновации.

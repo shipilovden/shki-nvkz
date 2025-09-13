@@ -1,15 +1,16 @@
 ---
-title: "Using custom components in markdown"
+title: "Использование пользовательских компонентов в markdown"
 publishedAt: "2025-04-20"
-summary: "Every career is a journey, filled with challenges, growth, and those significant moments that mark a shift in our path."
-tag: "Magic Portfolio"
+summary: "Magic Portfolio заменяет некоторые стандартные HTML-элементы на компоненты Once UI для лучшей интеграции в дизайн и добавления дополнительной функциональности."
+image: "/images/gallery/vertical-1.jpg"
+tag: "шки-нвкз"
 ---
 
-Magic Portfolio will replace some default HTML elements to Once UI components to integrate better in the design and add additional functionality. Furthermore, many common Once UI components are already imported and available for use.
+Magic Portfolio заменяет некоторые стандартные HTML-элементы на компоненты Once UI для лучшей интеграции в дизайн и добавления дополнительной функциональности. Кроме того, многие распространенные компоненты Once UI уже импортированы и доступны для использования.
 
-## Feedback
+## Обратная связь
 
-The feedback component is used to display critical information to visitors.
+Компонент обратной связи используется для отображения критически важной информации посетителям.
 
 <Column fillWidth gap="-1" marginBottom="16" marginTop="8">
 <CodeBlock
@@ -36,9 +37,9 @@ The feedback component is used to display critical information to visitors.
 </Row>
 </Column>
 
-## Table
+## Таблица
 
-Tables are used to display data in a structured format.
+Таблицы используются для отображения данных в структурированном формате.
 
 <Column fillWidth gap="-1" marginBottom="16" marginTop="8">
 <CodeBlock
@@ -88,13 +89,13 @@ Tables are used to display data in a structured format.
 </Row>
 </Column>
 
-## Code
+## Код
 
-Use the CodeBlock component to display code snippets with code highlighting, preview, and copy to clipboard functionality. Use the InlineCode component for inline code snippets.
+Используйте компонент CodeBlock для отображения фрагментов кода с подсветкой синтаксиса, предварительным просмотром и функциональностью копирования в буфер обмена. Используйте компонент InlineCode для встроенных фрагментов кода.
 
 ### CodeBlock
 
-The code block component works based on Once UI's CodeBlock. You can access it with the complete syntax for full customization, or by using the standard markdown syntax (triple backticks) with pre-configured props.
+Компонент блока кода работает на основе CodeBlock от Once UI. Вы можете получить к нему доступ с полным синтаксисом для полной настройки или используя стандартный синтаксис markdown (тройные обратные кавычки) с предварительно настроенными свойствами.
 
 <Column fillWidth gap="-1" marginBottom="16" marginTop="8">
 <CodeBlock
@@ -134,7 +135,7 @@ console.log(greeting('World'));
 
 ### InlineCode
 
-The `InlineCode` is another Once UI component that you can access either through the complete syntax or the short syntax (backticks). Usually the standard markdown syntax is recommended, since it doesn't have that much configuration options.
+`InlineCode` — это еще один компонент Once UI, к которому вы можете получить доступ либо через полный синтаксис, либо через короткий синтаксис (обратные кавычки). Обычно рекомендуется стандартный синтаксис markdown, поскольку у него не так много вариантов конфигурации.
 
 <Column fillWidth gap="-1" marginBottom="16" marginTop="8">
 <CodeBlock
@@ -165,9 +166,9 @@ The `InlineCode` is another Once UI component that you can access either through
 </Row>
 </Column>
 
-## Accordion
+## Аккордеон
 
-Accordions are used to toggle between hiding and showing content.
+Аккордеоны используются для переключения между скрытием и отображением контента.
 
 <Column fillWidth gap="-1" marginBottom="16" marginTop="8">
 <CodeBlock
@@ -220,9 +221,9 @@ Accordions are used to toggle between hiding and showing content.
 </Row>
 </Column>
 
-## Button
+## Кнопка
 
-Buttons are used to trigger actions or navigate to other pages.
+Кнопки используются для запуска действий или навигации на другие страницы.
 
 <Column fillWidth gap="-1" marginBottom="16" marginTop="8">
 <CodeBlock
@@ -253,9 +254,9 @@ Buttons are used to trigger actions or navigate to other pages.
 </Row>
 </Column>
 
-## Card
+## Карточка
 
-Cards are used to group related content and actions.
+Карточки используются для группировки связанного контента и действий.
 
 <Column fillWidth gap="-1" marginBottom="16" marginTop="8">
 <CodeBlock
@@ -313,9 +314,9 @@ Cards are used to group related content and actions.
 </Row>
 </Column>
 
-## Icon
+## Иконка
 
-Icons are used to visually represent actions, objects, or concepts. For instructions on importing new icons, head over to [the Once UI documentation](https://once-ui.com/docs/icons).
+Иконки используются для визуального представления действий, объектов или концепций. Для получения инструкций по импорту новых иконок обратитесь к [документации Once UI](https://once-ui.com/docs/icons).
 
 <Column fillWidth gap="-1" marginBottom="16" marginTop="8">
 <CodeBlock
@@ -351,13 +352,13 @@ Icons are used to visually represent actions, objects, or concepts. For instruct
 </Row>
 </Column>
 
-## Layout
+## Макет
 
-Layout components help structure content on the page.
+Компоненты макета помогают структурировать контент на странице.
 
 ### Flex
 
-The Flex component is accessible as `Column` and `Row` and can handle a wide range of layout options and style properties.
+Компонент Flex доступен как `Column` и `Row` и может обрабатывать широкий спектр вариантов макета и свойств стиля.
 
 <Column fillWidth gap="-1" marginBottom="16" marginTop="8">
 <CodeBlock
@@ -422,9 +423,9 @@ The Flex component is accessible as `Column` and `Row` and can handle a wide ran
 </Row>
 </Column>
 
-### Grid
+### Сетка
 
-Use the grid to construct responsive grid layouts. It can be styled similarly to the Flex element.
+Используйте сетку для создания адаптивных макетов сетки. Она может быть стилизована аналогично элементу Flex.
 
 <Column fillWidth gap="-1" marginBottom="16" marginTop="8">
 <CodeBlock
@@ -495,9 +496,9 @@ Use the grid to construct responsive grid layouts. It can be styled similarly to
 </Row>
 </Column>
 
-## Media
+## Медиа
 
-Media provides an optimized way to display images. Access it with the `Media` component for full customization or use the markdown syntax.
+Медиа предоставляет оптимизированный способ отображения изображений. Получите к нему доступ с помощью компонента `Media` для полной настройки или используйте синтаксис markdown.
 
 <Column fillWidth gap="-1" marginBottom="16" marginTop="8">
 <CodeBlock
@@ -525,7 +526,7 @@ Media provides an optimized way to display images. Access it with the `Media` co
 </Row>
 </Column>
 
-You can also use it to embed YouTube videos.
+Вы также можете использовать его для встраивания видео YouTube.
 
 <Column fillWidth gap="-1" marginBottom="16" marginTop="8">
 <CodeBlock
@@ -552,9 +553,9 @@ You can also use it to embed YouTube videos.
 </Row>
 </Column>
 
-## Link
+## Ссылка
 
-SmartLink provides an enhanced way to link to internal and external resources. You can access it with the `SmartLink` component for full customization or with the standard markdown syntax.
+SmartLink предоставляет улучшенный способ ссылки на внутренние и внешние ресурсы. Вы можете получить к нему доступ с помощью компонента `SmartLink` для полной настройки или с помощью стандартного синтаксиса markdown.
 
 <Column fillWidth gap="-1" marginBottom="16" marginTop="8">
 <CodeBlock
@@ -579,9 +580,9 @@ SmartLink provides an enhanced way to link to internal and external resources. Y
 </Row>
 </Column>
 
-## Custom components
+## Пользовательские компоненты
 
-Since Magic Portfolio is based on Once UI, you can use all the components provided by Once UI in the `.mdx` files, but you need to import them first in the `src/product/mdx.tsx` file and pass it to the `components` object.
+Поскольку Magic Portfolio основан на Once UI, вы можете использовать все компоненты, предоставляемые Once UI в файлах `.mdx`, но вам нужно сначала импортировать их в файл `src/product/mdx.tsx` и передать в объект `components`.
 
 <CodeBlock
     marginBottom="16" marginTop="8"

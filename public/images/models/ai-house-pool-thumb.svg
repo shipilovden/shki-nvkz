@@ -1,0 +1,8 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="400" height="300" fill="#F3F4F6"/>
+<rect x="50" y="50" width="300" height="200" fill="#E5E7EB"/>
+<svg x="175" y="125" width="50" height="50" viewBox="0 0 24 24" fill="none">
+<path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22S22 17.52 22 12S17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="#99A3AF"/>
+</svg>
+<text x="200" y="270" font-family="Arial" font-size="14" fill="#667380" text-anchor="middle">AI House Pool</text>
+</svg>

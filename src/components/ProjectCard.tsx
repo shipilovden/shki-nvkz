@@ -1,13 +1,10 @@
 "use client";
 
 import {
-  AvatarGroup,
   Carousel,
   Column,
   Flex,
   Heading,
-  SmartLink,
-  Text,
 } from "@once-ui-system/core";
 
 interface ProjectCardProps {
@@ -15,30 +12,31 @@ interface ProjectCardProps {
   priority?: boolean;
   images: string[];
   title: string;
-  content: string;
-  description: string;
-  avatars: { src: string }[];
-  link: string;
 }
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({
   href,
   images = [],
   title,
-  content,
-  description,
-  avatars,
-  link,
 }) => {
+  // Фильтруем только изображения (исключаем видео)
+  const imageFiles = images.filter(image => 
+    image.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+  );
+
+
   return (
     <Column fillWidth gap="m">
-      <Carousel
-        sizes="(max-width: 960px) 100vw, 960px"
-        items={images.map((image) => ({
-          slide: image,
-          alt: title,
-        }))}
-      />
+      {imageFiles.length > 0 && (
+        <Carousel
+          sizes="(max-width: 960px) 100vw, 960px"
+          items={imageFiles.map((image, index) => ({
+            slide: image,
+            alt: title,
+            priority: true, // Приоритетная загрузка для всех изображений
+          }))}
+        />
+      )}
       <Flex
         s={{ direction: "column" }}
         fillWidth
@@ -53,36 +51,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               {title}
             </Heading>
           </Flex>
-        )}
-        {(avatars?.length > 0 || description?.trim() || content?.trim()) && (
-          <Column flex={7} gap="16">
-            {avatars?.length > 0 && <AvatarGroup avatars={avatars} size="m" reverse />}
-            {description?.trim() && (
-              <Text wrap="balance" variant="body-default-s" onBackground="neutral-weak">
-                {description}
-              </Text>
-            )}
-            <Flex gap="24" wrap>
-              {content?.trim() && (
-                <SmartLink
-                  suffixIcon="arrowRight"
-                  style={{ margin: "0", width: "fit-content" }}
-                  href={href}
-                >
-                  <Text variant="body-default-s">Read case study</Text>
-                </SmartLink>
-              )}
-              {link && (
-                <SmartLink
-                  suffixIcon="arrowUpRightFromSquare"
-                  style={{ margin: "0", width: "fit-content" }}
-                  href={link}
-                >
-                  <Text variant="body-default-s">View project</Text>
-                </SmartLink>
-              )}
-            </Flex>
-          </Column>
         )}
       </Flex>
     </Column>

@@ -1,5 +1,5 @@
-import { IconName } from "@/resources/icons";
-import { zones } from "tzdata";
+import type { IconName } from "@/resources/icons";
+import type { zones } from "tzdata";
 
 /**
  * IANA time zone string (e.g., 'Asia/Calcutta', 'Europe/Vienna').
@@ -96,6 +96,7 @@ export interface Home extends BasePageConfig {
     display: boolean;
     title: React.ReactNode;
     href: string;
+    target?: string;
   };
   /** The sub text which appears below the headline */
   subline: React.ReactNode;

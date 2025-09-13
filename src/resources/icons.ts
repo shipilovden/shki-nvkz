@@ -1,4 +1,4 @@
-import { IconType } from "react-icons";
+import type { IconType } from "react-icons";
 
 import {
   HiArrowUpRight,
@@ -12,6 +12,23 @@ import {
   HiOutlineDocument,
   HiOutlineGlobeAsiaAustralia,
   HiOutlineRocketLaunch,
+  HiCubeTransparent,
+  HiOutlineBuildingOffice2,
+  HiOutlinePaintBrush,
+  HiOutlineCube,
+  HiOutlineCog6Tooth,
+  HiOutlineExclamationTriangle,
+} from "react-icons/hi2";
+
+import {
+  HiPlay,
+  HiPause,
+  HiArrowPath,
+  HiSpeakerWave,
+  HiSpeakerXMark,
+  HiArrowDownTray,
+  HiBackward,
+  HiForward,
 } from "react-icons/hi2";
 
 import {
@@ -20,6 +37,7 @@ import {
   PiGridFourDuotone,
   PiBookBookmarkDuotone,
   PiImageDuotone,
+  PiMusicNoteDuotone,
 } from "react-icons/pi";
 
 import {
@@ -29,7 +47,7 @@ import {
   SiSupabase,
 } from "react-icons/si";
 
-import { FaDiscord, FaGithub, FaLinkedin, FaX, FaThreads, FaXTwitter, FaFacebook, FaPinterest, FaWhatsapp, FaReddit, FaTelegram, } from "react-icons/fa6";
+import { FaDiscord, FaGithub, FaLinkedin, FaX, FaThreads, FaXTwitter, FaFacebook, FaPinterest, FaWhatsapp, FaReddit, FaTelegram, FaVk, FaGamepad, FaChair, FaExpand } from "react-icons/fa6";
 
 export const iconLibrary: Record<string, IconType> = {
   arrowUpRight: HiArrowUpRight,
@@ -54,6 +72,8 @@ export const iconLibrary: Record<string, IconType> = {
   arrowUpRightFromSquare: HiArrowTopRightOnSquare,
   document: HiOutlineDocument,
   rocket: HiOutlineRocketLaunch,
+  "music-note": PiMusicNoteDuotone,
+  "3d": HiCubeTransparent,
   javascript: SiJavascript,
   nextjs: SiNextdotjs,
   supabase: SiSupabase,
@@ -63,6 +83,24 @@ export const iconLibrary: Record<string, IconType> = {
   whatsapp: FaWhatsapp,
   reddit: FaReddit,
   telegram: FaTelegram,
+  vk: FaVk,
+  play: HiPlay,
+  pause: HiPause,
+  repeat: HiArrowPath,
+  volume: HiSpeakerWave,
+  mute: HiSpeakerXMark,
+  download: HiArrowDownTray,
+  previous: HiBackward,
+  next: HiForward,
+  // 3D модели иконки
+  building: HiOutlineBuildingOffice2,
+  palette: HiOutlinePaintBrush,
+  package: HiOutlineCube,
+  gamepad: FaGamepad,
+  chair: FaChair,
+  gear: HiOutlineCog6Tooth,
+  expand: FaExpand,
+  warning: HiOutlineExclamationTriangle,
 };
 
 export type IconLibrary = typeof iconLibrary;

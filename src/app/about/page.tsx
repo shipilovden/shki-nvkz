@@ -94,7 +94,7 @@ export default function About() {
             <Avatar src={person.avatar} size="xl" />
             <Row gap="8" vertical="center">
               <Icon onBackground="accent-weak" name="globe" />
-              {person.location}
+              {person.location.split('/')[1] || person.location}
             </Row>
             {person.languages && person.languages.length > 0 && (
               <Row wrap gap="8">
@@ -130,10 +130,11 @@ export default function About() {
                   backdropFilter: "blur(var(--static-space-1))",
                 }}
               >
-                <Icon paddingLeft="12" name="calendar" onBackground="brand-weak" />
-                <Row paddingX="8">Schedule a call</Row>
+                <Icon paddingLeft="12" name="globe" onBackground="brand-weak" />
+                <Row paddingX="8">Карта</Row>
                 <IconButton
-                  href={about.calendar.link}
+                  href="https://yandex.ru/maps/-/CLUzACZC"
+                  target="_blank"
                   data-border="rounded"
                   variant="secondary"
                   icon="chevronRight"
