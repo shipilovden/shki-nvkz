@@ -5,13 +5,18 @@ let modelsCache: Map<string, any> = new Map();
 
 // Добавляем тестовую модель для проверки
 if (modelsCache.size === 0) {
+  // Получаем текущий домен из переменных окружения
+  const baseUrl = process.env.VERCEL_URL 
+    ? `https://${process.env.VERCEL_URL}` 
+    : 'https://magic-portfolio-idaz5ijpc-shipilovdens-projects.vercel.app';
+    
   modelsCache.set('test-model', {
     id: 'test-model',
     name: 'Тестовая модель',
     description: 'Тестовая 3D модель для проверки AR',
     fileUrl: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
-    qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://shki-nvkz.vercel.app/ar/view/test-model',
-    arUrl: 'https://shki-nvkz.vercel.app/ar/view/test-model',
+    qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${baseUrl}/ar/view/test-model`,
+    arUrl: `${baseUrl}/ar/view/test-model`,
     createdAt: new Date().toISOString(),
     fileSize: 1024000,
     fileType: 'model/gltf-binary'
