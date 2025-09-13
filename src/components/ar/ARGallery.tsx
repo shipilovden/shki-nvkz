@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Column, Row, Text, Button, Input, Icon, useToast } from "@once-ui-system/core";
 import { ARUploader } from "./ARUploader";
-import { ARViewer } from "./ARViewer";
+import { ARModelViewer } from "./ARModelViewer";
 import { ARCard } from "./ARCard";
 import type { ARModel } from "@/types/ar.types";
 import { arStorage, type ARModelData } from "@/utils/arStorage";
@@ -244,7 +244,7 @@ export function ARGallery() {
           
           {/* AR Viewer */}
           {selectedModel && (
-            <ARViewer model={selectedModel} />
+            <ARModelViewer modelId={selectedModel.id} />
           )}
         </Column>
 

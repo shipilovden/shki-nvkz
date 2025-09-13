@@ -3,6 +3,21 @@ import { NextRequest, NextResponse } from 'next/server';
 // Временное хранилище моделей в памяти (в продакшене лучше использовать базу данных)
 let modelsCache: Map<string, any> = new Map();
 
+// Добавляем тестовую модель для проверки
+if (modelsCache.size === 0) {
+  modelsCache.set('test-model', {
+    id: 'test-model',
+    name: 'Тестовая модель',
+    description: 'Тестовая 3D модель для проверки AR',
+    fileUrl: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
+    qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://shki-nvkz.vercel.app/ar/view/test-model',
+    arUrl: 'https://shki-nvkz.vercel.app/ar/view/test-model',
+    createdAt: new Date().toISOString(),
+    fileSize: 1024000,
+    fileType: 'model/gltf-binary'
+  });
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
