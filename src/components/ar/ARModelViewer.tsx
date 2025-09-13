@@ -36,15 +36,21 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
       try {
         // Сначала пробуем загрузить с сервера (для QR кодов)
         try {
+          console.log('Пытаемся загрузить модель с сервера:', modelId);
           const response = await fetch(`/api/ar/models/${modelId}`);
+          console.log('Ответ сервера:', response.status, response.statusText);
+          
           if (response.ok) {
             const model = await response.json();
+            console.log('Модель загружена с сервера:', model);
             if (model && model.fileUrl) {
               setModelUrl(model.fileUrl);
               setModelInfo(model);
               setIsLoading(false);
               return;
             }
+          } else {
+            console.warn('Сервер вернул ошибку:', response.status, response.statusText);
           }
         } catch (serverError) {
           console.warn('Не удалось загрузить модель с сервера:', serverError);
@@ -259,39 +265,46 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
   }
 
   return (
-    <Column gap="l" style={{ width: '100%' }}>
-      {/* Информация о модели */}
+    <div style={{ 
+      width: '100%', 
+      height: '100vh', 
+      position: 'relative',
+      backgroundColor: '#f5f5f5'
+    }}>
+      {/* Информация о модели в верхнем левом углу */}
       {modelInfo && (
-        <Row gap="m" align="center" style={{ 
-          padding: '16px', 
-          backgroundColor: 'var(--color-neutral-alpha-weak)', 
-          borderRadius: '8px' 
+        <div style={{
+          position: 'absolute',
+          top: '16px',
+          left: '16px',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          padding: '12px 16px',
+          borderRadius: '8px',
+          backdropFilter: 'blur(4px)',
+          border: '1px solid rgba(0, 0, 0, 0.1)',
+          zIndex: 10,
+          maxWidth: '300px'
         }}>
-          <Column flex={1}>
-            <Text variant="heading-strong-s">{modelInfo.name}</Text>
-            <Text variant="body-default-xs" onBackground="neutral-weak">
-              {modelInfo.description}
-            </Text>
-            <Row gap="s" align="center" style={{ marginTop: '8px' }}>
-              <Badge variant="neutral" size="s">
-                {(modelInfo.fileSize / 1024 / 1024).toFixed(1)} МБ
-              </Badge>
-              <Badge variant="neutral" size="s">
-                {new Date(modelInfo.createdAt).toLocaleDateString('ru-RU')}
-              </Badge>
-            </Row>
-          </Column>
-        </Row>
+          <Text variant="heading-strong-s">{modelInfo.name}</Text>
+          <Text variant="body-default-xs" onBackground="neutral-weak" style={{ marginTop: '4px' }}>
+            {modelInfo.description}
+          </Text>
+          <Row gap="s" align="center" style={{ marginTop: '8px' }}>
+            <Badge variant="neutral" size="s">
+              {(modelInfo.fileSize / 1024 / 1024).toFixed(1)} МБ
+            </Badge>
+            <Badge variant="neutral" size="s">
+              {new Date(modelInfo.createdAt).toLocaleDateString('ru-RU')}
+            </Badge>
+          </Row>
+        </div>
       )}
 
-      {/* 3D Viewer */}
+      {/* 3D Viewer на весь экран */}
       <div
         style={{
           width: '100%',
-          height: '500px',
-          border: '1px solid var(--color-neutral-alpha-strong)',
-          borderRadius: '12px',
-          backgroundColor: 'var(--color-neutral-alpha-weak)',
+          height: '100%',
           position: 'relative',
           overflow: 'hidden'
         }}
@@ -309,13 +322,40 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
             style={{
               width: '100%',
               height: '100%',
-              backgroundColor: 'transparent'
+              backgroundColor: 'transparent',
+              display: 'block'
             }}
             camera-orbit="0deg 75deg 1.5m"
             field-of-view="30deg"
+            exposure="1.0"
+            shadow-intensity="0.5"
+            loading="eager"
             onLoad={() => setIsLoading(false)}
             onError={() => setHasError(true)}
-          />
+            interaction-policy="allow-when-focused"
+            touch-action="pan-y"
+            min-camera-orbit="auto auto auto"
+            max-camera-orbit="auto auto auto"
+            min-field-of-view="10deg"
+            max-field-of-view="45deg"
+          >
+            {/* Fallback для браузеров без поддержки model-viewer */}
+            <div slot="poster" style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'var(--color-neutral-alpha-weak)'
+            }}>
+              <Column align="center" gap="m">
+                <Icon name="package" size="xl" onBackground="neutral-medium" />
+                <Text variant="body-default-m" onBackground="neutral-medium">
+                  3D модель: {modelInfo?.name || "Загрузка..."}
+                </Text>
+              </Column>
+            </div>
+          </model-viewer>
         ) : (
           <div style={{
             width: '100%',
@@ -324,74 +364,124 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
             alignItems: 'center',
             justifyContent: 'center',
             flexDirection: 'column',
-            gap: '16px'
+            gap: '16px',
+            backgroundColor: 'var(--color-neutral-alpha-weak)'
           }}>
-            <Icon name="package" size="l" onBackground="neutral-medium" style={{ fontSize: '48px' }} />
+            <Icon name="package" size="xl" onBackground="neutral-medium" />
             <Text variant="body-default-m" onBackground="neutral-medium">
               Модель не найдена
+            </Text>
+            <Text variant="body-default-s" onBackground="neutral-weak">
+              ID: {modelId}
             </Text>
           </div>
         )}
       </div>
 
-      {/* Панель управления */}
-      <Row gap="m" align="center" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
-        {isARSupported && (
-          <Button
-            variant="primary"
-            size="m"
-            onClick={startAR}
-            prefixIcon="rocket"
-          >
-            Запустить AR
-          </Button>
-        )}
-        
+      {/* Кнопки управления в правом нижнем углу как на Sketchfab */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '16px',
+          right: '16px',
+          display: 'flex',
+          gap: '8px',
+          flexDirection: 'column',
+          zIndex: 10
+        }}
+      >
         {isVRAvailable && (
           <Button
             variant="secondary"
-            size="m"
+            size="s"
             onClick={startVR}
             prefixIcon="3d"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              backdropFilter: 'blur(4px)'
+            }}
           >
-            Запустить VR
+            VR
+          </Button>
+        )}
+        
+        {isARSupported && (
+          <Button
+            variant="secondary"
+            size="s"
+            onClick={startAR}
+            prefixIcon="rocket"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              backdropFilter: 'blur(4px)'
+            }}
+          >
+            AR
           </Button>
         )}
         
         <Button
-          variant="tertiary"
-          size="m"
+          variant="secondary"
+          size="s"
           onClick={toggleFullscreen}
           prefixIcon={isFullscreen ? "close" : "expand"}
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
+            backdropFilter: 'blur(4px)'
+          }}
         >
-          {isFullscreen ? "Выйти из полноэкранного" : "Полноэкранный"}
+          {isFullscreen ? "Выйти" : "Полный экран"}
         </Button>
-      </Row>
+      </div>
 
-      {/* Информация о поддержке */}
-      <Row gap="l" align="center" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
-        <Row gap="s" align="center">
+      {/* Индикатор поддержки в левом нижнем углу */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '16px',
+          left: '16px',
+          display: 'flex',
+          gap: '12px',
+          zIndex: 10
+        }}
+      >
+        <Row gap="s" align="center" style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '6px 12px',
+          borderRadius: '6px',
+          backdropFilter: 'blur(4px)',
+          border: '1px solid rgba(0, 0, 0, 0.1)'
+        }}>
           <Icon 
             name={isARSupported ? "check" : "close"} 
             size="s" 
             onBackground={isARSupported ? "success-medium" : "danger-medium"} 
           />
           <Text variant="body-default-xs" onBackground="neutral-medium">
-            AR: {isARSupported ? "Поддерживается" : "Не поддерживается"}
+            AR
           </Text>
         </Row>
         
-        <Row gap="s" align="center">
+        <Row gap="s" align="center" style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '6px 12px',
+          borderRadius: '6px',
+          backdropFilter: 'blur(4px)',
+          border: '1px solid rgba(0, 0, 0, 0.1)'
+        }}>
           <Icon 
             name={isVRAvailable ? "check" : "close"} 
             size="s" 
             onBackground={isVRAvailable ? "success-medium" : "danger-medium"} 
           />
           <Text variant="body-default-xs" onBackground="neutral-medium">
-            VR: {isVRAvailable ? "Поддерживается" : "Не поддерживается"}
+            VR
           </Text>
         </Row>
-      </Row>
-    </Column>
+      </div>
+    </div>
   );
 }
