@@ -107,7 +107,7 @@ export function ARCard({ model, isSelected, onSelect, onDelete }: ARCardProps) {
             •
           </Text>
           <Text variant="body-default-xs" onBackground="neutral-weak">
-            {model.createdAt.toLocaleDateString('ru-RU')}
+            {new Date(model.createdAt).toLocaleDateString('ru-RU')}
           </Text>
         </Row>
       </Column>

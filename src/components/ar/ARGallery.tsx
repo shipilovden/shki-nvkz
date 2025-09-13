@@ -20,7 +20,12 @@ export function ARGallery() {
       const storedModels = localStorage.getItem('arModels');
       if (storedModels) {
         const models = JSON.parse(storedModels);
-        setArModels(models);
+        // Восстанавливаем Date объекты
+        const restoredModels = models.map((model: any) => ({
+          ...model,
+          createdAt: new Date(model.createdAt)
+        }));
+        setArModels(restoredModels);
       }
     } catch (error) {
       console.error('Ошибка загрузки моделей из localStorage:', error);
