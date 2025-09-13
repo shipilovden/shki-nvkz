@@ -95,85 +95,24 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
     loadModel();
   }, [modelId]);
 
-  const startAR = async () => {
-    if (!isARSupported) {
-      alert('AR не поддерживается в вашем браузере. Попробуйте использовать мобильное устройство с Chrome или Safari.');
-      return;
-    }
-
-    try {
-      console.log('Запускаем AR...');
-      if (modelViewerRef.current) {
-        // Проверяем, есть ли метод activateAR
-        if (typeof modelViewerRef.current.activateAR === 'function') {
-          await modelViewerRef.current.activateAR();
-        } else {
-          // Альтернативный способ запуска AR
-          const modelViewer = modelViewerRef.current;
-          if (modelViewer && modelView.canActivateAR) {
-            await modelView.activateAR();
-          } else {
-            // Прямой запуск AR через WebXR
-            if ('xr' in navigator) {
-              const session = await navigator.xr.requestSession('immersive-ar');
-              console.log('AR сессия запущена:', session);
-            }
-          }
-        }
-        setIsARActive(true);
-        console.log('AR успешно запущен');
-      }
-    } catch (error) {
-      console.error('Ошибка запуска AR:', error);
-      alert(`Не удалось запустить AR: ${error.message || error}`);
+  const startAR = () => {
+    if (modelViewerRef.current && isARSupported) {
+      modelViewerRef.current.enterAR();
+      setIsARActive(true);
     }
   };
 
-  const startVR = async () => {
-    if (!isVRAvailable) {
-      alert('VR не поддерживается в вашем браузере. Попробуйте использовать VR-совместимое устройство.');
-      return;
-    }
-
-    try {
-      console.log('Запускаем VR...');
-      if (modelViewerRef.current) {
-        // Проверяем, есть ли метод activateVR
-        if (typeof modelViewerRef.current.activateVR === 'function') {
-          await modelViewerRef.current.activateVR();
-        } else {
-          // Альтернативный способ запуска VR
-          const modelViewer = modelViewerRef.current;
-          if (modelViewer && modelView.canActivateVR) {
-            await modelView.activateVR();
-          } else {
-            // Прямой запуск VR через WebXR
-            if ('xr' in navigator) {
-              const session = await navigator.xr.requestSession('immersive-vr');
-              console.log('VR сессия запущена:', session);
-            }
-          }
-        }
-        setIsVRActive(true);
-        console.log('VR успешно запущен');
-      }
-    } catch (error) {
-      console.error('Ошибка запуска VR:', error);
-      alert(`Не удалось запустить VR: ${error.message || error}`);
+  const startVR = () => {
+    if (modelViewerRef.current && isVRAvailable) {
+      modelViewerRef.current.enterVR();
+      setIsVRActive(true);
     }
   };
 
-  const toggleFullscreen = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-        setIsFullscreen(true);
-      } else {
-        await document.exitFullscreen();
-        setIsFullscreen(false);
-      }
-    } catch (error) {
-      console.error('Ошибка переключения полноэкранного режима:', error);
+  const toggleFullscreen = () => {
+    if (modelViewerRef.current) {
+      modelViewerRef.current.requestFullscreen();
+      setIsFullscreen(true);
     }
   };
 
@@ -424,91 +363,60 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
       <div
         style={{
           position: 'absolute',
-          bottom: '20px',
-          right: '20px',
+          bottom: '16px',
+          right: '16px',
           display: 'flex',
-          gap: '12px',
-          flexDirection: 'column',
-          zIndex: 1000
+          gap: '8px',
+          flexDirection: 'column'
         }}
       >
-        {/* VR кнопка */}
-        <Button
-          variant="primary"
-          size="m"
-          onClick={startVR}
-          prefixIcon="3d"
-          disabled={!isVRAvailable}
-          style={{
-            backgroundColor: isVRAvailable ? 'rgba(0, 123, 255, 0.9)' : 'rgba(128, 128, 128, 0.5)',
-            border: '2px solid rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(8px)',
-            color: 'white',
-            fontWeight: 'bold',
-            minWidth: '80px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-          }}
-        >
-          VR
-        </Button>
+        {isVRAvailable && (
+          <Button
+            variant="secondary"
+            size="s"
+            onClick={startVR}
+            prefixIcon="3d"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              backdropFilter: 'blur(4px)'
+            }}
+          >
+            VR
+          </Button>
+        )}
         
-        {/* AR кнопка */}
-        <Button
-          variant="primary"
-          size="m"
-          onClick={startAR}
-          prefixIcon="rocket"
-          disabled={!isARSupported}
-          style={{
-            backgroundColor: isARSupported ? 'rgba(40, 167, 69, 0.9)' : 'rgba(128, 128, 128, 0.5)',
-            border: '2px solid rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(8px)',
-            color: 'white',
-            fontWeight: 'bold',
-            minWidth: '80px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-          }}
-        >
-          AR
-        </Button>
+        {isARSupported && (
+          <Button
+            variant="secondary"
+            size="s"
+            onClick={startAR}
+            prefixIcon="rocket"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              backdropFilter: 'blur(4px)'
+            }}
+          >
+            AR
+          </Button>
+        )}
         
-        {/* Полноэкранный режим */}
         <Button
           variant="secondary"
-          size="m"
+          size="s"
           onClick={toggleFullscreen}
-          prefixIcon={isFullscreen ? "close" : "expand"}
+          prefixIcon="expand"
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            border: '2px solid rgba(0, 0, 0, 0.2)',
-            backdropFilter: 'blur(8px)',
-            color: '#333',
-            fontWeight: 'bold',
-            minWidth: '80px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
+            backdropFilter: 'blur(4px)',
+            minWidth: '40px',
+            width: '40px',
+            height: '40px',
+            padding: '0'
           }}
-        >
-          {isFullscreen ? "Выйти" : "Полный экран"}
-        </Button>
-
-        {/* Кнопка загрузки модели */}
-        <Button
-          variant="tertiary"
-          size="m"
-          onClick={() => window.open('/ar', '_blank')}
-          prefixIcon="upload"
-          style={{
-            backgroundColor: 'rgba(108, 117, 125, 0.9)',
-            border: '2px solid rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(8px)',
-            color: 'white',
-            fontWeight: 'bold',
-            minWidth: '80px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-          }}
-        >
-          Загрузить
-        </Button>
+        />
       </div>
 
       {/* Индикатор поддержки в левом нижнем углу */}
