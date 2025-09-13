@@ -19,6 +19,11 @@ declare namespace JSX {
       'ar-placement'?: string;
       'interaction-policy'?: string;
       'touch-action'?: string;
+      'disable-zoom'?: boolean;
+      'disable-pan'?: boolean;
+      'disable-tap'?: boolean;
+      'camera-orbit'?: string;
+      'field-of-view'?: string;
       ref?: React.Ref<any>;
       children?: React.ReactNode;
     };
