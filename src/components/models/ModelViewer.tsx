@@ -204,8 +204,8 @@ export function ModelViewer({
       <div 
         style={{ 
           width: '100%', 
-          height: '500px', // Фиксированная высота для десктопа
-          maxWidth: '800px',
+          height: '600px', // Увеличена высота для десктопа
+          maxWidth: '1000px', // Увеличена максимальная ширина
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
@@ -217,7 +217,7 @@ export function ModelViewer({
           overflow: 'hidden'
         }}
         s={{
-          height: '400px', // Меньшая высота для мобильных
+          height: '500px', // Увеличена высота для мобильных
           maxWidth: '100%' // Полная ширина на мобильных
         }}
       >
