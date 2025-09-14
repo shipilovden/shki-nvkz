@@ -57,30 +57,69 @@ export function SketchfabLoader({ onModelLoad }: SketchfabLoaderProps) {
       }
 
       const data = await response.json();
+      console.log('Sketchfab model data:', data);
       
       // Получаем прямую ссылку на GLB файл
-      const downloadResponse = await fetch(`https://api.sketchfab.com/v3/models/${modelId}/download`, {
-        headers: {
-          'Authorization': `Token ${API_TOKEN}`
-        }
-      });
-
       let glbUrl = null;
-      if (downloadResponse.ok) {
-        const downloadData = await downloadResponse.json();
-        // Ищем GLB файл в доступных форматах
-        const glbFile = downloadData.gltf?.urls?.glb || downloadData.gltf?.urls?.['glb-draco'];
-        if (glbFile) {
-          glbUrl = glbFile;
+      
+      try {
+        const downloadResponse = await fetch(`https://api.sketchfab.com/v3/models/${modelId}/download`, {
+          headers: {
+            'Authorization': `Token ${API_TOKEN}`
+          }
+        });
+
+        console.log('Download response status:', downloadResponse.status);
+        
+        if (downloadResponse.ok) {
+          const downloadData = await downloadResponse.json();
+          console.log('Download data:', downloadData);
+          
+          // Ищем GLB файл в доступных форматах
+          const glbFile = downloadData.gltf?.urls?.glb || downloadData.gltf?.urls?.['glb-draco'];
+          console.log('GLB file found:', glbFile);
+          
+          if (glbFile) {
+            glbUrl = glbFile;
+            console.log('Using GLB URL:', glbUrl);
+          }
+        } else {
+          console.log('Download failed:', downloadResponse.status, downloadResponse.statusText);
+          
+          // Попробуем альтернативный способ - через публичный API
+          console.log('Trying alternative approach...');
+          
+          // Некоторые модели могут быть доступны через публичный API
+          const publicResponse = await fetch(`https://api.sketchfab.com/v3/models/${modelId}`);
+          if (publicResponse.ok) {
+            const publicData = await publicResponse.json();
+            console.log('Public model data:', publicData);
+            
+            // Проверяем, есть ли публичная ссылка на GLB
+            if (publicData.assets && publicData.assets.length > 0) {
+              const glbAsset = publicData.assets.find((asset: any) => 
+                asset.url && (asset.url.includes('.glb') || asset.url.includes('.gltf'))
+              );
+              if (glbAsset) {
+                glbUrl = glbAsset.url;
+                console.log('Found public GLB URL:', glbUrl);
+              }
+            }
+          }
         }
+      } catch (error) {
+        console.log('Error fetching GLB:', error);
       }
 
       // Создаем объект модели для нашего вьювера
+      // Попробуем использовать Sketchfab Viewer API с AR поддержкой
+      const embedUrl = `https://sketchfab.com/models/${modelId}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0&ui_stop=0&ui_annotations=0&ui_help=0&ui_settings=0&ui_vr=1&ui_fullscreen=1&ui_ar=1`;
+      
       const model: Model3D = {
         id: `sketchfab-${modelId}`,
         title: data.name || "Sketchfab Model",
         description: data.description || "Модель из Sketchfab",
-        src: glbUrl || `https://sketchfab.com/models/${modelId}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0&ui_stop=0&ui_annotations=0&ui_help=0&ui_settings=0&ui_vr=0&ui_fullscreen=0&ui_annotations=0`,
+        src: glbUrl || embedUrl,
         thumbnail: data.thumbnails?.images?.[0]?.url || "/images/placeholder-3d.jpg",
         category: "Sketchfab",
         format: glbUrl ? "glb" : "sketchfab",
@@ -93,6 +132,11 @@ export function SketchfabLoader({ onModelLoad }: SketchfabLoaderProps) {
         arEnabled: !!glbUrl, // AR работает только с GLB
         vrEnabled: !!glbUrl  // VR работает только с GLB
       };
+      
+      console.log('Created model:', model);
+      console.log('AR enabled:', model.arEnabled);
+      console.log('VR enabled:', model.vrEnabled);
+      console.log('Is Sketchfab iframe:', model.isSketchfab);
 
       onModelLoad(model);
       setSketchfabUrl("");
