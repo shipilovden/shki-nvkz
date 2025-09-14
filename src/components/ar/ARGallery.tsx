@@ -12,7 +12,6 @@ export function ARGallery() {
   const { addToast } = useToast();
   const [arModels, setArModels] = useState<ARModel[]>([]);
   const [selectedModel, setSelectedModel] = useState<ARModel | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [ngrokUrl, setNgrokUrl] = useState("");
 
   // Загружаем модели из IndexedDB при инициализации
@@ -55,11 +54,8 @@ export function ARGallery() {
     loadModels();
   }, []);
 
-  // Фильтруем модели по поисковому запросу
-  const filteredModels = arModels.filter(model =>
-    model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    model.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Показываем все модели (поиск убран)
+  const filteredModels = arModels;
 
   const handleModelUpload = (model: ARModel) => {
     setArModels(prev => [...prev, model]);
@@ -260,13 +256,27 @@ export function ARGallery() {
               alignItems: 'center'
             }}
           >
-            {/* Поиск */}
-            <Input
-              placeholder="Поиск моделей..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+            {/* Кнопка создания QR */}
+            <Button
+              variant="primary"
+              size="m"
+              onClick={() => {
+                if (selectedModel) {
+                  // Открываем QR код в новой вкладке
+                  window.open(selectedModel.qrCodeUrl, '_blank');
+                } else {
+                  addToast({
+                    variant: "warning",
+                    message: "Сначала выберите модель для создания QR кода",
+                  });
+                }
+              }}
+              prefixIcon="qrCode"
               style={{ width: '100%' }}
-            />
+              disabled={!selectedModel}
+            >
+              Создать QR код
+            </Button>
 
             {/* Список моделей */}
             <Column 

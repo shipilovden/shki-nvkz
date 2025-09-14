@@ -21,15 +21,32 @@ export function ARModelViewer({ modelId }: ARModelViewerProps) {
   const [modelInfo, setModelInfo] = useState<any>(null);
 
   useEffect(() => {
-    // Проверяем поддержку WebXR для AR и VR
-    if ('xr' in navigator) {
-      navigator.xr?.isSessionSupported('immersive-ar').then((supported) => {
-        setIsARSupported(supported);
-      });
-      navigator.xr?.isSessionSupported('immersive-vr').then((supported) => {
-        setIsVRAvailable(supported);
-      });
-    }
+    // Проверяем поддержку AR/VR через model-viewer
+    const checkSupport = () => {
+      // Проверяем поддержку AR
+      if ('xr' in navigator) {
+        navigator.xr?.isSessionSupported('immersive-ar').then((supported) => {
+          setIsARSupported(supported);
+        }).catch(() => {
+          // Fallback: проверяем через user agent
+          const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          setIsARSupported(isMobile);
+        });
+        
+        navigator.xr?.isSessionSupported('immersive-vr').then((supported) => {
+          setIsVRAvailable(supported);
+        }).catch(() => {
+          setIsVRAvailable(false);
+        });
+      } else {
+        // Fallback для браузеров без WebXR
+        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        setIsARSupported(isMobile);
+        setIsVRAvailable(false);
+      }
+    };
+
+    checkSupport();
 
     // Загружаем модель по ID с сервера
     const loadModel = async () => {
