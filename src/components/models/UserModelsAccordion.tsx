@@ -175,39 +175,24 @@ export function UserModelsAccordion({
                     justifyContent: 'center'
                   }}
                 >
-                  {model.isSketchfab ? (
-                    // Для Sketchfab моделей используем iframe
-                    <iframe
-                      src={model.src}
-                      title={model.title}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        border: 'none',
-                        borderRadius: '4px'
-                      }}
-                      allow="autoplay; fullscreen; xr-spatial-tracking"
-                    />
-                  ) : (
-                    // Для обычных моделей используем model-viewer
-                    <model-viewer
-                      src={model.src}
-                      alt={model.title}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        backgroundColor: 'var(--color-neutral-alpha-weak)'
-                      }}
-                      camera-controls
-                      auto-rotate
-                      exposure="1.0"
-                      shadow-intensity="0.5"
-                      loading="eager"
-                      animation-name=""
-                      autoplay
-                      animation-crossfade-duration="300"
-                    />
-                  )}
+                  {/* model-viewer для всех моделей (включая Sketchfab) */}
+                  <model-viewer
+                    src={model.src}
+                    alt={model.title}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      backgroundColor: 'var(--color-neutral-alpha-weak)'
+                    }}
+                    camera-controls
+                    auto-rotate
+                    exposure="1.0"
+                    shadow-intensity="0.5"
+                    loading="eager"
+                    animation-name=""
+                    autoplay
+                    animation-crossfade-duration="300"
+                  />
                 </div>
 
                 {/* Информация о модели */}

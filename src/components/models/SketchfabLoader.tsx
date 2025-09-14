@@ -52,20 +52,23 @@ export function SketchfabLoader({ onModelLoad }: SketchfabLoaderProps) {
       const data = await response.json();
       
       // Создаем объект модели для нашего вьювера
+      // Используем Sketchfab Viewer API для загрузки в model-viewer
       const model: Model3D = {
         id: `sketchfab-${modelId}`,
         title: data.name || "Sketchfab Model",
         description: data.description || "Модель из Sketchfab",
-        src: `https://sketchfab.com/models/${modelId}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0&ui_stop=0&ui_annotations=0&ui_help=0&ui_settings=0&ui_vr=0&ui_fullscreen=0&ui_annotations=0`,
+        src: `https://api.sketchfab.com/v3/models/${modelId}/download`, // Прямая ссылка на GLB
         thumbnail: data.thumbnails?.images?.[0]?.url || "/images/placeholder-3d.jpg",
         category: "Sketchfab",
-        format: "sketchfab",
+        format: "glb",
         author: data.user?.displayName || "Sketchfab User",
         tags: data.tags?.map((tag: any) => tag.slug) || ["sketchfab"],
         year: new Date(data.publishedAt || Date.now()).getFullYear(),
         isSketchfab: true,
         sketchfabId: modelId,
-        originalUrl: sketchfabUrl
+        originalUrl: sketchfabUrl,
+        arEnabled: true, // Включаем AR для Sketchfab моделей
+        vrEnabled: true  // Включаем VR для Sketchfab моделей
       };
 
       onModelLoad(model);

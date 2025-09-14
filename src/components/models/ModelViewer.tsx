@@ -284,24 +284,8 @@ export function ModelViewer({
           </Column>
         )}
 
-        {model.isSketchfab ? (
-          // Sketchfab iframe для Sketchfab моделей
-          <iframe
-            src={model.src}
-            title={model.title}
-            style={{
-              width: '100%',
-              height: '100%',
-              border: 'none',
-              borderRadius: '8px',
-              backgroundColor: isLightBackground ? '#ffffff' : '#000000'
-            }}
-            allow="autoplay; fullscreen; xr-spatial-tracking"
-            allowFullScreen
-          />
-        ) : (
-          // model-viewer для обычных GLB/GLTF моделей
-          <model-viewer
+        {/* model-viewer для всех моделей (включая Sketchfab) */}
+        <model-viewer
             ref={modelViewerRef}
             src={model.src}
             alt={model.title}
@@ -374,16 +358,15 @@ export function ModelViewer({
               </Column>
             </div>
           </model-viewer>
-        )}
 
         {/* Кнопки управления в верхней части вьювера */}
         <div
           style={{
             position: 'absolute',
-            top: '16px',
-            right: '16px',
+            top: '12px',
+            right: '24px',
             display: 'flex',
-            gap: '8px',
+            gap: '6px',
             flexDirection: 'row',
             zIndex: 1000
           }}
@@ -398,9 +381,9 @@ export function ModelViewer({
               border: isLightBackground ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(0, 0, 0, 0.2)',
               backdropFilter: 'blur(4px)',
               color: isLightBackground ? '#ffffff' : '#000000',
-              minWidth: '32px',
-              width: '32px',
-              height: '32px',
+              minWidth: '28px',
+              width: '28px',
+              height: '28px',
               padding: '0',
               boxShadow: isLightBackground ? '0 2px 8px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.1)',
               fontSize: '12px'
@@ -462,9 +445,9 @@ export function ModelViewer({
               border: '1px solid rgba(255, 255, 255, 0.2)',
               backdropFilter: 'blur(4px)',
               color: 'var(--color-neutral-weak)',
-              minWidth: '32px',
-              width: '32px',
-              height: '32px',
+              minWidth: '28px',
+              width: '28px',
+              height: '28px',
               padding: '0'
             }}
             title="Полноэкранный режим"
