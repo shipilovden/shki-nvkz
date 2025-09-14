@@ -255,15 +255,15 @@ export function RecordingControls({
   return (
     <div
       style={{
-        position: 'fixed',
-        bottom: '20px',
+        position: isARActive ? 'fixed' : 'absolute',
+        bottom: isARActive ? '20px' : '16px',
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '12px',
-        zIndex: 9999,
+        gap: isARActive ? '8px' : '6px',
+        zIndex: isARActive ? 9999 : 1000,
         pointerEvents: 'auto'
       }}
     >
@@ -272,72 +272,72 @@ export function RecordingControls({
         {/* Кнопка фото */}
         <Button
           variant="secondary"
-          size="l"
+          size="xs"
           onClick={handleScreenshot}
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            border: '2px solid rgba(0, 0, 0, 0.1)',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
             borderRadius: '50%',
-            width: '60px',
-            height: '60px',
+            width: isARActive ? '40px' : '32px',
+            height: isARActive ? '40px' : '32px',
             padding: '0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
           }}
           title="Сделать фото"
         >
-          <Icon name="image" size="l" />
+          <Icon name="image" size={isARActive ? "s" : "xs"} />
         </Button>
 
         {/* Кнопка записи видео */}
         <Button
           variant="secondary"
-          size="xl"
+          size="s"
           onClick={handleVideoRecord}
           style={{
             backgroundColor: recordingState.isRecording ? '#ff4444' : 'rgba(255, 255, 255, 0.9)',
-            border: recordingState.isRecording ? '2px solid #ff4444' : '2px solid rgba(0, 0, 0, 0.1)',
+            border: recordingState.isRecording ? '1px solid #ff4444' : '1px solid rgba(0, 0, 0, 0.1)',
             borderRadius: '50%',
-            width: recordingState.isRecording ? '70px' : '80px',
-            height: recordingState.isRecording ? '70px' : '80px',
+            width: isARActive ? (recordingState.isRecording ? '45px' : '50px') : (recordingState.isRecording ? '35px' : '40px'),
+            height: isARActive ? (recordingState.isRecording ? '45px' : '50px') : (recordingState.isRecording ? '35px' : '40px'),
             padding: '0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
             animation: recordingState.isRecording ? 'pulse 1s infinite' : 'none'
           }}
           title={recordingState.isRecording ? "Остановить запись" : "Начать запись"}
         >
           {recordingState.isRecording ? (
-            <div style={{ width: '20px', height: '20px', backgroundColor: '#ffffff', borderRadius: '4px' }} />
+            <div style={{ width: isARActive ? '12px' : '10px', height: isARActive ? '12px' : '10px', backgroundColor: '#ffffff', borderRadius: '2px' }} />
           ) : (
-            <div style={{ width: '0', height: '0', borderLeft: '20px solid #ff4444', borderTop: '12px solid transparent', borderBottom: '12px solid transparent' }} />
+            <div style={{ width: '0', height: '0', borderLeft: isARActive ? '12px' : '10px', borderTop: isARActive ? '8px' : '6px', borderBottom: isARActive ? '8px' : '6px', borderLeftColor: '#ff4444', borderTopColor: 'transparent', borderBottomColor: 'transparent' }} />
           )}
         </Button>
 
         {/* Кнопка настроек */}
         <Button
           variant="secondary"
-          size="l"
+          size="xs"
           onClick={toggleSettings}
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            border: '2px solid rgba(0, 0, 0, 0.1)',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
             borderRadius: '50%',
-            width: '60px',
-            height: '60px',
+            width: isARActive ? '40px' : '32px',
+            height: isARActive ? '40px' : '32px',
             padding: '0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
           }}
           title="Настройки"
         >
-          <Icon name="gear" size="l" />
+          <Icon name="gear" size={isARActive ? "s" : "xs"} />
         </Button>
       </Row>
 

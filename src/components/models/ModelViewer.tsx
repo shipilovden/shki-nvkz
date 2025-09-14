@@ -457,16 +457,16 @@ export function ModelViewer({
             }}
           />
         </div>
-      </div>
 
-      {/* Система записи - ВНЕ model-viewer, чтобы была видна в AR */}
-      <RecordingControls
-        isFullscreen={isFullscreen}
-        isVRActive={isVRActive}
-        isARActive={isARActive}
-        onScreenshot={handleScreenshot}
-        onVideoRecord={handleVideoRecord}
-      />
+        {/* Система записи - маленькие кнопки внутри вьювера */}
+        <RecordingControls
+          isFullscreen={isFullscreen}
+          isVRActive={isVRActive}
+          isARActive={isARActive}
+          onScreenshot={handleScreenshot}
+          onVideoRecord={handleVideoRecord}
+        />
+      </div>
 
       {/* Информация о модели под вьювером как на Sketchfab */}
       <Column gap="m" align="start" style={{ width: '100%', maxWidth: '800px' }}>
