@@ -292,7 +292,8 @@ export function ModelViewer({
             left: '16px',
             display: 'flex',
             gap: '8px',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            zIndex: 1000
           }}
         >
           <Button
@@ -301,14 +302,16 @@ export function ModelViewer({
             onClick={toggleBackground}
             prefixIcon={isLightBackground ? "moon" : "sun"}
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
               backdropFilter: 'blur(4px)',
-              color: 'var(--color-neutral-weak)',
+              color: '#ffffff',
               minWidth: '40px',
               width: '40px',
               height: '40px',
-              padding: '0'
+              padding: '0',
+              zIndex: 1000,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
             }}
             title={isLightBackground ? "Тёмный фон" : "Светлый фон"}
           />
