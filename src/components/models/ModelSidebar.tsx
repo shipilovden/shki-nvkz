@@ -110,7 +110,7 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
                   size="s"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onDeleteModel(model.id);
+                    onDeleteModel(model);
                   }}
                   style={{ 
                     minWidth: '20px',
