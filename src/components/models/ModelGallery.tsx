@@ -231,6 +231,23 @@ export function ModelGallery({ models }: ModelGalleryProps) {
         <Row gap="xl" style={{ width: '100%', maxWidth: '1400px' }} align="start">
           {/* Левая часть - 3D Viewer и информация */}
           <Column gap="l" style={{ flex: 1, maxWidth: '800px' }} align="center">
+            {/* Кнопка загрузки AR моделей - над вьювером */}
+            <Row gap="m" align="start" style={{ width: '100%', justifyContent: 'flex-start' }}>
+              <Button
+                variant="secondary"
+                size="xs"
+                onClick={() => setShowUploader(!showUploader)}
+                style={{
+                  fontSize: '12px',
+                  padding: '6px 12px',
+                  height: 'auto',
+                  minHeight: '28px'
+                }}
+              >
+                {showUploader ? "Скрыть" : "Загрузить!"}
+              </Button>
+            </Row>
+            
             {/* 3D Viewer */}
             <ModelViewer
               model={selectedModel}
@@ -242,22 +259,6 @@ export function ModelGallery({ models }: ModelGalleryProps) {
 
           {/* Правая часть - боковая панель с моделями */}
           <Column gap="l" style={{ width: '300px', minWidth: '300px' }} align="start">
-            {/* Кнопка загрузки AR моделей */}
-            <Button
-              variant="primary"
-              size="s"
-              onClick={() => setShowUploader(!showUploader)}
-              prefixIcon="upload"
-              style={{ 
-                width: '100%',
-                fontSize: '12px',
-                padding: '8px 12px',
-                borderRadius: '6px'
-              }}
-            >
-              {showUploader ? "Скрыть" : "Загрузить!"}
-            </Button>
-
             {/* AR Uploader */}
             {showUploader && (
               <ARUploader 
