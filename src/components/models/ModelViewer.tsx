@@ -90,16 +90,35 @@ export function ModelViewer({
         console.log('Fullscreen changed:', isFullscreenNow);
       };
 
+      // Обработчики для отслеживания выхода из AR/VR
+      const handleVisibilityChange = () => {
+        if (document.hidden) {
+          console.log('Page hidden, resetting AR/VR states');
+          setIsARActive(false);
+          setIsVRActive(false);
+        }
+      };
+
+      const handleBeforeUnload = () => {
+        console.log('Page unloading, resetting AR/VR states');
+        setIsARActive(false);
+        setIsVRActive(false);
+      };
+
       document.addEventListener('fullscreenchange', handleFullscreenChange);
       document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
       document.addEventListener('mozfullscreenchange', handleFullscreenChange);
       document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('beforeunload', handleBeforeUnload);
 
       return () => {
         document.removeEventListener('fullscreenchange', handleFullscreenChange);
         document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
         document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
         document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('beforeunload', handleBeforeUnload);
       };
     }
   }, [model.src, isLoading]);
@@ -130,9 +149,13 @@ export function ModelViewer({
 
   const handleAREnter = () => {
     if (modelViewerRef.current && isARAvailable) {
+      console.log('Entering AR mode...');
       modelViewerRef.current.enterAR();
       setIsARActive(true);
+      console.log('isARActive set to true');
       onAREnter?.();
+    } else {
+      console.log('Cannot enter AR - modelViewer:', !!modelViewerRef.current, 'isARAvailable:', isARAvailable);
     }
   };
 
@@ -339,13 +362,16 @@ export function ModelViewer({
 
         {/* Система записи - по центру внизу, только в AR режиме */}
         {isARActive && (
-          <RecordingControls
-            isFullscreen={isFullscreen}
-            isVRActive={isVRActive}
-            isARActive={isARActive}
-            onScreenshot={handleScreenshot}
-            onVideoRecord={handleVideoRecord}
-          />
+          <>
+            {console.log('Rendering RecordingControls - isARActive:', isARActive)}
+            <RecordingControls
+              isFullscreen={isFullscreen}
+              isVRActive={isVRActive}
+              isARActive={isARActive}
+              onScreenshot={handleScreenshot}
+              onVideoRecord={handleVideoRecord}
+            />
+          </>
         )}
 
         {/* Кнопки управления справа внизу как на Sketchfab */}

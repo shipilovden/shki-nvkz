@@ -86,11 +86,20 @@ export function RecordingControls({
 
   // Запрос разрешений при монтировании (только в AR режиме)
   useEffect(() => {
+    console.log('RecordingControls useEffect triggered - isARActive:', isARActive);
     if (isARActive) {
       console.log('RecordingControls mounted in AR mode, requesting permissions...');
       requestPermissions();
     }
   }, [isARActive]);
+
+  // Отладочная информация при монтировании
+  useEffect(() => {
+    console.log('RecordingControls component mounted');
+    return () => {
+      console.log('RecordingControls component unmounted');
+    };
+  }, []);
 
   // Очистка ресурсов при размонтировании
   useEffect(() => {
