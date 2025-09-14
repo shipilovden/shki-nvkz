@@ -31,7 +31,7 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
         maxHeight: '500px', // Максимальная высота
         overflowY: 'auto',
         padding: '12px',
-        border: '1px solid var(--color-neutral-strong)',
+        border: '1px solid var(--color-neutral-weak)',
         borderRadius: '8px',
         backgroundColor: 'var(--color-neutral-alpha-strong)'
       }}
@@ -50,7 +50,7 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
               : 'var(--color-neutral-alpha-weak)', // Более светлый фон для видимости
             border: selectedModel?.id === model.id
               ? '2px solid var(--color-brand-strong)'
-              : '1px solid var(--color-neutral-medium)', // Более видимая граница
+              : '1px solid var(--color-neutral-weak)', // Светлая граница в тёмной теме
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             minHeight: '80px',
             transform: 'translateY(0)',
@@ -61,7 +61,7 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
             if (selectedModel?.id !== model.id) {
               e.currentTarget.style.transform = 'translateY(-2px)';
               e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-              e.currentTarget.style.borderColor = 'var(--color-neutral-medium)';
+              e.currentTarget.style.borderColor = 'var(--color-neutral-weak)';
               e.currentTarget.style.backgroundColor = 'var(--color-neutral-alpha-medium)'; // Светлеет при наведении
             }
           }}
@@ -69,7 +69,7 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
             if (selectedModel?.id !== model.id) {
               e.currentTarget.style.transform = 'translateY(0)';
               e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-              e.currentTarget.style.borderColor = 'var(--color-neutral-medium)';
+              e.currentTarget.style.borderColor = 'var(--color-neutral-weak)';
               e.currentTarget.style.backgroundColor = 'var(--color-neutral-alpha-weak)'; // Возвращается к исходному цвету
             }
           }}

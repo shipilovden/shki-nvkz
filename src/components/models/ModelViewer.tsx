@@ -124,7 +124,7 @@ export function ModelViewer({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          border: '2px solid var(--color-neutral-medium)',
+          border: '2px solid var(--color-neutral-weak)',
           borderRadius: '8px',
           backgroundColor: 'var(--color-neutral-alpha-strong)',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
@@ -272,9 +272,10 @@ export function ModelViewer({
               onClick={handleVREnter}
               prefixIcon="3d"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                border: '1px solid rgba(0, 0, 0, 0.1)',
-                backdropFilter: 'blur(4px)'
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(4px)',
+                color: 'var(--color-neutral-weak)'
               }}
             >
               VR
@@ -288,9 +289,10 @@ export function ModelViewer({
               onClick={handleAREnter}
               prefixIcon="rocket"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                border: '1px solid rgba(0, 0, 0, 0.1)',
-                backdropFilter: 'blur(4px)'
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(4px)',
+                color: 'var(--color-neutral-weak)'
               }}
             >
               AR
@@ -303,9 +305,10 @@ export function ModelViewer({
             onClick={handleFullscreen}
             prefixIcon="expand"
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              border: '1px solid rgba(0, 0, 0, 0.1)',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               backdropFilter: 'blur(4px)',
+              color: 'var(--color-neutral-weak)',
               minWidth: '40px',
               width: '40px',
               height: '40px',
