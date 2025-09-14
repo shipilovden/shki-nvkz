@@ -284,79 +284,97 @@ export function ModelViewer({
           </Column>
         )}
 
-        <model-viewer
-          ref={modelViewerRef}
-          src={model.src}
-          alt={model.title}
-          style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: isLightBackground ? '#ffffff' : '#000000',
-            borderRadius: '8px',
-            display: 'block'
-          }}
-          camera-controls
-          auto-rotate
-          exposure="1.0"
-          shadow-intensity="0.5"
-          loading="eager"
-          animation-name=""
-          autoplay
-          animation-crossfade-duration="300"
-          onLoad={handleModelLoad}
-          onError={handleModelError}
-          onProgress={(event: any) => {
-            console.log('Model loading progress:', event.detail);
-          }}
-          onModelVisibility={(event: any) => {
-            console.log('Model visibility changed:', event.detail);
-          }}
-          onEnvironmentChange={(event: any) => {
-            console.log('Environment changed:', event.detail);
-          }}
-          onCameraChange={(event: any) => {
-            console.log('Camera changed:', event.detail);
-          }}
-          onARStatusChange={(event: any) => {
-            console.log('AR status changed:', event.detail);
-            if (event.detail.status === 'not-presenting') {
-              handleARExit();
-            } else if (event.detail.status === 'presenting') {
-              setIsARActive(true);
-            }
-          }}
-          // VR/AR настройки
-          vr={isVRAvailable}
-          ar={isARAvailable}
-          ar-modes="webxr scene-viewer quick-look"
-          ar-scale="auto"
-          ar-placement="floor"
-          // Дополнительные настройки для лучшего взаимодействия
-          interaction-policy="allow-when-focused"
-          touch-action="pan-y"
-          min-camera-orbit="auto auto auto"
-          max-camera-orbit="auto auto auto"
-          min-field-of-view="10deg"
-          max-field-of-view="45deg"
-        >
-          {/* Fallback для браузеров без поддержки model-viewer */}
-          <div slot="poster" style={{
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'var(--color-neutral-alpha-weak)',
-            borderRadius: '12px'
-          }}>
-            <Column align="center" gap="m">
-              <Icon name="3d" size="xl" onBackground="neutral-medium" />
-              <Text variant="body-default-m" onBackground="neutral-medium">
-                3D модель: {model.title}
-              </Text>
-            </Column>
-          </div>
-        </model-viewer>
+        {model.isSketchfab ? (
+          // Sketchfab iframe для Sketchfab моделей
+          <iframe
+            src={model.src}
+            title={model.title}
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              borderRadius: '8px',
+              backgroundColor: isLightBackground ? '#ffffff' : '#000000'
+            }}
+            allow="autoplay; fullscreen; xr-spatial-tracking"
+            allowFullScreen
+          />
+        ) : (
+          // model-viewer для обычных GLB/GLTF моделей
+          <model-viewer
+            ref={modelViewerRef}
+            src={model.src}
+            alt={model.title}
+            style={{
+              width: '100%',
+              height: '100%',
+              backgroundColor: isLightBackground ? '#ffffff' : '#000000',
+              borderRadius: '8px',
+              display: 'block'
+            }}
+            camera-controls
+            auto-rotate
+            exposure="1.0"
+            shadow-intensity="0.5"
+            loading="eager"
+            animation-name=""
+            autoplay
+            animation-crossfade-duration="300"
+            onLoad={handleModelLoad}
+            onError={handleModelError}
+            onProgress={(event: any) => {
+              console.log('Model loading progress:', event.detail);
+            }}
+            onModelVisibility={(event: any) => {
+              console.log('Model visibility changed:', event.detail);
+            }}
+            onEnvironmentChange={(event: any) => {
+              console.log('Environment changed:', event.detail);
+            }}
+            onCameraChange={(event: any) => {
+              console.log('Camera changed:', event.detail);
+            }}
+            onARStatusChange={(event: any) => {
+              console.log('AR status changed:', event.detail);
+              if (event.detail.status === 'not-presenting') {
+                handleARExit();
+              } else if (event.detail.status === 'presenting') {
+                setIsARActive(true);
+              }
+            }}
+            // VR/AR настройки
+            vr={isVRAvailable}
+            ar={isARAvailable}
+            ar-modes="webxr scene-viewer quick-look"
+            ar-scale="auto"
+            ar-placement="floor"
+            // Дополнительные настройки для лучшего взаимодействия
+            interaction-policy="allow-when-focused"
+            touch-action="pan-y"
+            min-camera-orbit="auto auto auto"
+            max-camera-orbit="auto auto auto"
+            min-field-of-view="10deg"
+            max-field-of-view="45deg"
+          >
+            {/* Fallback для браузеров без поддержки model-viewer */}
+            <div slot="poster" style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'var(--color-neutral-alpha-weak)',
+              borderRadius: '12px'
+            }}>
+              <Column align="center" gap="m">
+                <Icon name="3d" size="xl" onBackground="neutral-medium" />
+                <Text variant="body-default-m" onBackground="neutral-medium">
+                  3D модель: {model.title}
+                </Text>
+              </Column>
+            </div>
+          </model-viewer>
+        )}
 
         {/* Кнопка переключения фона - слева внизу */}
         <div

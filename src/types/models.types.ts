@@ -2,12 +2,12 @@ export interface Model3D {
   id: string;
   title: string;
   description: string;
-  src: string; // Google Drive ссылка на GLB файл
+  src: string; // Google Drive ссылка на GLB файл или Sketchfab embed URL
   thumbnail?: string; // Превью изображение
   category: string;
   tags: string[];
   size?: string; // Размер файла
-  format: 'glb' | 'gltf';
+  format: 'glb' | 'gltf' | 'sketchfab';
   author?: string;
   year?: number;
   license?: string;
@@ -20,6 +20,10 @@ export interface Model3D {
   environmentImage?: string; // HDR окружение
   exposure?: number;
   shadowIntensity?: number;
+  // Sketchfab специфичные поля
+  isSketchfab?: boolean;
+  sketchfabId?: string;
+  originalUrl?: string;
 }
 
 export interface ModelCategory {

@@ -5,6 +5,7 @@ import { Column, Row, Text, Button, Input, useToast } from "@once-ui-system/core
 import { ModelViewer } from "./ModelViewer";
 import { ModelSidebar } from "./ModelSidebar";
 import { ARUploader } from "../ar/ARUploader";
+import { SketchfabLoader } from "./SketchfabLoader";
 import { arStorage, type ARModelData } from "@/utils/arStorage";
 import type { Model3D } from "@/types/models.types";
 import type { ARModel } from "@/types/ar.types";
@@ -72,6 +73,21 @@ export function ModelGallery({ models }: ModelGalleryProps) {
     addToast({
       variant: "success",
       message: `AR модель "${model.name}" загружена!`,
+    });
+  };
+
+  const handleSketchfabModelLoad = (model: Model3D) => {
+    console.log('Sketchfab model loaded:', model);
+    
+    // Добавляем модель в список пользовательских моделей
+    setUserModels(prev => [...prev, model]);
+    
+    // Автоматически выбираем загруженную модель
+    setSelectedModel(model);
+    
+    addToast({
+      variant: "success",
+      message: "Модель Sketchfab загружена!"
     });
   };
 
@@ -260,22 +276,27 @@ export function ModelGallery({ models }: ModelGalleryProps) {
           >
             {/* Левая часть - 3D Viewer и информация */}
             <Column gap="l" style={{ flex: 1, maxWidth: '800px', height: '100%' }} align="center">
-              {/* Кнопка загрузки AR моделей - над вьювером */}
-              <Row gap="m" align="start" style={{ width: '100%', justifyContent: 'flex-start', height: '40px' }}>
-                <Button
-                  variant="secondary"
-                  size="xs"
-                  onClick={() => setShowUploader(!showUploader)}
-                  style={{
-                    fontSize: '12px',
-                    padding: '6px 12px',
-                    height: 'auto',
-                    minHeight: '28px'
-                  }}
-                >
-                  {showUploader ? "Скрыть" : "Загрузить!"}
-                </Button>
-              </Row>
+              {/* Кнопка загрузки AR моделей и Sketchfab загрузчик - над вьювером */}
+              <Column gap="s" style={{ width: '100%', justifyContent: 'flex-start' }}>
+                <Row gap="m" align="start" style={{ width: '100%', justifyContent: 'flex-start' }}>
+                  <Button
+                    variant="secondary"
+                    size="xs"
+                    onClick={() => setShowUploader(!showUploader)}
+                    style={{
+                      fontSize: '12px',
+                      padding: '6px 12px',
+                      height: 'auto',
+                      minHeight: '28px'
+                    }}
+                  >
+                    {showUploader ? "Скрыть" : "Загрузить!"}
+                  </Button>
+                </Row>
+                
+                {/* Sketchfab загрузчик */}
+                <SketchfabLoader onModelLoad={handleSketchfabModelLoad} />
+              </Column>
               
               {/* 3D Viewer */}
               <div style={{ flex: 1, width: '100%', height: 'calc(100% - 40px)' }}>
@@ -324,22 +345,27 @@ export function ModelGallery({ models }: ModelGalleryProps) {
             }}
             className={styles.mobileLayout}
           >
-            {/* Кнопка загрузки AR моделей */}
-            <Row gap="m" align="start" style={{ width: '100%', justifyContent: 'flex-start' }}>
-              <Button
-                variant="secondary"
-                size="xs"
-                onClick={() => setShowUploader(!showUploader)}
-                style={{
-                  fontSize: '12px',
-                  padding: '6px 12px',
-                  height: 'auto',
-                  minHeight: '28px'
-                }}
-              >
-                {showUploader ? "Скрыть" : "Загрузить!"}
-              </Button>
-            </Row>
+            {/* Кнопка загрузки AR моделей и Sketchfab загрузчик */}
+            <Column gap="s" style={{ width: '100%', justifyContent: 'flex-start' }}>
+              <Row gap="m" align="start" style={{ width: '100%', justifyContent: 'flex-start' }}>
+                <Button
+                  variant="secondary"
+                  size="xs"
+                  onClick={() => setShowUploader(!showUploader)}
+                  style={{
+                    fontSize: '12px',
+                    padding: '6px 12px',
+                    height: 'auto',
+                    minHeight: '28px'
+                  }}
+                >
+                  {showUploader ? "Скрыть" : "Загрузить!"}
+                </Button>
+              </Row>
+              
+              {/* Sketchfab загрузчик */}
+              <SketchfabLoader onModelLoad={handleSketchfabModelLoad} />
+            </Column>
 
             {/* AR Uploader */}
             {showUploader && (
