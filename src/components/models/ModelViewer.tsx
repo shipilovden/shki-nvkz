@@ -154,6 +154,21 @@ export function ModelViewer({
       setIsARActive(true);
       console.log('isARActive set to true');
       onAREnter?.();
+      
+      // Дополнительная проверка для мобильных устройств
+      setTimeout(() => {
+        console.log('Checking AR state after 1 second...');
+        // На мобильных устройствах AR может работать через scene-viewer
+        // Проверяем, активен ли AR режим
+        if (modelViewerRef.current) {
+          const modelViewer = modelViewerRef.current;
+          console.log('Model viewer AR state:', {
+            canActivateAR: modelViewer.canActivateAR,
+            arReady: modelViewer.arReady,
+            arModes: modelViewer.arModes
+          });
+        }
+      }, 1000);
     } else {
       console.log('Cannot enter AR - modelViewer:', !!modelViewerRef.current, 'isARAvailable:', isARAvailable);
     }
@@ -293,6 +308,12 @@ export function ModelViewer({
           onModelVisibility={(event: any) => {
             console.log('Model visibility changed:', event.detail);
           }}
+          onEnvironmentChange={(event: any) => {
+            console.log('Environment changed:', event.detail);
+          }}
+          onCameraChange={(event: any) => {
+            console.log('Camera changed:', event.detail);
+          }}
           // VR/AR настройки
           vr={isVRAvailable}
           ar={isARAvailable}
@@ -373,6 +394,26 @@ export function ModelViewer({
             />
           </>
         )}
+        
+        {/* Временная отладочная информация */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '10px',
+            left: '10px',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            color: 'white',
+            padding: '8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            zIndex: 3000
+          }}
+        >
+          <div>isARActive: {isARActive ? 'true' : 'false'}</div>
+          <div>isARAvailable: {isARAvailable ? 'true' : 'false'}</div>
+          <div>isVRActive: {isVRActive ? 'true' : 'false'}</div>
+          <div>isFullscreen: {isFullscreen ? 'true' : 'false'}</div>
+        </div>
 
         {/* Кнопки управления справа внизу как на Sketchfab */}
         <div
