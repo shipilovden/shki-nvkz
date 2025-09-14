@@ -124,9 +124,9 @@ export function ModelViewer({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          border: '1px solid #333333', // Тонкая тёмная линия
+          border: '1px solid var(--color-neutral-strong)',
           borderRadius: '8px',
-          backgroundColor: '#2a2a2a',
+          backgroundColor: 'var(--color-neutral-alpha-strong)',
           overflow: 'hidden'
         }}
       >
@@ -200,7 +200,7 @@ export function ModelViewer({
           style={{
             width: '100%',
             height: '100%',
-            backgroundColor: '#1a1a1a',
+            backgroundColor: 'var(--color-neutral-alpha-weak)',
             borderRadius: '8px',
             display: 'block'
           }}
