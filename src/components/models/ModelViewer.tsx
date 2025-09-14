@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from "react";
 import { Column, Row, Text, Button, Icon, Badge } from "@once-ui-system/core";
 import { RecordingControls } from "../recording/RecordingControls";
+import ArCameraControls from "../recording/ArCameraControls";
 import type { Model3D } from "@/types/models.types";
 
 interface ModelViewerProps {
@@ -36,7 +37,6 @@ export function ModelViewer({
   const [isLightBackground, setIsLightBackground] = useState(true);
   const [isVRActive, setIsVRActive] = useState(false);
   const [isARActive, setIsARActive] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
 
   useEffect(() => {
     console.log('ModelViewer mounted, model src:', model.src);
@@ -191,14 +191,6 @@ export function ModelViewer({
     setIsLightBackground(!isLightBackground);
   };
 
-  const handleScreenshot = () => {
-    console.log('Скриншот сделан');
-  };
-
-  const handleVideoRecord = (recording: boolean) => {
-    setIsRecording(recording);
-    console.log('Запись видео:', recording ? 'начата' : 'остановлена');
-  };
 
   return (
     <Column gap="l" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }} align="center">
@@ -458,13 +450,10 @@ export function ModelViewer({
           />
         </div>
 
-        {/* Система записи - маленькие кнопки внутри вьювера */}
-        <RecordingControls
-          isFullscreen={isFullscreen}
-          isVRActive={isVRActive}
-          isARActive={isARActive}
-          onScreenshot={handleScreenshot}
-          onVideoRecord={handleVideoRecord}
+        {/* Система записи AR - только в AR режиме */}
+        <ArCameraControls
+          arActive={isARActive}
+          modelViewerRef={modelViewerRef}
         />
       </div>
 
