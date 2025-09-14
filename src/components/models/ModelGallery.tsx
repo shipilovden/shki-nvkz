@@ -29,6 +29,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
       id: arModel.id,
       title: arModel.name,
       description: arModel.description,
+      src: arModel.fileUrl, // ModelSidebar ожидает поле src
       modelUrl: arModel.fileUrl,
       thumbnailUrl: arModel.qrCodeUrl, // Используем QR код как превью
       author: "Пользователь",
@@ -265,129 +266,20 @@ export function ModelGallery({ models }: ModelGalleryProps) {
               />
             )}
 
-            {/* Разделение на 3D и AR модели */}
-            <Column gap="m" style={{ width: '100%' }}>
-              {/* 3D Модели */}
-              <Column gap="s" style={{ width: '100%' }}>
-                <Text variant="body-strong-s" style={{ fontSize: '11px', color: '#666' }}>
-                  3D МОДЕЛИ
-                </Text>
-                <Column 
-                  gap="xs" 
-                  style={{ 
-                    width: '100%',
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                    padding: '8px',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '8px',
-                    backgroundColor: '#fafafa'
-                  }}
-                >
-                  {models.map((model) => (
-                    <Row 
-                      key={model.id} 
-                      gap="xs" 
-                      align="center" 
-                      style={{ 
-                        padding: '6px 8px',
-                        backgroundColor: selectedModel?.id === model.id ? '#e3f2fd' : 'transparent',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '11px'
-                      }}
-                      onClick={() => setSelectedModel(model)}
-                    >
-                      <Text variant="body-default-xs" style={{ fontSize: '11px' }}>
-                        {model.title}
-                      </Text>
-                    </Row>
-                  ))}
-                </Column>
-              </Column>
-
-              {/* AR Модели */}
-              {arModels.length > 0 && (
-                <Column gap="s" style={{ width: '100%' }}>
-                  <Text variant="body-strong-s" style={{ fontSize: '11px', color: '#666' }}>
-                    AR МОДЕЛИ
-                  </Text>
-                  <Column 
-                    gap="xs" 
-                    style={{ 
-                      width: '100%',
-                      maxHeight: '200px',
-                      overflowY: 'auto',
-                      padding: '8px',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '8px',
-                      backgroundColor: '#fafafa'
-                    }}
-                  >
-                    {arModels.map((model) => (
-                      <Row 
-                        key={model.id} 
-                        gap="xs" 
-                        align="center" 
-                        style={{ 
-                          padding: '6px 8px',
-                          backgroundColor: selectedModel?.id === model.id ? '#e8f5e8' : 'transparent',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '11px'
-                        }}
-                        onClick={() => {
-                          // Находим конвертированную модель
-                          const convertedModel = allModels.find(m => m.id === model.id);
-                          if (convertedModel) {
-                            setSelectedModel(convertedModel);
-                          }
-                        }}
-                      >
-                        <Column flex={1}>
-                          <Text variant="body-default-xs" style={{ fontSize: '11px' }}>
-                            {model.name}
-                          </Text>
-                        </Column>
-                        <Button
-                          variant="tertiary"
-                          size="s"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(model.qrCodeUrl, '_blank');
-                          }}
-                          style={{ 
-                            minWidth: '24px',
-                            height: '20px',
-                            padding: '0 6px',
-                            fontSize: '10px'
-                          }}
-                        >
-                          QR
-                        </Button>
-                        <Button
-                          variant="tertiary"
-                          size="s"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleARModelDelete(model.id);
-                          }}
-                          style={{ 
-                            minWidth: '20px',
-                            height: '20px',
-                            padding: '0',
-                            fontSize: '10px',
-                            color: '#ff4444'
-                          }}
-                        >
-                          ×
-                        </Button>
-                      </Row>
-                    ))}
-                  </Column>
-                </Column>
-              )}
-            </Column>
+            {/* Список всех моделей с миниатюрами */}
+            <ModelSidebar
+              models={filteredModels}
+              selectedModel={selectedModel}
+              onModelSelect={handleModelSelect}
+              onQRCodeClick={(model) => {
+                // Находим оригинальную AR модель
+                const arModel = arModels.find(ar => ar.id === model.id);
+                if (arModel) {
+                  window.open(arModel.qrCodeUrl, '_blank');
+                }
+              }}
+              onDeleteModel={handleARModelDelete}
+            />
           </Column>
         </Row>
       ) : (

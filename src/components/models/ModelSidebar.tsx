@@ -1,15 +1,17 @@
 "use client";
 
-import { Column, Row, Text, Icon, Badge } from "@once-ui-system/core";
+import { Column, Row, Text, Icon, Badge, Button } from "@once-ui-system/core";
 import type { Model3D } from "@/types/models.types";
 
 interface ModelSidebarProps {
   models: Model3D[];
   selectedModel: Model3D | null;
   onModelSelect: (model: Model3D) => void;
+  onQRCodeClick?: (model: Model3D) => void;
+  onDeleteModel?: (modelId: string) => void;
 }
 
-export function ModelSidebar({ models, selectedModel, onModelSelect }: ModelSidebarProps) {
+export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeClick, onDeleteModel }: ModelSidebarProps) {
   if (models.length === 0) {
     return (
       <Column align="center" gap="m" padding="l">
@@ -149,6 +151,49 @@ export function ModelSidebar({ models, selectedModel, onModelSelect }: ModelSide
                 <Icon name="rocket" size="xs" onBackground="brand-medium" />
               )}
             </Row>
+            
+            {/* Кнопки для пользовательских моделей */}
+            {(model as any).isUserModel && (
+              <Row gap="xs" align="center" style={{ marginTop: '4px' }}>
+                {onQRCodeClick && (
+                  <Button
+                    variant="tertiary"
+                    size="s"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onQRCodeClick(model);
+                    }}
+                    style={{ 
+                      minWidth: '24px',
+                      height: '20px',
+                      padding: '0 6px',
+                      fontSize: '10px'
+                    }}
+                  >
+                    QR
+                  </Button>
+                )}
+                {onDeleteModel && (
+                  <Button
+                    variant="tertiary"
+                    size="s"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteModel(model.id);
+                    }}
+                    style={{ 
+                      minWidth: '20px',
+                      height: '20px',
+                      padding: '0',
+                      fontSize: '10px',
+                      color: '#ff4444'
+                    }}
+                  >
+                    ×
+                  </Button>
+                )}
+              </Row>
+            )}
           </Column>
         </Row>
       ))}
