@@ -148,6 +148,11 @@ export function ModelViewer({
   };
 
   const handleAREnter = () => {
+    console.log('handleAREnter called', { 
+      modelViewerRef: !!modelViewerRef.current, 
+      isARAvailable 
+    });
+    
     if (modelViewerRef.current && isARAvailable) {
       console.log('Entering AR mode...');
       modelViewerRef.current.enterAR();

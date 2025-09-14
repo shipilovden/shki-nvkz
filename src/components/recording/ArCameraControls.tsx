@@ -19,9 +19,12 @@ export default function ArCameraControls({ arActive, modelViewerRef }: ArCameraC
 
   // Запрос разрешений на камеру
   useEffect(() => {
+    console.log('ArCameraControls useEffect arActive changed:', arActive);
     if (arActive) {
+      console.log('AR is active, requesting camera permission...');
       requestCameraPermission();
     } else {
+      console.log('AR is not active, stopping camera...');
       stopCamera();
     }
   }, [arActive]);
@@ -179,6 +182,7 @@ export default function ArCameraControls({ arActive, modelViewerRef }: ArCameraC
 
   // Отладочная информация
   console.log('ArCameraControls render:', { arActive, hasPermission });
+  console.log('ArCameraControls props:', { arActive, modelViewerRef: !!modelViewerRef });
 
   if (!arActive || !hasPermission) {
     return null;
