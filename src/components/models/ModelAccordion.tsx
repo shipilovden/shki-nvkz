@@ -34,7 +34,7 @@ export function ModelAccordion({
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <Text variant="body-strong-s" className={styles.accordionTitle}>
-          Все модели ({models.length})
+          Модели
         </Text>
         <Icon 
           name="chevronDown" 

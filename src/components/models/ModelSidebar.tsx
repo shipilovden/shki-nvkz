@@ -38,7 +38,7 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
       gap="s" 
       style={{ 
         width: '100%',
-        maxHeight: '500px', // Максимальная высота
+        maxHeight: '400px', // Уменьшенная высота
         overflowY: 'auto',
         padding: '12px',
         border: '1px solid var(--neutral-alpha-strong)',

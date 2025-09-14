@@ -253,7 +253,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
               display: 'flex',
               flexDirection: 'row',
               alignItems: 'flex-start', 
-              height: '600px',
+              height: '500px', // Уменьшенная высота
               gap: '24px'
             }}
             className={styles.desktopLayout}
