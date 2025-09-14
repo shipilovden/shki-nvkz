@@ -287,7 +287,7 @@ export function RecordingControls({
           }}
           title="Сделать фото"
         >
-          <Icon name="camera" size="l" />
+          <Icon name="image" size="l" />
         </Button>
 
         {/* Кнопка записи видео */}
@@ -336,7 +336,7 @@ export function RecordingControls({
           }}
           title="Настройки"
         >
-          <Icon name="settings" size="l" />
+          <Icon name="gear" size="l" />
         </Button>
       </Row>
 
@@ -392,7 +392,7 @@ export function RecordingControls({
               variant={recordingState.isVideoEnabled ? "primary" : "secondary"}
               size="xs"
               onClick={toggleVideo}
-              prefixIcon="video"
+              prefixIcon="play"
               style={{ fontSize: '10px' }}
             >
               Видео
@@ -401,7 +401,7 @@ export function RecordingControls({
               variant={recordingState.isAudioEnabled ? "primary" : "secondary"}
               size="xs"
               onClick={toggleAudio}
-              prefixIcon="microphone"
+              prefixIcon="volume"
               style={{ fontSize: '10px' }}
             >
               Звук

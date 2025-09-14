@@ -174,6 +174,12 @@ export function ModelViewer({
     }
   };
 
+  // Обработчик выхода из AR режима
+  const handleARExit = () => {
+    console.log('Exiting AR mode...');
+    setIsARActive(false);
+  };
+
   const handleFullscreen = () => {
     if (modelViewerRef.current) {
       modelViewerRef.current.requestFullscreen();
@@ -314,6 +320,12 @@ export function ModelViewer({
           onCameraChange={(event: any) => {
             console.log('Camera changed:', event.detail);
           }}
+          onARStatusChange={(event: any) => {
+            console.log('AR status changed:', event.detail);
+            if (event.detail.status === 'not-presenting') {
+              handleARExit();
+            }
+          }}
           // VR/AR настройки
           vr={isVRAvailable}
           ar={isARAvailable}
@@ -363,7 +375,7 @@ export function ModelViewer({
             variant="secondary"
             size="xs"
             onClick={toggleBackground}
-            prefixIcon={isLightBackground ? "night" : "sun"}
+            prefixIcon={isLightBackground ? "moon" : "sun"}
             style={{
               backgroundColor: isLightBackground ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)',
               border: isLightBackground ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(0, 0, 0, 0.2)',
