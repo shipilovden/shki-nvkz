@@ -74,9 +74,38 @@ export function SketchfabLoader({ onModelLoad }: SketchfabLoaderProps) {
         if (downloadResponse.ok) {
           const downloadData = await downloadResponse.json();
           console.log('Download data:', downloadData);
+          console.log('Download data structure:', JSON.stringify(downloadData, null, 2));
           
           // Ищем GLB файл в доступных форматах
-          const glbFile = downloadData.gltf?.urls?.glb || downloadData.gltf?.urls?.['glb-draco'];
+          let glbFile = null;
+          
+          // Проверяем разные возможные структуры
+          if (downloadData.gltf?.urls?.glb) {
+            glbFile = downloadData.gltf.urls.glb;
+            console.log('Found GLB in gltf.urls.glb:', glbFile);
+          } else if (downloadData.gltf?.urls?.['glb-draco']) {
+            glbFile = downloadData.gltf.urls['glb-draco'];
+            console.log('Found GLB in gltf.urls.glb-draco:', glbFile);
+          } else if (downloadData.glb?.url) {
+            glbFile = downloadData.glb.url;
+            console.log('Found GLB in glb.url:', glbFile);
+          } else if (downloadData.glb?.urls?.glb) {
+            glbFile = downloadData.glb.urls.glb;
+            console.log('Found GLB in glb.urls.glb:', glbFile);
+          } else {
+            console.log('No GLB found, checking all available formats:');
+            console.log('Available formats:', Object.keys(downloadData));
+            if (downloadData.gltf) {
+              console.log('GLTF structure:', downloadData.gltf);
+              if (downloadData.gltf.urls) {
+                console.log('GLTF URLs:', downloadData.gltf.urls);
+              }
+            }
+            if (downloadData.glb) {
+              console.log('GLB structure:', downloadData.glb);
+            }
+          }
+          
           console.log('GLB file found:', glbFile);
           
           if (glbFile) {
@@ -115,6 +144,14 @@ export function SketchfabLoader({ onModelLoad }: SketchfabLoaderProps) {
       // Попробуем использовать Sketchfab Viewer API с AR поддержкой
       const embedUrl = `https://sketchfab.com/models/${modelId}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0&ui_stop=0&ui_annotations=0&ui_help=0&ui_settings=0&ui_vr=1&ui_fullscreen=1&ui_ar=1`;
       
+      // Проверяем, поддерживает ли модель AR/VR
+      const supportsAR = data.viewerFeatures?.includes('ar') || false;
+      const supportsVR = data.viewerFeatures?.includes('vr') || false;
+      
+      console.log('Model AR support:', supportsAR);
+      console.log('Model VR support:', supportsVR);
+      console.log('Model viewer features:', data.viewerFeatures);
+      
       const model: Model3D = {
         id: `sketchfab-${modelId}`,
         title: data.name || "Sketchfab Model",
@@ -129,8 +166,8 @@ export function SketchfabLoader({ onModelLoad }: SketchfabLoaderProps) {
         isSketchfab: !glbUrl, // Если есть GLB, то это не iframe
         sketchfabId: modelId,
         originalUrl: sketchfabUrl,
-        arEnabled: !!glbUrl, // AR работает только с GLB
-        vrEnabled: !!glbUrl  // VR работает только с GLB
+        arEnabled: !!glbUrl || supportsAR, // AR работает с GLB или если модель поддерживает AR
+        vrEnabled: !!glbUrl || supportsVR  // VR работает с GLB или если модель поддерживает VR
       };
       
       console.log('Created model:', model);
