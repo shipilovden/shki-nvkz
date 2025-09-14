@@ -281,9 +281,13 @@ export function ModelGallery({ models }: ModelGalleryProps) {
               <div style={{ flex: 1, width: '100%', height: 'calc(100% - 40px)' }}>
                 <ModelViewer
                   model={selectedModel}
+                  allModels={filteredModels}
+                  onModelChange={handleModelSelect}
                   onVREnter={handleVREnter}
                   onAREnter={handleAREnter}
                   onFullscreen={handleFullscreen}
+                  onQRCodeClick={handleQRCodeClick}
+                  onDeleteModel={handleDeleteModel}
                 />
               </div>
             </Column>
@@ -355,9 +359,13 @@ export function ModelGallery({ models }: ModelGalleryProps) {
             <div style={{ width: '100%', height: '400px' }}>
               <ModelViewer
                 model={selectedModel}
+                allModels={filteredModels}
+                onModelChange={handleModelSelect}
                 onVREnter={handleVREnter}
                 onAREnter={handleAREnter}
                 onFullscreen={handleFullscreen}
+                onQRCodeClick={handleQRCodeClick}
+                onDeleteModel={handleDeleteModel}
               />
             </div>
 
