@@ -31,6 +31,8 @@ export function ModelViewer({
   const [hasError, setHasError] = useState(false);
   const [isVRAvailable, setIsVRAvailable] = useState(false);
   const [isARAvailable, setIsARAvailable] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLightBackground, setIsLightBackground] = useState(true);
 
   useEffect(() => {
     console.log('ModelViewer mounted, model src:', model.src);
@@ -71,6 +73,30 @@ export function ModelViewer({
       } else {
         console.log('WebXR not supported in this browser');
       }
+
+      // Обработчики полноэкранного режима
+      const handleFullscreenChange = () => {
+        const isFullscreenNow = !!(
+          document.fullscreenElement ||
+          (document as any).webkitFullscreenElement ||
+          (document as any).mozFullScreenElement ||
+          (document as any).msFullscreenElement
+        );
+        setIsFullscreen(isFullscreenNow);
+        console.log('Fullscreen changed:', isFullscreenNow);
+      };
+
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+      return () => {
+        document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+        document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+      };
     }
   }, [model.src, isLoading]);
 
@@ -111,6 +137,10 @@ export function ModelViewer({
     }
   };
 
+  const toggleBackground = () => {
+    setIsLightBackground(!isLightBackground);
+  };
+
   return (
     <Column gap="l" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }} align="center">
 
@@ -124,10 +154,12 @@ export function ModelViewer({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          border: '2px solid var(--neutral-alpha-strong)',
-          borderRadius: '8px',
-          backgroundColor: 'var(--color-neutral-alpha-strong)',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          border: isFullscreen ? 'none' : '2px solid var(--neutral-alpha-strong)',
+          borderRadius: isFullscreen ? '0' : '8px',
+          backgroundColor: isFullscreen 
+            ? (isLightBackground ? '#ffffff' : '#000000')
+            : 'var(--color-neutral-alpha-strong)',
+          boxShadow: isFullscreen ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.1)',
           overflow: 'hidden'
         }}
       >
@@ -201,7 +233,9 @@ export function ModelViewer({
           style={{
             width: '100%',
             height: '100%',
-            backgroundColor: 'var(--color-neutral-alpha-weak)',
+            backgroundColor: isFullscreen 
+              ? (isLightBackground ? '#ffffff' : '#000000')
+              : 'var(--color-neutral-alpha-weak)',
             borderRadius: '8px',
             display: 'block'
           }}
@@ -265,6 +299,26 @@ export function ModelViewer({
             flexDirection: 'column'
           }}
         >
+          {/* Кнопка переключения фона - только в полноэкранном режиме */}
+          {isFullscreen && (
+            <Button
+              variant="secondary"
+              size="s"
+              onClick={toggleBackground}
+              prefixIcon={isLightBackground ? "moon" : "sun"}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(4px)',
+                color: 'var(--color-neutral-weak)',
+                minWidth: '40px',
+                width: '40px',
+                height: '40px',
+                padding: '0'
+              }}
+              title={isLightBackground ? "Тёмный фон" : "Светлый фон"}
+            />
+          )}
           {isVRAvailable && model.vrEnabled && (
             <Button
               variant="secondary"
