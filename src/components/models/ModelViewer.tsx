@@ -3,17 +3,13 @@
 import { useRef, useEffect, useState } from "react";
 import { Column, Row, Text, Button, Icon, Badge } from "@once-ui-system/core";
 import type { Model3D } from "@/types/models.types";
-import { ModelAccordion } from "./ModelAccordion";
 
 interface ModelViewerProps {
   model: Model3D;
-  allModels?: Model3D[];
   onModelChange?: (model: Model3D) => void;
   onVREnter?: () => void;
   onAREnter?: () => void;
   onFullscreen?: () => void;
-  onQRCodeClick?: (model: Model3D) => void;
-  onDeleteModel?: (model: Model3D) => void;
 }
 
 declare global {
@@ -26,12 +22,9 @@ declare global {
 
 export function ModelViewer({ 
   model, 
-  allModels = [],
   onVREnter, 
   onAREnter, 
-  onFullscreen,
-  onQRCodeClick,
-  onDeleteModel
+  onFullscreen
 }: ModelViewerProps) {
   const modelViewerRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -430,18 +423,6 @@ export function ModelViewer({
           }}
         />
 
-        {/* Аккордеон с мини-просмотром моделей */}
-        {allModels.length > 0 && (
-          <ModelAccordion
-            models={allModels}
-            selectedModel={model}
-            onModelSelect={(selectedModel) => {
-              onModelChange?.(selectedModel);
-            }}
-            onQRCodeClick={onQRCodeClick}
-            onDeleteModel={onDeleteModel}
-          />
-        )}
       </Column>
     </Column>
   );
