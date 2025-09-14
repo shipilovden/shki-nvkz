@@ -8,6 +8,7 @@ import { ARUploader } from "../ar/ARUploader";
 import { arStorage, type ARModelData } from "@/utils/arStorage";
 import type { Model3D } from "@/types/models.types";
 import type { ARModel } from "@/types/ar.types";
+import styles from './ModelGallery.module.css';
 
 interface ModelGalleryProps {
   models: Model3D[];
@@ -245,18 +246,17 @@ export function ModelGallery({ models }: ModelGalleryProps) {
       {filteredModels.length > 0 && selectedModel ? (
         <>
           {/* Десктопная версия - горизонтальный макет */}
-          <Row 
-            gap="xl" 
+          <div 
             style={{ 
               width: '100%', 
-              maxWidth: '1400px', 
+              maxWidth: '1400px',
+              display: 'flex',
+              flexDirection: 'row',
               alignItems: 'flex-start', 
               height: '600px',
-              display: 'flex'
+              gap: '24px'
             }}
-            s={{ 
-              display: 'none' // Скрываем на мобильных
-            }}
+            className={styles.desktopLayout}
           >
             {/* Левая часть - 3D Viewer и информация */}
             <Column gap="l" style={{ flex: 1, maxWidth: '800px', height: '100%' }} align="center">
@@ -311,19 +311,18 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                 />
               </div>
             </Column>
-          </Row>
+          </div>
 
           {/* Мобильная версия - вертикальный макет */}
-          <Column 
-            gap="l" 
+          <div 
             style={{ 
               width: '100%', 
               maxWidth: '1400px',
-              display: 'none' // Скрываем на десктопе
+              display: 'none',
+              flexDirection: 'column',
+              gap: '16px'
             }}
-            s={{ 
-              display: 'flex' // Показываем на мобильных
-            }}
+            className={styles.mobileLayout}
           >
             {/* Кнопка загрузки AR моделей */}
             <Row gap="m" align="start" style={{ width: '100%', justifyContent: 'flex-start' }}>
@@ -372,7 +371,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                 onDeleteModel={handleDeleteModel}
               />
             </div>
-          </Column>
+          </div>
         </>
       ) : (
         <Column gap="l" align="center" style={{ padding: '40px' }}>

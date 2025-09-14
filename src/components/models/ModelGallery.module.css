@@ -1,0 +1,19 @@
+/* Десктопная версия - показываем по умолчанию */
+.desktopLayout {
+  display: flex !important;
+}
+
+.mobileLayout {
+  display: none !important;
+}
+
+/* Мобильная версия - показываем на экранах меньше 768px */
+@media (max-width: 768px) {
+  .desktopLayout {
+    display: none !important;
+  }
+  
+  .mobileLayout {
+    display: flex !important;
+  }
+}
