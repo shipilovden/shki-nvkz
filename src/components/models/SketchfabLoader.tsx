@@ -58,8 +58,11 @@ export function SketchfabLoader({ onModelLoad }: SketchfabLoaderProps) {
         description: data.description || "Модель из Sketchfab",
         src: `https://sketchfab.com/models/${modelId}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0&ui_stop=0&ui_annotations=0&ui_help=0&ui_settings=0&ui_vr=0&ui_fullscreen=0&ui_annotations=0`,
         thumbnail: data.thumbnails?.images?.[0]?.url || "/images/placeholder-3d.jpg",
+        category: "Sketchfab",
+        format: "sketchfab",
         author: data.user?.displayName || "Sketchfab User",
-        tags: data.tags?.map((tag: any) => tag.slug) || [],
+        tags: data.tags?.map((tag: any) => tag.slug) || ["sketchfab"],
+        year: new Date(data.publishedAt || Date.now()).getFullYear(),
         isSketchfab: true,
         sketchfabId: modelId,
         originalUrl: sketchfabUrl

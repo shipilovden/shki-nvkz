@@ -22,6 +22,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
   const [isVRActive, setIsVRActive] = useState(false);
   const [isARActive, setIsARActive] = useState(false);
   const [arModels, setArModels] = useState<ARModel[]>([]);
+  const [sketchfabModels, setSketchfabModels] = useState<Model3D[]>([]);
   const [showUploader, setShowUploader] = useState(false);
 
   // Загружаем AR модели при монтировании
@@ -79,8 +80,8 @@ export function ModelGallery({ models }: ModelGalleryProps) {
   const handleSketchfabModelLoad = (model: Model3D) => {
     console.log('Sketchfab model loaded:', model);
     
-    // Добавляем модель в список пользовательских моделей
-    setUserModels(prev => [...prev, model]);
+    // Добавляем модель в список Sketchfab моделей
+    setSketchfabModels(prev => [...prev, model]);
     
     // Автоматически выбираем загруженную модель
     setSelectedModel(model);
@@ -145,8 +146,8 @@ export function ModelGallery({ models }: ModelGalleryProps) {
       isUserModel: true
     }));
 
-    return [...models, ...convertedARModels];
-  }, [models, arModels]);
+    return [...models, ...convertedARModels, ...sketchfabModels];
+  }, [models, arModels, sketchfabModels]);
 
   // Фильтруем модели по поиску
   const filteredModels = useMemo(() => {
