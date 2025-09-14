@@ -22,7 +22,6 @@ const routes: RoutesConfig = {
   "/work": true,
   "/blog": true,
   "/gallery": true,
-  "/ar": true,
   "/music": true,
   "/3d": true,
 };

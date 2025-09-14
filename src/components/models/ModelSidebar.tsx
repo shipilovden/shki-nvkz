@@ -31,9 +31,9 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
         height: '100%', // Занимает всю доступную высоту
         overflowY: 'auto',
         padding: '12px',
-        border: '1px solid #e0e0e0', // Тонкая серая линия
+        border: '1px solid #333333', // Тонкая тёмная линия
         borderRadius: '8px',
-        backgroundColor: '#fafafa'
+        backgroundColor: '#2a2a2a'
       }}
     >
       {models.map((model) => (

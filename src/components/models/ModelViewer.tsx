@@ -124,9 +124,9 @@ export function ModelViewer({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          border: '1px solid #e0e0e0', // Тонкая серая линия
+          border: '1px solid #333333', // Тонкая тёмная линия
           borderRadius: '8px',
-          backgroundColor: '#ffffff',
+          backgroundColor: '#2a2a2a',
           overflow: 'hidden'
         }}
       >
@@ -200,7 +200,7 @@ export function ModelViewer({
           style={{
             width: '100%',
             height: '100%',
-            backgroundColor: '#f8f8f8',
+            backgroundColor: '#1a1a1a',
             borderRadius: '8px',
             display: 'block'
           }}
@@ -209,6 +209,9 @@ export function ModelViewer({
           exposure="1.0"
           shadow-intensity="0.5"
           loading="eager"
+          animation-name=""
+          autoplay
+          animation-crossfade-duration="300"
           onLoad={handleModelLoad}
           onError={handleModelError}
           onProgress={(event: any) => {
