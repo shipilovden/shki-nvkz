@@ -253,7 +253,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
               display: 'flex',
               flexDirection: 'row',
               alignItems: 'flex-start', 
-              height: '500px', // Уменьшенная высота
+              height: '600px', // Увеличена высота для десктопа
               gap: '24px'
             }}
             className={styles.desktopLayout}
