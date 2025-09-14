@@ -298,20 +298,21 @@ export function ModelViewer({
         >
           <Button
             variant="secondary"
-            size="s"
+            size="xs"
             onClick={toggleBackground}
             prefixIcon={isLightBackground ? "moon" : "sun"}
             style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
+              backgroundColor: isLightBackground ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)',
+              border: isLightBackground ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(0, 0, 0, 0.2)',
               backdropFilter: 'blur(4px)',
-              color: '#ffffff',
-              minWidth: '40px',
-              width: '40px',
-              height: '40px',
+              color: isLightBackground ? '#ffffff' : '#000000',
+              minWidth: '32px',
+              width: '32px',
+              height: '32px',
               padding: '0',
               zIndex: 1000,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+              boxShadow: isLightBackground ? '0 2px 8px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.1)',
+              fontSize: '12px'
             }}
             title={isLightBackground ? "Тёмный фон" : "Светлый фон"}
           />
