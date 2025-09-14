@@ -19,7 +19,7 @@ export function UserModelsAccordion({
   onQRCodeClick,
   onDeleteModel
 }: UserModelsAccordionProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false); // По умолчанию свёрнут
 
   if (userModels.length === 0) {
     return null;

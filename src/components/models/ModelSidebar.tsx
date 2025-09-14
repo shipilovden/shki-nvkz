@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { Column, Row, Text, Icon, Badge, Button } from "@once-ui-system/core";
 import type { Model3D } from "@/types/models.types";
 import { UserModelsAccordion } from './UserModelsAccordion';
+import { ModelAccordion } from './ModelAccordion';
 
 interface ModelSidebarProps {
   models: Model3D[];
@@ -56,8 +57,19 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
         />
       )}
 
-      {/* Обычные модели */}
-      {regularModels.map((model) => (
+      {/* Аккордеон с обычными моделями */}
+      {regularModels.length > 0 && (
+        <ModelAccordion
+          models={regularModels}
+          selectedModel={selectedModel}
+          onModelSelect={onModelSelect}
+          onQRCodeClick={onQRCodeClick}
+          onDeleteModel={onDeleteModel}
+        />
+      )}
+      
+      {/* Обычные модели - временно скрыты */}
+      {false && regularModels.map((model) => (
         <div
           key={model.id}
           style={{
