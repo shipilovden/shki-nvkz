@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import { Column, Row, Text, Button, Icon, Badge } from "@once-ui-system/core";
+import { RecordingControls } from "../recording/RecordingControls";
 import type { Model3D } from "@/types/models.types";
 
 interface ModelViewerProps {
@@ -33,6 +34,9 @@ export function ModelViewer({
   const [isARAvailable, setIsARAvailable] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isLightBackground, setIsLightBackground] = useState(true);
+  const [isVRActive, setIsVRActive] = useState(false);
+  const [isARActive, setIsARActive] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
   useEffect(() => {
     console.log('ModelViewer mounted, model src:', model.src);
@@ -119,6 +123,7 @@ export function ModelViewer({
   const handleVREnter = () => {
     if (modelViewerRef.current && isVRAvailable) {
       modelViewerRef.current.enterVR();
+      setIsVRActive(true);
       onVREnter?.();
     }
   };
@@ -126,6 +131,7 @@ export function ModelViewer({
   const handleAREnter = () => {
     if (modelViewerRef.current && isARAvailable) {
       modelViewerRef.current.enterAR();
+      setIsARActive(true);
       onAREnter?.();
     }
   };
@@ -139,6 +145,15 @@ export function ModelViewer({
 
   const toggleBackground = () => {
     setIsLightBackground(!isLightBackground);
+  };
+
+  const handleScreenshot = () => {
+    console.log('Скриншот сделан');
+  };
+
+  const handleVideoRecord = (recording: boolean) => {
+    setIsRecording(recording);
+    console.log('Запись видео:', recording ? 'начата' : 'остановлена');
   };
 
   return (
@@ -321,6 +336,17 @@ export function ModelViewer({
             title={isLightBackground ? "Тёмный фон" : "Светлый фон"}
           />
         </div>
+
+        {/* Система записи - по центру внизу */}
+        {(isFullscreen || isVRActive || isARActive) && (
+          <RecordingControls
+            isFullscreen={isFullscreen}
+            isVRActive={isVRActive}
+            isARActive={isARActive}
+            onScreenshot={handleScreenshot}
+            onVideoRecord={handleVideoRecord}
+          />
+        )}
 
         {/* Кнопки управления справа внизу как на Sketchfab */}
         <div
