@@ -284,8 +284,24 @@ export function ModelViewer({
           </Column>
         )}
 
-        {/* model-viewer для всех моделей (включая Sketchfab) */}
-        <model-viewer
+        {model.isSketchfab ? (
+          // Sketchfab iframe для Sketchfab моделей
+          <iframe
+            src={model.src}
+            title={model.title}
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              borderRadius: '8px',
+              backgroundColor: isLightBackground ? '#ffffff' : '#000000'
+            }}
+            allow="autoplay; fullscreen; xr-spatial-tracking"
+            allowFullScreen
+          />
+        ) : (
+          // model-viewer для обычных GLB/GLTF моделей
+          <model-viewer
             ref={modelViewerRef}
             src={model.src}
             alt={model.title}
@@ -358,19 +374,21 @@ export function ModelViewer({
               </Column>
             </div>
           </model-viewer>
+        )}
 
-        {/* Кнопки управления в верхней части вьювера */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '12px',
-            right: '24px',
-            display: 'flex',
-            gap: '6px',
-            flexDirection: 'row',
-            zIndex: 1000
-          }}
-        >
+        {/* Кнопки управления в верхней части вьювера - только для обычных моделей */}
+        {!model.isSketchfab && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '12px',
+              right: '24px',
+              display: 'flex',
+              gap: '6px',
+              flexDirection: 'row',
+              zIndex: 1000
+            }}
+          >
           <Button
             variant="secondary"
             size="xs"
@@ -453,6 +471,7 @@ export function ModelViewer({
             title="Полноэкранный режим"
           />
         </div>
+        )}
 
         {/* Система записи AR - только в AR режиме */}
         <ArCameraControls

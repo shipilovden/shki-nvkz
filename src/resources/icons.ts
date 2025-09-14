@@ -47,7 +47,7 @@ import {
   SiSupabase,
 } from "react-icons/si";
 
-import { FaDiscord, FaGithub, FaLinkedin, FaX, FaThreads, FaXTwitter, FaFacebook, FaPinterest, FaWhatsapp, FaReddit, FaTelegram, FaVk, FaGamepad, FaChair, FaExpand } from "react-icons/fa6";
+import { FaDiscord, FaGithub, FaLinkedin, FaX, FaThreads, FaXTwitter, FaFacebook, FaPinterest, FaWhatsapp, FaReddit, FaTelegram, FaVk, FaGamepad, FaChair, FaExpand, FaMoon, FaSun } from "react-icons/fa6";
 
 export const iconLibrary: Record<string, IconType> = {
   arrowUpRight: HiArrowUpRight,
@@ -101,6 +101,8 @@ export const iconLibrary: Record<string, IconType> = {
   gear: HiOutlineCog6Tooth,
   expand: FaExpand,
   warning: HiOutlineExclamationTriangle,
+  moon: FaMoon,
+  sun: FaSun,
 };
 
 export type IconLibrary = typeof iconLibrary;
