@@ -507,8 +507,8 @@ export function ModelViewer({
           )}
         </Row>
         
-        {/* Информация о AR/VR для Sketchfab моделей */}
-        {model.isSketchfab && (
+        {/* Информация о AR/VR для Sketchfab моделей без GLB */}
+        {model.isSketchfab && !model.arEnabled && (
           <Row 
             gap="s" 
             align="center" 
@@ -522,7 +522,27 @@ export function ModelViewer({
           >
             <Icon name="warning" size="s" onBackground="warning-medium" />
             <Text variant="body-default-xs" onBackground="warning-medium">
-              AR/VR недоступны для моделей Sketchfab. Для AR загрузите GLB/GLTF файл через кнопку "Загрузить!"
+              AR/VR недоступны для этой модели Sketchfab. Для AR загрузите GLB/GLTF файл через кнопку "Загрузить!"
+            </Text>
+          </Row>
+        )}
+        
+        {/* Информация об успешной загрузке GLB */}
+        {model.isSketchfab && model.arEnabled && (
+          <Row 
+            gap="s" 
+            align="center" 
+            style={{ 
+              padding: '8px 12px',
+              backgroundColor: 'var(--color-success-alpha-weak)',
+              border: '1px solid var(--color-success-alpha-strong)',
+              borderRadius: '6px',
+              marginTop: '8px'
+            }}
+          >
+            <Icon name="check" size="s" onBackground="success-medium" />
+            <Text variant="body-default-xs" onBackground="success-medium">
+              ✅ AR/VR доступны! Модель загружена как GLB файл.
             </Text>
           </Row>
         )}

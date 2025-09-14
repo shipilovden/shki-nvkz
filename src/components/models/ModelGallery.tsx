@@ -318,7 +318,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                 >
                   <Icon name="info" size="xs" onBackground="info-medium" />
                   <Text variant="body-default-xs" onBackground="info-medium">
-                    Sketchfab модели не поддерживают AR. Для AR загрузите GLB/GLTF файл выше.
+                    Sketchfab модели с API токеном поддерживают AR! Если AR недоступен, загрузите GLB/GLTF файл выше.
                   </Text>
                 </Row>
               </Column>

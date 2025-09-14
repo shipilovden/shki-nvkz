@@ -42,8 +42,15 @@ export function SketchfabLoader({ onModelLoad }: SketchfabLoaderProps) {
       setIsLoading(true);
       setError("");
 
+      // API токен Sketchfab
+      const API_TOKEN = 'ce8a7b48e37246239f4df5728b5272d0';
+
       // Используем Sketchfab API для получения информации о модели
-      const response = await fetch(`https://api.sketchfab.com/v3/models/${modelId}`);
+      const response = await fetch(`https://api.sketchfab.com/v3/models/${modelId}`, {
+        headers: {
+          'Authorization': `Token ${API_TOKEN}`
+        }
+      });
       
       if (!response.ok) {
         throw new Error(`Ошибка загрузки модели: ${response.status}`);
@@ -51,23 +58,40 @@ export function SketchfabLoader({ onModelLoad }: SketchfabLoaderProps) {
 
       const data = await response.json();
       
+      // Получаем прямую ссылку на GLB файл
+      const downloadResponse = await fetch(`https://api.sketchfab.com/v3/models/${modelId}/download`, {
+        headers: {
+          'Authorization': `Token ${API_TOKEN}`
+        }
+      });
+
+      let glbUrl = null;
+      if (downloadResponse.ok) {
+        const downloadData = await downloadResponse.json();
+        // Ищем GLB файл в доступных форматах
+        const glbFile = downloadData.gltf?.urls?.glb || downloadData.gltf?.urls?.['glb-draco'];
+        if (glbFile) {
+          glbUrl = glbFile;
+        }
+      }
+
       // Создаем объект модели для нашего вьювера
       const model: Model3D = {
         id: `sketchfab-${modelId}`,
         title: data.name || "Sketchfab Model",
         description: data.description || "Модель из Sketchfab",
-        src: `https://sketchfab.com/models/${modelId}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0&ui_stop=0&ui_annotations=0&ui_help=0&ui_settings=0&ui_vr=0&ui_fullscreen=0&ui_annotations=0`,
+        src: glbUrl || `https://sketchfab.com/models/${modelId}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0&ui_stop=0&ui_annotations=0&ui_help=0&ui_settings=0&ui_vr=0&ui_fullscreen=0&ui_annotations=0`,
         thumbnail: data.thumbnails?.images?.[0]?.url || "/images/placeholder-3d.jpg",
         category: "Sketchfab",
-        format: "sketchfab",
+        format: glbUrl ? "glb" : "sketchfab",
         author: data.user?.displayName || "Sketchfab User",
         tags: data.tags?.map((tag: any) => tag.slug) || ["sketchfab"],
         year: new Date(data.publishedAt || Date.now()).getFullYear(),
-        isSketchfab: true,
+        isSketchfab: !glbUrl, // Если есть GLB, то это не iframe
         sketchfabId: modelId,
         originalUrl: sketchfabUrl,
-        arEnabled: false, // AR не работает с iframe
-        vrEnabled: false  // VR не работает с iframe
+        arEnabled: !!glbUrl, // AR работает только с GLB
+        vrEnabled: !!glbUrl  // VR работает только с GLB
       };
 
       onModelLoad(model);
