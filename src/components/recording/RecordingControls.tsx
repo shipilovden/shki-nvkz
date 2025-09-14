@@ -255,15 +255,16 @@ export function RecordingControls({
   return (
     <div
       style={{
-        position: 'absolute',
-        bottom: '16px',
+        position: 'fixed',
+        bottom: '20px',
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         gap: '12px',
-        zIndex: 2000
+        zIndex: 9999,
+        pointerEvents: 'auto'
       }}
     >
       {/* Основные кнопки записи */}
