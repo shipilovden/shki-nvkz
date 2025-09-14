@@ -47,14 +47,14 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
             cursor: 'pointer',
             backgroundColor: selectedModel?.id === model.id
               ? 'var(--color-brand-alpha-strong)'
-              : 'var(--color-neutral-alpha-medium)',
+              : 'var(--color-neutral-alpha-weak)', // Более светлый фон для видимости
             border: selectedModel?.id === model.id
               ? '2px solid var(--color-brand-strong)'
-              : '1px solid var(--color-neutral-strong)', // Более светлая обводка для карточек
+              : '1px solid var(--color-neutral-medium)', // Более видимая граница
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             minHeight: '80px',
             transform: 'translateY(0)',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
           }}
           onClick={() => onModelSelect(model)}
           onMouseEnter={(e) => {
@@ -62,13 +62,15 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
               e.currentTarget.style.transform = 'translateY(-2px)';
               e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
               e.currentTarget.style.borderColor = 'var(--color-neutral-medium)';
+              e.currentTarget.style.backgroundColor = 'var(--color-neutral-alpha-medium)'; // Светлеет при наведении
             }
           }}
           onMouseLeave={(e) => {
             if (selectedModel?.id !== model.id) {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
-              e.currentTarget.style.borderColor = 'var(--color-neutral-strong)';
+              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+              e.currentTarget.style.borderColor = 'var(--color-neutral-medium)';
+              e.currentTarget.style.backgroundColor = 'var(--color-neutral-alpha-weak)'; // Возвращается к исходному цвету
             }
           }}
         >

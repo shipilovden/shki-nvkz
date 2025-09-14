@@ -124,9 +124,10 @@ export function ModelViewer({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          border: '1px solid var(--color-neutral-strong)',
+          border: '2px solid var(--color-neutral-medium)',
           borderRadius: '8px',
           backgroundColor: 'var(--color-neutral-alpha-strong)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
           overflow: 'hidden'
         }}
       >
