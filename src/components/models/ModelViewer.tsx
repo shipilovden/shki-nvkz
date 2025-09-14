@@ -337,14 +337,16 @@ export function ModelViewer({
           />
         </div>
 
-        {/* Система записи - по центру внизу */}
-        <RecordingControls
-          isFullscreen={isFullscreen}
-          isVRActive={isVRActive}
-          isARActive={isARActive}
-          onScreenshot={handleScreenshot}
-          onVideoRecord={handleVideoRecord}
-        />
+        {/* Система записи - по центру внизу, только в AR режиме */}
+        {isARActive && (
+          <RecordingControls
+            isFullscreen={isFullscreen}
+            isVRActive={isVRActive}
+            isARActive={isARActive}
+            onScreenshot={handleScreenshot}
+            onVideoRecord={handleVideoRecord}
+          />
+        )}
 
         {/* Кнопки управления справа внизу как на Sketchfab */}
         <div

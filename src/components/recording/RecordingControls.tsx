@@ -84,18 +84,13 @@ export function RecordingControls({
     }
   };
 
-  // Запрос разрешений при монтировании
+  // Запрос разрешений при монтировании (только в AR режиме)
   useEffect(() => {
-    console.log('RecordingControls mounted, requesting permissions...');
-    requestPermissions();
-  }, []);
-
-  // Обновление разрешений при изменении режимов
-  useEffect(() => {
-    if (isFullscreen || isVRActive || isARActive) {
+    if (isARActive) {
+      console.log('RecordingControls mounted in AR mode, requesting permissions...');
       requestPermissions();
     }
-  }, [isFullscreen, isVRActive, isARActive]);
+  }, [isARActive]);
 
   // Очистка ресурсов при размонтировании
   useEffect(() => {
