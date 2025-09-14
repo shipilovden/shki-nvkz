@@ -45,6 +45,8 @@ export default async function RootLayout({
       )}
     >
       <head>
+        {/* Permissions Policy для AR/VR */}
+        <meta httpEquiv="Permissions-Policy" content="accelerometer=*, gyroscope=*, magnetometer=*, camera=*, microphone=*" />
         <script
           type="module"
           src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"

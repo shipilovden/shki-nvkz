@@ -376,8 +376,8 @@ export function ModelViewer({
           </model-viewer>
         )}
 
-        {/* Кнопки управления в верхней части вьювера - только для обычных моделей */}
-        {!model.isSketchfab && (
+        {/* Кнопки управления в верхней части вьювера - для моделей с AR/VR */}
+        {model.arEnabled && (
           <div
             style={{
               position: 'absolute',
