@@ -22,9 +22,30 @@ export function ModelGallery({ models }: ModelGalleryProps) {
   const [arModels, setArModels] = useState<ARModel[]>([]);
   const [showUploader, setShowUploader] = useState(false);
 
+  // Объединяем 3D и AR модели для отображения в viewer
+  const allModels = useMemo(() => {
+    // Конвертируем AR модели в формат 3D моделей
+    const convertedARModels = arModels.map(arModel => ({
+      id: arModel.id,
+      title: arModel.name,
+      description: arModel.description,
+      modelUrl: arModel.fileUrl,
+      thumbnailUrl: arModel.qrCodeUrl, // Используем QR код как превью
+      author: "Пользователь",
+      year: new Date(arModel.createdAt).getFullYear().toString(),
+      size: `${(arModel.fileSize / 1024 / 1024).toFixed(1)} МБ`,
+      tags: ["AR", "Пользовательская"],
+      vrEnabled: true,
+      arEnabled: true,
+      isUserModel: true // Флаг для пользовательских моделей
+    }));
+
+    return [...models, ...convertedARModels];
+  }, [models, arModels]);
+
   // Фильтрация моделей
   const filteredModels = useMemo(() => {
-    let filtered = models;
+    let filtered = allModels;
 
     // Поиск
     if (searchQuery.trim()) {
@@ -38,7 +59,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
     }
 
     return filtered;
-  }, [models, searchQuery]);
+  }, [allModels, searchQuery]);
 
   // Загружаем AR модели при инициализации
   useEffect(() => {
@@ -77,6 +98,49 @@ export function ModelGallery({ models }: ModelGalleryProps) {
       variant: "success",
       message: `AR модель "${model.name}" загружена!`,
     });
+  };
+
+  const handleARModelDelete = async (modelId: string) => {
+    try {
+      // Удаляем из IndexedDB
+      if (arStorage.isSupported()) {
+        await arStorage.deleteModel(modelId);
+      } else {
+        // Fallback к localStorage
+        const storedModels = localStorage.getItem('arModels');
+        if (storedModels) {
+          const models = JSON.parse(storedModels);
+          const filteredModels = models.filter((model: any) => model.id !== modelId);
+          localStorage.setItem('arModels', JSON.stringify(filteredModels));
+        }
+      }
+
+      // Удаляем с сервера
+      try {
+        await fetch(`/api/ar/models/${modelId}`, {
+          method: 'DELETE',
+        });
+      } catch (serverError) {
+        console.warn('Не удалось удалить модель с сервера:', serverError);
+      }
+
+      // Обновляем локальное состояние
+      setArModels(prev => prev.filter(model => model.id !== modelId));
+      if (selectedModel?.id === modelId) {
+        setSelectedModel(null);
+      }
+
+      addToast({
+        variant: "success",
+        message: "Модель удалена",
+      });
+    } catch (error) {
+      console.error('Ошибка удаления модели:', error);
+      addToast({
+        variant: "danger",
+        message: "Ошибка удаления модели",
+      });
+    }
   };
 
   // Обновляем выбранную модель при изменении фильтров
@@ -180,12 +244,17 @@ export function ModelGallery({ models }: ModelGalleryProps) {
             {/* Кнопка загрузки AR моделей */}
             <Button
               variant="primary"
-              size="m"
+              size="s"
               onClick={() => setShowUploader(!showUploader)}
               prefixIcon="upload"
-              style={{ width: '100%' }}
+              style={{ 
+                width: '100%',
+                fontSize: '12px',
+                padding: '8px 12px',
+                borderRadius: '6px'
+              }}
             >
-              {showUploader ? "Скрыть загрузку" : "Загрузить AR модель"}
+              {showUploader ? "Скрыть" : "Загрузить!"}
             </Button>
 
             {/* AR Uploader */}
@@ -196,63 +265,129 @@ export function ModelGallery({ models }: ModelGalleryProps) {
               />
             )}
 
-            {/* Список AR моделей */}
-            {arModels.length > 0 && (
+            {/* Разделение на 3D и AR модели */}
+            <Column gap="m" style={{ width: '100%' }}>
+              {/* 3D Модели */}
               <Column gap="s" style={{ width: '100%' }}>
-                <Text variant="heading-strong-s">Ваши AR модели</Text>
+                <Text variant="body-strong-s" style={{ fontSize: '11px', color: '#666' }}>
+                  3D МОДЕЛИ
+                </Text>
                 <Column 
-                  gap="s" 
+                  gap="xs" 
                   style={{ 
                     width: '100%',
-                    maxHeight: '300px',
+                    maxHeight: '200px',
                     overflowY: 'auto',
-                    padding: '12px',
-                    border: '1px solid var(--color-neutral-alpha-strong)',
-                    borderRadius: '12px',
-                    backgroundColor: 'var(--color-neutral-alpha-medium)'
+                    padding: '8px',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    backgroundColor: '#fafafa'
                   }}
                 >
-                  {arModels.map((model) => (
+                  {models.map((model) => (
                     <Row 
                       key={model.id} 
-                      gap="s" 
+                      gap="xs" 
                       align="center" 
                       style={{ 
-                        padding: '8px',
-                        backgroundColor: 'var(--color-neutral-alpha-weak)',
-                        borderRadius: '8px',
-                        cursor: 'pointer'
+                        padding: '6px 8px',
+                        backgroundColor: selectedModel?.id === model.id ? '#e3f2fd' : 'transparent',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '11px'
                       }}
-                      onClick={() => window.open(model.qrCodeUrl, '_blank')}
+                      onClick={() => setSelectedModel(model)}
                     >
-                      <Column flex={1}>
-                        <Text variant="body-strong-xs">{model.name}</Text>
-                        <Text variant="body-default-xs" onBackground="neutral-weak">
-                          {(model.fileSize / 1024 / 1024).toFixed(1)} МБ
-                        </Text>
-                      </Column>
-                      <Button
-                        variant="tertiary"
-                        size="s"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(model.qrCodeUrl, '_blank');
-                        }}
-                        prefixIcon="qrCode"
-                      >
-                        QR
-                      </Button>
+                      <Text variant="body-default-xs" style={{ fontSize: '11px' }}>
+                        {model.title}
+                      </Text>
                     </Row>
                   ))}
                 </Column>
               </Column>
-            )}
 
-            <ModelSidebar
-              models={filteredModels}
-              selectedModel={selectedModel}
-              onModelSelect={handleModelSelect}
-            />
+              {/* AR Модели */}
+              {arModels.length > 0 && (
+                <Column gap="s" style={{ width: '100%' }}>
+                  <Text variant="body-strong-s" style={{ fontSize: '11px', color: '#666' }}>
+                    AR МОДЕЛИ
+                  </Text>
+                  <Column 
+                    gap="xs" 
+                    style={{ 
+                      width: '100%',
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      padding: '8px',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '8px',
+                      backgroundColor: '#fafafa'
+                    }}
+                  >
+                    {arModels.map((model) => (
+                      <Row 
+                        key={model.id} 
+                        gap="xs" 
+                        align="center" 
+                        style={{ 
+                          padding: '6px 8px',
+                          backgroundColor: selectedModel?.id === model.id ? '#e8f5e8' : 'transparent',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '11px'
+                        }}
+                        onClick={() => {
+                          // Находим конвертированную модель
+                          const convertedModel = allModels.find(m => m.id === model.id);
+                          if (convertedModel) {
+                            setSelectedModel(convertedModel);
+                          }
+                        }}
+                      >
+                        <Column flex={1}>
+                          <Text variant="body-default-xs" style={{ fontSize: '11px' }}>
+                            {model.name}
+                          </Text>
+                        </Column>
+                        <Button
+                          variant="tertiary"
+                          size="s"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(model.qrCodeUrl, '_blank');
+                          }}
+                          style={{ 
+                            minWidth: '24px',
+                            height: '20px',
+                            padding: '0 6px',
+                            fontSize: '10px'
+                          }}
+                        >
+                          QR
+                        </Button>
+                        <Button
+                          variant="tertiary"
+                          size="s"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleARModelDelete(model.id);
+                          }}
+                          style={{ 
+                            minWidth: '20px',
+                            height: '20px',
+                            padding: '0',
+                            fontSize: '10px',
+                            color: '#ff4444'
+                          }}
+                        >
+                          ×
+                        </Button>
+                      </Row>
+                    ))}
+                  </Column>
+                </Column>
+              )}
+            </Column>
           </Column>
         </Row>
       ) : (
