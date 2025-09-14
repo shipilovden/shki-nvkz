@@ -304,7 +304,7 @@ export function ModelViewer({
             variant="secondary"
             size="xs"
             onClick={toggleBackground}
-            prefixIcon={isLightBackground ? "moon" : "sun"}
+            prefixIcon={isLightBackground ? "darkMode" : "lightMode"}
             style={{
               backgroundColor: isLightBackground ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)',
               border: isLightBackground ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(0, 0, 0, 0.2)',
