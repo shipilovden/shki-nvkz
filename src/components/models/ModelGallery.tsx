@@ -146,7 +146,13 @@ export function ModelGallery({ models }: ModelGalleryProps) {
       isUserModel: true
     }));
 
-    return [...models, ...convertedARModels, ...sketchfabModels];
+    // Добавляем флаг isUserModel для Sketchfab моделей
+    const convertedSketchfabModels = sketchfabModels.map(model => ({
+      ...model,
+      isUserModel: true
+    }));
+
+    return [...models, ...convertedARModels, ...convertedSketchfabModels];
   }, [models, arModels, sketchfabModels]);
 
   // Фильтруем модели по поиску

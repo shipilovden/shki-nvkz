@@ -376,15 +376,15 @@ export function ModelViewer({
           </model-viewer>
         )}
 
-        {/* Кнопка переключения фона - слева внизу */}
+        {/* Кнопки управления в верхней части вьювера */}
         <div
           style={{
             position: 'absolute',
-            bottom: '16px',
-            left: '16px',
+            top: '16px',
+            right: '16px',
             display: 'flex',
             gap: '8px',
-            flexDirection: 'column',
+            flexDirection: 'row',
             zIndex: 1000
           }}
         >
@@ -402,39 +402,29 @@ export function ModelViewer({
               width: '32px',
               height: '32px',
               padding: '0',
-              zIndex: 1000,
               boxShadow: isLightBackground ? '0 2px 8px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.1)',
               fontSize: '12px'
             }}
             title={isLightBackground ? "Тёмный фон" : "Светлый фон"}
           />
-        </div>
-
-        
-
-        {/* Кнопки управления справа внизу как на Sketchfab */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '16px',
-            right: '16px',
-            display: 'flex',
-            gap: '8px',
-            flexDirection: 'column'
-          }}
-        >
+          
           {isVRAvailable && model.vrEnabled && (
             <Button
               variant="secondary"
-              size="s"
+              size="xs"
               onClick={handleVREnter}
               prefixIcon="3d"
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
                 backdropFilter: 'blur(4px)',
-                color: 'var(--color-neutral-weak)'
+                color: 'var(--color-neutral-weak)',
+                minWidth: '32px',
+                width: '32px',
+                height: '32px',
+                padding: '0'
               }}
+              title="VR режим"
             >
               VR
             </Button>
@@ -443,15 +433,20 @@ export function ModelViewer({
           {isARAvailable && model.arEnabled && (
             <Button
               variant="secondary"
-              size="s"
+              size="xs"
               onClick={handleAREnter}
               prefixIcon="rocket"
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
                 backdropFilter: 'blur(4px)',
-                color: 'var(--color-neutral-weak)'
+                color: 'var(--color-neutral-weak)',
+                minWidth: '32px',
+                width: '32px',
+                height: '32px',
+                padding: '0'
               }}
+              title="AR режим"
             >
               AR
             </Button>
@@ -459,7 +454,7 @@ export function ModelViewer({
           
           <Button
             variant="secondary"
-            size="s"
+            size="xs"
             onClick={handleFullscreen}
             prefixIcon="expand"
             style={{
@@ -467,11 +462,12 @@ export function ModelViewer({
               border: '1px solid rgba(255, 255, 255, 0.2)',
               backdropFilter: 'blur(4px)',
               color: 'var(--color-neutral-weak)',
-              minWidth: '40px',
-              width: '40px',
-              height: '40px',
+              minWidth: '32px',
+              width: '32px',
+              height: '32px',
               padding: '0'
             }}
+            title="Полноэкранный режим"
           />
         </div>
 
