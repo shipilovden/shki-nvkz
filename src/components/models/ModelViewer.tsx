@@ -381,59 +381,15 @@ export function ModelViewer({
           />
         </div>
 
-        {/* Система записи - по центру внизу, только в AR режиме или для тестирования */}
-        {(isARActive || (!isARAvailable && process.env.NODE_ENV === 'development')) && (
-          <>
-            {console.log('Rendering RecordingControls - isARActive:', isARActive, 'isARAvailable:', isARAvailable)}
-            <RecordingControls
-              isFullscreen={isFullscreen}
-              isVRActive={isVRActive}
-              isARActive={isARActive}
-              onScreenshot={handleScreenshot}
-              onVideoRecord={handleVideoRecord}
-            />
-          </>
-        )}
+        {/* Система записи - по центру внизу, всегда видна */}
+        <RecordingControls
+          isFullscreen={isFullscreen}
+          isVRActive={isVRActive}
+          isARActive={isARActive}
+          onScreenshot={handleScreenshot}
+          onVideoRecord={handleVideoRecord}
+        />
         
-        {/* Временная отладочная информация */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '10px',
-            left: '10px',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            color: 'white',
-            padding: '8px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            zIndex: 3000
-          }}
-        >
-          <div>isARActive: {isARActive ? 'true' : 'false'}</div>
-          <div>isARAvailable: {isARAvailable ? 'true' : 'false'}</div>
-          <div>isVRActive: {isVRActive ? 'true' : 'false'}</div>
-          <div>isFullscreen: {isFullscreen ? 'true' : 'false'}</div>
-          {!isARAvailable && (
-            <button
-              onClick={() => {
-                console.log('Force enabling AR for testing');
-                setIsARActive(true);
-              }}
-              style={{
-                marginTop: '8px',
-                padding: '4px 8px',
-                backgroundColor: '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '10px',
-                cursor: 'pointer'
-              }}
-            >
-              Force AR (Test)
-            </button>
-          )}
-        </div>
 
         {/* Кнопки управления справа внизу как на Sketchfab */}
         <div

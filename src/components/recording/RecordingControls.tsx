@@ -63,10 +63,10 @@ export function RecordingControls({
       
       setPermissions({ camera: videoTracks.length > 0, microphone: audioTracks.length > 0 });
       
-      // Останавливаем поток после проверки
-      stream.getTracks().forEach(track => track.stop());
-      
       console.log('Разрешения получены:', { camera: videoTracks.length > 0, microphone: audioTracks.length > 0 });
+      
+      // НЕ останавливаем поток - оставляем для записи
+      // stream.getTracks().forEach(track => track.stop());
     } catch (error) {
       console.error('Ошибка получения разрешений:', error);
       setPermissions({ camera: false, microphone: false });
@@ -84,14 +84,11 @@ export function RecordingControls({
     }
   };
 
-  // Запрос разрешений при монтировании (только в AR режиме)
+  // Запрос разрешений при монтировании
   useEffect(() => {
-    console.log('RecordingControls useEffect triggered - isARActive:', isARActive);
-    if (isARActive) {
-      console.log('RecordingControls mounted in AR mode, requesting permissions...');
-      requestPermissions();
-    }
-  }, [isARActive]);
+    console.log('RecordingControls mounted, requesting permissions...');
+    requestPermissions();
+  }, []);
 
   // Отладочная информация при монтировании
   useEffect(() => {
