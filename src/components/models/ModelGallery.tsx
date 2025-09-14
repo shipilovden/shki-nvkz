@@ -1,20 +1,26 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Column, Row, Text, Button, Input } from "@once-ui-system/core";
+import { Column, Row, Text, Button, Input, useToast } from "@once-ui-system/core";
 import { ModelViewer } from "./ModelViewer";
 import { ModelSidebar } from "./ModelSidebar";
+import { ARUploader } from "../ar/ARUploader";
+import { arStorage, type ARModelData } from "@/utils/arStorage";
 import type { Model3D } from "@/types/models.types";
+import type { ARModel } from "@/types/ar.types";
 
 interface ModelGalleryProps {
   models: Model3D[];
 }
 
 export function ModelGallery({ models }: ModelGalleryProps) {
+  const { addToast } = useToast();
   const [selectedModel, setSelectedModel] = useState<Model3D | null>(models.length > 0 ? models[0] : null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isVRActive, setIsVRActive] = useState(false);
   const [isARActive, setIsARActive] = useState(false);
+  const [arModels, setArModels] = useState<ARModel[]>([]);
+  const [showUploader, setShowUploader] = useState(false);
 
   // Фильтрация моделей
   const filteredModels = useMemo(() => {
@@ -34,8 +40,43 @@ export function ModelGallery({ models }: ModelGalleryProps) {
     return filtered;
   }, [models, searchQuery]);
 
+  // Загружаем AR модели при инициализации
+  useEffect(() => {
+    const loadARModels = async () => {
+      try {
+        if (arStorage.isSupported()) {
+          const models = await arStorage.getAllModels();
+          const convertedModels: ARModel[] = models.map((modelData: ARModelData) => ({
+            id: modelData.id,
+            name: modelData.name,
+            description: modelData.description,
+            fileUrl: modelData.fileUrl,
+            qrCodeUrl: modelData.qrCodeUrl,
+            arUrl: modelData.arUrl,
+            createdAt: new Date(modelData.createdAt),
+            fileSize: modelData.fileSize,
+            fileType: modelData.fileType,
+            file: null
+          }));
+          setArModels(convertedModels);
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки AR моделей:', error);
+      }
+    };
+    loadARModels();
+  }, []);
+
   const handleModelSelect = (model: Model3D) => {
     setSelectedModel(model);
+  };
+
+  const handleARModelUpload = (model: ARModel) => {
+    setArModels(prev => [...prev, model]);
+    addToast({
+      variant: "success",
+      message: `AR модель "${model.name}" загружена!`,
+    });
   };
 
   // Обновляем выбранную модель при изменении фильтров
@@ -136,6 +177,77 @@ export function ModelGallery({ models }: ModelGalleryProps) {
 
           {/* Правая часть - боковая панель с моделями */}
           <Column gap="l" style={{ width: '300px', minWidth: '300px' }} align="start">
+            {/* Кнопка загрузки AR моделей */}
+            <Button
+              variant="primary"
+              size="m"
+              onClick={() => setShowUploader(!showUploader)}
+              prefixIcon="upload"
+              style={{ width: '100%' }}
+            >
+              {showUploader ? "Скрыть загрузку" : "Загрузить AR модель"}
+            </Button>
+
+            {/* AR Uploader */}
+            {showUploader && (
+              <ARUploader 
+                onModelUpload={handleARModelUpload} 
+                ngrokUrl="" 
+              />
+            )}
+
+            {/* Список AR моделей */}
+            {arModels.length > 0 && (
+              <Column gap="s" style={{ width: '100%' }}>
+                <Text variant="heading-strong-s">Ваши AR модели</Text>
+                <Column 
+                  gap="s" 
+                  style={{ 
+                    width: '100%',
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    padding: '12px',
+                    border: '1px solid var(--color-neutral-alpha-strong)',
+                    borderRadius: '12px',
+                    backgroundColor: 'var(--color-neutral-alpha-medium)'
+                  }}
+                >
+                  {arModels.map((model) => (
+                    <Row 
+                      key={model.id} 
+                      gap="s" 
+                      align="center" 
+                      style={{ 
+                        padding: '8px',
+                        backgroundColor: 'var(--color-neutral-alpha-weak)',
+                        borderRadius: '8px',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => window.open(model.qrCodeUrl, '_blank')}
+                    >
+                      <Column flex={1}>
+                        <Text variant="body-strong-xs">{model.name}</Text>
+                        <Text variant="body-default-xs" onBackground="neutral-weak">
+                          {(model.fileSize / 1024 / 1024).toFixed(1)} МБ
+                        </Text>
+                      </Column>
+                      <Button
+                        variant="tertiary"
+                        size="s"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(model.qrCodeUrl, '_blank');
+                        }}
+                        prefixIcon="qrCode"
+                      >
+                        QR
+                      </Button>
+                    </Row>
+                  ))}
+                </Column>
+              </Column>
+            )}
+
             <ModelSidebar
               models={filteredModels}
               selectedModel={selectedModel}
