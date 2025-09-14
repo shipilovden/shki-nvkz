@@ -156,9 +156,7 @@ export function ModelViewer({
           alignItems: 'center',
           border: isFullscreen ? 'none' : '2px solid var(--neutral-alpha-strong)',
           borderRadius: isFullscreen ? '0' : '8px',
-          backgroundColor: isFullscreen 
-            ? (isLightBackground ? '#ffffff' : '#000000')
-            : 'var(--color-neutral-alpha-strong)',
+          backgroundColor: isLightBackground ? '#ffffff' : '#000000',
           boxShadow: isFullscreen ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.1)',
           overflow: 'hidden'
         }}
@@ -233,9 +231,7 @@ export function ModelViewer({
           style={{
             width: '100%',
             height: '100%',
-            backgroundColor: isFullscreen 
-              ? (isLightBackground ? '#ffffff' : '#000000')
-              : 'var(--color-neutral-alpha-weak)',
+            backgroundColor: isLightBackground ? '#ffffff' : '#000000',
             borderRadius: '8px',
             display: 'block'
           }}
@@ -288,7 +284,37 @@ export function ModelViewer({
           </div>
         </model-viewer>
 
-        {/* Кнопки управления в углу как на Sketchfab */}
+        {/* Кнопка переключения фона - слева внизу */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '16px',
+            left: '16px',
+            display: 'flex',
+            gap: '8px',
+            flexDirection: 'column'
+          }}
+        >
+          <Button
+            variant="secondary"
+            size="s"
+            onClick={toggleBackground}
+            prefixIcon={isLightBackground ? "moon" : "sun"}
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(4px)',
+              color: 'var(--color-neutral-weak)',
+              minWidth: '40px',
+              width: '40px',
+              height: '40px',
+              padding: '0'
+            }}
+            title={isLightBackground ? "Тёмный фон" : "Светлый фон"}
+          />
+        </div>
+
+        {/* Кнопки управления справа внизу как на Sketchfab */}
         <div
           style={{
             position: 'absolute',
@@ -299,26 +325,6 @@ export function ModelViewer({
             flexDirection: 'column'
           }}
         >
-          {/* Кнопка переключения фона - только в полноэкранном режиме */}
-          {isFullscreen && (
-            <Button
-              variant="secondary"
-              size="s"
-              onClick={toggleBackground}
-              prefixIcon={isLightBackground ? "moon" : "sun"}
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                backdropFilter: 'blur(4px)',
-                color: 'var(--color-neutral-weak)',
-                minWidth: '40px',
-                width: '40px',
-                height: '40px',
-                padding: '0'
-              }}
-              title={isLightBackground ? "Тёмный фон" : "Светлый фон"}
-            />
-          )}
           {isVRAvailable && model.vrEnabled && (
             <Button
               variant="secondary"
