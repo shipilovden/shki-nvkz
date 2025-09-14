@@ -86,6 +86,12 @@ export function RecordingControls({
 
   // Запрос разрешений при монтировании
   useEffect(() => {
+    console.log('RecordingControls mounted, requesting permissions...');
+    requestPermissions();
+  }, []);
+
+  // Обновление разрешений при изменении режимов
+  useEffect(() => {
     if (isFullscreen || isVRActive || isARActive) {
       requestPermissions();
     }
@@ -256,7 +262,7 @@ export function RecordingControls({
         flexDirection: 'column',
         alignItems: 'center',
         gap: '12px',
-        zIndex: 1000
+        zIndex: 2000
       }}
     >
       {/* Основные кнопки записи */}
