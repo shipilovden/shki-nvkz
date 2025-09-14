@@ -228,9 +228,9 @@ export function ModelGallery({ models }: ModelGalleryProps) {
 
       {/* Основной контент - макет как на Sketchfab */}
       {filteredModels.length > 0 && selectedModel ? (
-        <Row gap="xl" style={{ width: '100%', maxWidth: '1400px' }} align="start">
+        <Row gap="xl" style={{ width: '100%', maxWidth: '1400px', alignItems: 'flex-start' }}>
           {/* Левая часть - 3D Viewer и информация */}
-          <Column gap="l" style={{ flex: 1, maxWidth: '800px' }} align="center">
+          <Column gap="l" style={{ flex: 1, maxWidth: '800px', height: '600px' }} align="center">
             {/* Кнопка загрузки AR моделей - над вьювером */}
             <Row gap="m" align="start" style={{ width: '100%', justifyContent: 'flex-start' }}>
               <Button
@@ -249,16 +249,18 @@ export function ModelGallery({ models }: ModelGalleryProps) {
             </Row>
             
             {/* 3D Viewer */}
-            <ModelViewer
-              model={selectedModel}
-              onVREnter={handleVREnter}
-              onAREnter={handleAREnter}
-              onFullscreen={handleFullscreen}
-            />
+            <div style={{ flex: 1, width: '100%' }}>
+              <ModelViewer
+                model={selectedModel}
+                onVREnter={handleVREnter}
+                onAREnter={handleAREnter}
+                onFullscreen={handleFullscreen}
+              />
+            </div>
           </Column>
 
           {/* Правая часть - боковая панель с моделями */}
-          <Column gap="l" style={{ width: '300px', minWidth: '300px' }} align="start">
+          <Column gap="l" style={{ width: '300px', minWidth: '300px', height: '600px' }} align="start">
             {/* AR Uploader */}
             {showUploader && (
               <ARUploader 

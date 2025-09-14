@@ -112,17 +112,22 @@ export function ModelViewer({
   };
 
   return (
-    <Column gap="l" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }} align="center">
+    <Column gap="l" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }} align="center">
 
       {/* 3D Viewer */}
       <div 
         style={{ 
           width: '100%', 
+          height: '500px', // Фиксированная высота
           maxWidth: '800px',
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center'
+          alignItems: 'center',
+          border: '1px solid #e0e0e0', // Тонкая серая линия
+          borderRadius: '8px',
+          backgroundColor: '#ffffff',
+          overflow: 'hidden'
         }}
       >
         {/* Убираем индикатор загрузки - model-viewer сам покажет загрузку */}
@@ -194,11 +199,10 @@ export function ModelViewer({
           alt={model.title}
           style={{
             width: '100%',
-            height: '500px',
-            backgroundColor: '#f0f0f0',
-            borderRadius: '12px',
-            display: 'block',
-            border: '1px solid #ddd'
+            height: '100%',
+            backgroundColor: '#f8f8f8',
+            borderRadius: '8px',
+            display: 'block'
           }}
           camera-controls
           auto-rotate

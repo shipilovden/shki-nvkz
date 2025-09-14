@@ -28,12 +28,12 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
       gap="s" 
       style={{ 
         width: '100%',
-        maxHeight: '500px', // Максимальная высота вместо фиксированной
+        height: '100%', // Занимает всю доступную высоту
         overflowY: 'auto',
         padding: '12px',
-        border: '1px solid var(--color-neutral-strong)',
-        borderRadius: '12px',
-        backgroundColor: 'var(--color-neutral-alpha-strong)'
+        border: '1px solid #e0e0e0', // Тонкая серая линия
+        borderRadius: '8px',
+        backgroundColor: '#fafafa'
       }}
     >
       {models.map((model) => (
