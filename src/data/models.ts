@@ -10,7 +10,7 @@ import type { Model3D, ModelCategory } from "@/types/models.types";
  */
 const DEFAULT_MODEL_SETTINGS = {
   format: "glb" as const,
-  author: "Google",
+  author: "shki-nvkz",
   year: 2024,
   license: "Creative Commons",
   vrEnabled: true,

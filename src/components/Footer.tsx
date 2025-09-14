@@ -23,7 +23,7 @@ export const Footer = () => {
       >
         <Text variant="body-default-s" onBackground="neutral-strong">
           <Text onBackground="neutral-weak">© {currentYear} /</Text>
-          <Text paddingX="4">Denis Shipilov Art</Text>
+          <Text paddingX="4">shki-nvkz / Denis Shipilov</Text>
         </Text>
         <Row gap="16">
           {social.map(
