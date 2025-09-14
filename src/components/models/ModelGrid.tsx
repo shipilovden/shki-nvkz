@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { Column, Row, Text, Button, Badge } from '@once-ui/react';
+import { Column, Row, Text, Button, Badge } from '@once-ui-system/core';
 import { Model3D } from '@/types/models.types';
 import { ARModel } from '@/types/ar.types';
 import { ARUploader } from '@/components/ar/ARUploader';
