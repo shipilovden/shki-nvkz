@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from 'react';
 import { Column, Row, Text, Icon, Badge, Button } from "@once-ui-system/core";
 import type { Model3D } from "@/types/models.types";
+import { UserModelsAccordion } from './UserModelsAccordion';
 
 interface ModelSidebarProps {
   models: Model3D[];
@@ -12,6 +14,13 @@ interface ModelSidebarProps {
 }
 
 export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeClick, onDeleteModel }: ModelSidebarProps) {
+  // Разделяем модели на обычные и пользовательские
+  const { regularModels, userModels } = useMemo(() => {
+    const regular = models.filter(model => !(model as any).isUserModel);
+    const user = models.filter(model => (model as any).isUserModel);
+    return { regularModels: regular, userModels: user };
+  }, [models]);
+
   if (models.length === 0) {
     return (
       <Column align="center" gap="m" padding="l">
@@ -36,7 +45,19 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
         backgroundColor: 'var(--color-neutral-alpha-strong)'
       }}
     >
-      {models.map((model) => (
+      {/* Аккордеон с загруженными моделями */}
+      {userModels.length > 0 && (
+        <UserModelsAccordion
+          userModels={userModels}
+          selectedModel={selectedModel}
+          onModelSelect={onModelSelect}
+          onQRCodeClick={onQRCodeClick || (() => {})}
+          onDeleteModel={onDeleteModel || (() => {})}
+        />
+      )}
+
+      {/* Обычные модели */}
+      {regularModels.map((model) => (
         <div
           key={model.id}
           style={{
@@ -73,61 +94,6 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
             }
           }}
         >
-          {/* Кнопки в верхнем правом углу */}
-          {(model as any).isUserModel && (
-            <div style={{ 
-              position: 'absolute', 
-              top: '4px', 
-              right: '4px', 
-              display: 'flex', 
-              gap: '4px',
-              zIndex: 10
-            }}>
-              {onQRCodeClick && (
-                <Button
-                  variant="tertiary"
-                  size="s"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onQRCodeClick(model);
-                  }}
-                  style={{ 
-                    minWidth: '20px',
-                    height: '20px',
-                    padding: '0 4px',
-                    fontSize: '8px',
-                    backgroundColor: 'var(--color-neutral-alpha-medium)',
-                    color: 'var(--color-neutral-strong)',
-                    border: '1px solid var(--neutral-alpha-strong)'
-                  }}
-                >
-                  QR
-                </Button>
-              )}
-              {onDeleteModel && (
-                <Button
-                  variant="tertiary"
-                  size="s"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteModel(model);
-                  }}
-                  style={{ 
-                    minWidth: '20px',
-                    height: '20px',
-                    padding: '0',
-                    fontSize: '12px',
-                    backgroundColor: 'var(--color-neutral-alpha-medium)',
-                    color: 'var(--color-neutral-strong)',
-                    border: '1px solid var(--neutral-alpha-strong)'
-                  }}
-                >
-                  ×
-                </Button>
-              )}
-            </div>
-          )}
-
           <Row
             gap="s"
             vertical="center"
