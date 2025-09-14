@@ -507,6 +507,26 @@ export function ModelViewer({
           )}
         </Row>
         
+        {/* Информация о AR/VR для Sketchfab моделей */}
+        {model.isSketchfab && (
+          <Row 
+            gap="s" 
+            align="center" 
+            style={{ 
+              padding: '8px 12px',
+              backgroundColor: 'var(--color-warning-alpha-weak)',
+              border: '1px solid var(--color-warning-alpha-strong)',
+              borderRadius: '6px',
+              marginTop: '8px'
+            }}
+          >
+            <Icon name="warning" size="s" onBackground="warning-medium" />
+            <Text variant="body-default-xs" onBackground="warning-medium">
+              AR/VR недоступны для моделей Sketchfab. Для AR загрузите GLB/GLTF файл через кнопку "Загрузить!"
+            </Text>
+          </Row>
+        )}
+        
         {/* Серая линия под информацией о модели */}
         <div
           style={{

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Column, Row, Text, Button, Input, useToast } from "@once-ui-system/core";
+import { Column, Row, Text, Button, Input, useToast, Icon } from "@once-ui-system/core";
 import { ModelViewer } from "./ModelViewer";
 import { ModelSidebar } from "./ModelSidebar";
 import { ARUploader } from "../ar/ARUploader";
@@ -303,6 +303,24 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                 
                 {/* Sketchfab загрузчик */}
                 <SketchfabLoader onModelLoad={handleSketchfabModelLoad} />
+                
+                {/* Информация о AR для Sketchfab */}
+                <Row 
+                  gap="s" 
+                  align="center" 
+                  style={{ 
+                    padding: '6px 10px',
+                    backgroundColor: 'var(--color-info-alpha-weak)',
+                    border: '1px solid var(--color-info-alpha-strong)',
+                    borderRadius: '4px',
+                    marginTop: '4px'
+                  }}
+                >
+                  <Icon name="info" size="xs" onBackground="info-medium" />
+                  <Text variant="body-default-xs" onBackground="info-medium">
+                    Sketchfab модели не поддерживают AR. Для AR загрузите GLB/GLTF файл выше.
+                  </Text>
+                </Row>
               </Column>
               
               {/* 3D Viewer */}
