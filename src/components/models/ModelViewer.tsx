@@ -316,6 +316,8 @@ export function ModelViewer({
             console.log('AR status changed:', event.detail);
             if (event.detail.status === 'not-presenting') {
               handleARExit();
+            } else if (event.detail.status === 'presenting') {
+              setIsARActive(true);
             }
           }}
           // VR/AR настройки

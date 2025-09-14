@@ -28,12 +28,15 @@ export default function ArCameraControls({ arActive, modelViewerRef }: ArCameraC
 
   const requestCameraPermission = async () => {
     try {
+      console.log('Requesting camera permission...');
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           width: { ideal: 1280 },
           height: { ideal: 720 }
         } 
       });
+      
+      console.log('Camera permission granted, stream:', stream);
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -42,6 +45,7 @@ export default function ArCameraControls({ arActive, modelViewerRef }: ArCameraC
       
       streamRef.current = stream;
       setHasPermission(true);
+      console.log('hasPermission set to true');
     } catch (error) {
       console.error('Ошибка доступа к камере:', error);
       setHasPermission(false);
@@ -172,6 +176,9 @@ export default function ArCameraControls({ arActive, modelViewerRef }: ArCameraC
       startVideoRecording();
     }
   };
+
+  // Отладочная информация
+  console.log('ArCameraControls render:', { arActive, hasPermission });
 
   if (!arActive || !hasPermission) {
     return null;
