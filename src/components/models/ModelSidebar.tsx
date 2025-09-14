@@ -28,10 +28,10 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
       gap="s" 
       style={{ 
         width: '100%',
-        height: '500px', // Ограничиваем высоту как у вьювера
+        maxHeight: '500px', // Максимальная высота вместо фиксированной
         overflowY: 'auto',
         padding: '12px',
-        border: '1px solid var(--color-neutral-strong)', // Более светлая обводка для темной темы
+        border: '1px solid var(--color-neutral-strong)',
         borderRadius: '12px',
         backgroundColor: 'var(--color-neutral-alpha-strong)'
       }}

@@ -209,22 +209,22 @@ export function ARUploader({ onModelUpload, ngrokUrl }: ARUploaderProps) {
   };
 
   return (
-    <Column 
-      gap="l" 
-      padding="xl"
+    <div
       style={{
         width: '100%',
-        border: '2px dashed var(--color-neutral-alpha-strong)',
-        borderRadius: '12px',
-        backgroundColor: 'var(--color-neutral-alpha-weak)',
+        border: '2px dashed #ddd',
+        borderRadius: '8px',
+        backgroundColor: isDragging ? '#f0f8ff' : '#fafafa',
         transition: 'all 0.3s ease',
-        borderColor: isDragging ? 'var(--color-brand-medium)' : 'var(--color-neutral-alpha-strong)',
-        backgroundColor: isDragging ? 'var(--color-brand-alpha-weak)' : 'var(--color-neutral-alpha-weak)'
+        borderColor: isDragging ? '#007bff' : '#ddd',
+        padding: '20px',
+        textAlign: 'center',
+        cursor: 'pointer'
       }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      align="center"
+      onClick={openFileDialog}
     >
       <input
         ref={fileInputRef}
@@ -234,46 +234,16 @@ export function ARUploader({ onModelUpload, ngrokUrl }: ARUploaderProps) {
         style={{ display: 'none' }}
       />
 
-      <Column gap="m" align="center">
-        <Icon 
-          name="package" 
-          size="l" 
-          onBackground="neutral-medium"
-          style={{ fontSize: '48px' }}
-        />
-        
-        <Text variant="heading-strong-m" align="center">
-          Загрузите 3D модель
-        </Text>
-        
-        <Text variant="body-default-s" onBackground="neutral-weak" align="center">
-          Перетащите файл GLB или GLTF сюда, или нажмите кнопку для выбора
-        </Text>
-        
-        <Text variant="body-default-xs" onBackground="neutral-medium" align="center">
-          Максимальный размер файла: 10 МБ
-        </Text>
-      </Column>
-
-      <Row gap="m" align="center">
-        <Button
-          variant="primary"
-          onClick={openFileDialog}
-          disabled={isUploading}
-          prefixIcon="package"
-        >
-          {isUploading ? "Загрузка..." : "Выбрать файл"}
-        </Button>
-      </Row>
-
-      <Column gap="s" align="center">
-        <Text variant="body-default-xs" onBackground="neutral-weak" align="center">
-          Поддерживаемые форматы: GLB, GLTF
-        </Text>
-        <Text variant="body-default-xs" onBackground="neutral-weak" align="center">
-          Максимальный размер: 50 МБ
-        </Text>
-      </Column>
-    </Column>
+      <Icon 
+        name="package" 
+        size="m" 
+        onBackground="neutral-medium"
+        style={{ fontSize: '24px', marginBottom: '8px' }}
+      />
+      
+      <Text variant="body-default-s" style={{ fontSize: '12px', color: '#666' }}>
+        {isUploading ? "Загрузка..." : "Перетащите файл или нажмите"}
+      </Text>
+    </div>
   );
 }
