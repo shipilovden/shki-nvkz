@@ -363,7 +363,7 @@ export function ModelViewer({
             variant="secondary"
             size="xs"
             onClick={toggleBackground}
-            prefixIcon={isLightBackground ? "darkMode" : "lightMode"}
+            prefixIcon={isLightBackground ? "night" : "sun"}
             style={{
               backgroundColor: isLightBackground ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)',
               border: isLightBackground ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(0, 0, 0, 0.2)',
@@ -381,10 +381,10 @@ export function ModelViewer({
           />
         </div>
 
-        {/* Система записи - по центру внизу, только в AR режиме */}
-        {isARActive && (
+        {/* Система записи - по центру внизу, только в AR режиме или для тестирования */}
+        {(isARActive || (!isARAvailable && process.env.NODE_ENV === 'development')) && (
           <>
-            {console.log('Rendering RecordingControls - isARActive:', isARActive)}
+            {console.log('Rendering RecordingControls - isARActive:', isARActive, 'isARAvailable:', isARAvailable)}
             <RecordingControls
               isFullscreen={isFullscreen}
               isVRActive={isVRActive}
@@ -413,6 +413,26 @@ export function ModelViewer({
           <div>isARAvailable: {isARAvailable ? 'true' : 'false'}</div>
           <div>isVRActive: {isVRActive ? 'true' : 'false'}</div>
           <div>isFullscreen: {isFullscreen ? 'true' : 'false'}</div>
+          {!isARAvailable && (
+            <button
+              onClick={() => {
+                console.log('Force enabling AR for testing');
+                setIsARActive(true);
+              }}
+              style={{
+                marginTop: '8px',
+                padding: '4px 8px',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '10px',
+                cursor: 'pointer'
+              }}
+            >
+              Force AR (Test)
+            </button>
+          )}
         </div>
 
         {/* Кнопки управления справа внизу как на Sketchfab */}
