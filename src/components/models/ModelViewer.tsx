@@ -148,7 +148,7 @@ export function ModelViewer({
       <div 
         style={{ 
           width: '100%', 
-          height: '500px', // Фиксированная высота
+          height: '500px', // Фиксированная высота для десктопа
           maxWidth: '800px',
           position: 'relative',
           display: 'flex',
@@ -159,6 +159,10 @@ export function ModelViewer({
           backgroundColor: isLightBackground ? '#ffffff' : '#000000',
           boxShadow: isFullscreen ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.1)',
           overflow: 'hidden'
+        }}
+        s={{
+          height: '400px', // Меньшая высота для мобильных
+          maxWidth: '100%' // Полная ширина на мобильных
         }}
       >
         {/* Убираем индикатор загрузки - model-viewer сам покажет загрузку */}

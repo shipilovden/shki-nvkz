@@ -241,13 +241,92 @@ export function ModelGallery({ models }: ModelGalleryProps) {
         </Row>
       </Column>
 
-      {/* Основной контент - макет как на Sketchfab */}
+      {/* Основной контент - адаптивный макет */}
       {filteredModels.length > 0 && selectedModel ? (
-        <Row gap="xl" style={{ width: '100%', maxWidth: '1400px', alignItems: 'flex-start', height: '600px' }}>
-          {/* Левая часть - 3D Viewer и информация */}
-          <Column gap="l" style={{ flex: 1, maxWidth: '800px', height: '100%' }} align="center">
-            {/* Кнопка загрузки AR моделей - над вьювером */}
-            <Row gap="m" align="start" style={{ width: '100%', justifyContent: 'flex-start', height: '40px' }}>
+        <>
+          {/* Десктопная версия - горизонтальный макет */}
+          <Row 
+            gap="xl" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '1400px', 
+              alignItems: 'flex-start', 
+              height: '600px',
+              display: 'flex'
+            }}
+            s={{ 
+              display: 'none' // Скрываем на мобильных
+            }}
+          >
+            {/* Левая часть - 3D Viewer и информация */}
+            <Column gap="l" style={{ flex: 1, maxWidth: '800px', height: '100%' }} align="center">
+              {/* Кнопка загрузки AR моделей - над вьювером */}
+              <Row gap="m" align="start" style={{ width: '100%', justifyContent: 'flex-start', height: '40px' }}>
+                <Button
+                  variant="secondary"
+                  size="xs"
+                  onClick={() => setShowUploader(!showUploader)}
+                  style={{
+                    fontSize: '12px',
+                    padding: '6px 12px',
+                    height: 'auto',
+                    minHeight: '28px'
+                  }}
+                >
+                  {showUploader ? "Скрыть" : "Загрузить!"}
+                </Button>
+              </Row>
+              
+              {/* 3D Viewer */}
+              <div style={{ flex: 1, width: '100%', height: 'calc(100% - 40px)' }}>
+                <ModelViewer
+                  model={selectedModel}
+                  onVREnter={handleVREnter}
+                  onAREnter={handleAREnter}
+                  onFullscreen={handleFullscreen}
+                />
+              </div>
+            </Column>
+
+            {/* Правая часть - боковая панель с моделями */}
+            <Column gap="l" style={{ width: '300px', minWidth: '300px', height: '100%' }} align="start">
+              {/* AR Uploader - фиксированная высота */}
+              {showUploader && (
+                <div style={{ height: '80px', marginBottom: '16px' }}>
+                  <ARUploader 
+                    onModelUpload={handleARModelUpload} 
+                    ngrokUrl="" 
+                  />
+                </div>
+              )}
+
+              {/* Список всех моделей с миниатюрами - всегда на одном уровне */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: showUploader ? 'calc(100% - 96px)' : '100%' }}>
+                <ModelSidebar
+                  models={filteredModels}
+                  selectedModel={selectedModel}
+                  onModelSelect={handleModelSelect}
+                  onQRCodeClick={handleQRCodeClick}
+                  onDeleteModel={handleDeleteModel}
+                />
+              </div>
+            </Column>
+          </Row>
+
+          {/* Мобильная версия - вертикальный макет */}
+          <Column 
+            gap="l" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '1400px',
+              display: 'none' // Скрываем на десктопе
+            }}
+            s={{ 
+              display: 'flex' // Показываем на мобильных
+            }}
+          >
+            {/* Кнопка загрузки AR моделей */}
+            <Row gap="m" align="start" style={{ width: '100%', justifyContent: 'flex-start' }}>
               <Button
                 variant="secondary"
                 size="xs"
@@ -262,23 +341,10 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                 {showUploader ? "Скрыть" : "Загрузить!"}
               </Button>
             </Row>
-            
-            {/* 3D Viewer */}
-            <div style={{ flex: 1, width: '100%', height: 'calc(100% - 40px)' }}>
-              <ModelViewer
-                model={selectedModel}
-                onVREnter={handleVREnter}
-                onAREnter={handleAREnter}
-                onFullscreen={handleFullscreen}
-              />
-            </div>
-          </Column>
 
-          {/* Правая часть - боковая панель с моделями */}
-          <Column gap="l" style={{ width: '300px', minWidth: '300px', height: '100%' }} align="start">
-            {/* AR Uploader - фиксированная высота */}
+            {/* AR Uploader */}
             {showUploader && (
-              <div style={{ height: '80px', marginBottom: '16px' }}>
+              <div style={{ width: '100%', marginBottom: '16px' }}>
                 <ARUploader 
                   onModelUpload={handleARModelUpload} 
                   ngrokUrl="" 
@@ -286,8 +352,18 @@ export function ModelGallery({ models }: ModelGalleryProps) {
               </div>
             )}
 
-            {/* Список всех моделей с миниатюрами - всегда на одном уровне */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: showUploader ? 'calc(100% - 96px)' : '100%' }}>
+            {/* 3D Viewer - большой на мобильном */}
+            <div style={{ width: '100%', height: '400px' }}>
+              <ModelViewer
+                model={selectedModel}
+                onVREnter={handleVREnter}
+                onAREnter={handleAREnter}
+                onFullscreen={handleFullscreen}
+              />
+            </div>
+
+            {/* Список моделей - компактный внизу */}
+            <div style={{ width: '100%', maxHeight: '200px' }}>
               <ModelSidebar
                 models={filteredModels}
                 selectedModel={selectedModel}
@@ -297,7 +373,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
               />
             </div>
           </Column>
-        </Row>
+        </>
       ) : (
         <Column gap="l" align="center" style={{ padding: '40px' }}>
           <Text variant="heading-strong-m" align="center">
