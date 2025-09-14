@@ -37,12 +37,10 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
       }}
     >
       {models.map((model) => (
-        <Row
+        <div
           key={model.id}
-          gap="s"
-          vertical="center"
-          padding="s"
           style={{
+            position: 'relative',
             borderRadius: '8px',
             cursor: 'pointer',
             backgroundColor: selectedModel?.id === model.id
@@ -54,7 +52,8 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             minHeight: '80px',
             transform: 'translateY(0)',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            padding: '8px'
           }}
           onClick={() => onModelSelect(model)}
           onMouseEnter={(e) => {
@@ -74,6 +73,66 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
             }
           }}
         >
+          {/* Кнопки в верхнем правом углу */}
+          {(model as any).isUserModel && (
+            <div style={{ 
+              position: 'absolute', 
+              top: '4px', 
+              right: '4px', 
+              display: 'flex', 
+              gap: '4px',
+              zIndex: 10
+            }}>
+              {onQRCodeClick && (
+                <Button
+                  variant="tertiary"
+                  size="s"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onQRCodeClick(model);
+                  }}
+                  style={{ 
+                    minWidth: '20px',
+                    height: '20px',
+                    padding: '0 4px',
+                    fontSize: '8px',
+                    backgroundColor: 'var(--color-neutral-alpha-medium)',
+                    color: 'var(--color-neutral-strong)',
+                    border: '1px solid var(--neutral-alpha-strong)'
+                  }}
+                >
+                  QR
+                </Button>
+              )}
+              {onDeleteModel && (
+                <Button
+                  variant="tertiary"
+                  size="s"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteModel(model.id);
+                  }}
+                  style={{ 
+                    minWidth: '20px',
+                    height: '20px',
+                    padding: '0',
+                    fontSize: '12px',
+                    backgroundColor: 'var(--color-neutral-alpha-medium)',
+                    color: 'var(--color-neutral-strong)',
+                    border: '1px solid var(--neutral-alpha-strong)'
+                  }}
+                >
+                  ×
+                </Button>
+              )}
+            </div>
+          )}
+
+          <Row
+            gap="s"
+            vertical="center"
+            style={{ height: '100%' }}
+          >
           {/* Мини-вьювер 3D модели */}
           <div
             style={{
@@ -154,50 +213,9 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
               )}
             </Row>
             
-            {/* Кнопки для пользовательских моделей */}
-            {(model as any).isUserModel && (
-              <Row gap="xs" align="center" style={{ marginTop: '4px' }}>
-                {onQRCodeClick && (
-                  <Button
-                    variant="tertiary"
-                    size="s"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onQRCodeClick(model);
-                    }}
-                    style={{ 
-                      minWidth: '24px',
-                      height: '20px',
-                      padding: '0 6px',
-                      fontSize: '10px'
-                    }}
-                  >
-                    QR
-                  </Button>
-                )}
-                {onDeleteModel && (
-                  <Button
-                    variant="tertiary"
-                    size="s"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteModel(model.id);
-                    }}
-                    style={{ 
-                      minWidth: '20px',
-                      height: '20px',
-                      padding: '0',
-                      fontSize: '10px',
-                      color: '#ff4444'
-                    }}
-                  >
-                    ×
-                  </Button>
-                )}
-              </Row>
-            )}
           </Column>
-        </Row>
+          </Row>
+        </div>
       ))}
     </Column>
   );

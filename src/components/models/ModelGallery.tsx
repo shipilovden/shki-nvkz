@@ -276,22 +276,26 @@ export function ModelGallery({ models }: ModelGalleryProps) {
 
           {/* Правая часть - боковая панель с моделями */}
           <Column gap="l" style={{ width: '300px', minWidth: '300px', minHeight: '500px' }} align="start">
-            {/* AR Uploader */}
+            {/* AR Uploader - фиксированная высота */}
             {showUploader && (
-              <ARUploader 
-                onModelUpload={handleARModelUpload} 
-                ngrokUrl="" 
-              />
+              <div style={{ height: '80px', marginBottom: '16px' }}>
+                <ARUploader 
+                  onModelUpload={handleARModelUpload} 
+                  ngrokUrl="" 
+                />
+              </div>
             )}
 
-            {/* Список всех моделей с миниатюрами */}
-            <ModelSidebar
-              models={filteredModels}
-              selectedModel={selectedModel}
-              onModelSelect={handleModelSelect}
-              onQRCodeClick={handleQRCodeClick}
-              onDeleteModel={handleDeleteModel}
-            />
+            {/* Список всех моделей с миниатюрами - всегда на одном уровне */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <ModelSidebar
+                models={filteredModels}
+                selectedModel={selectedModel}
+                onModelSelect={handleModelSelect}
+                onQRCodeClick={handleQRCodeClick}
+                onDeleteModel={handleDeleteModel}
+              />
+            </div>
           </Column>
         </Row>
       ) : (
