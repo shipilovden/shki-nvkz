@@ -165,7 +165,7 @@ export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccord
                 </Row>
                 
                 <Text variant="body-default-xs" onBackground="neutral-weak" style={{ fontSize: '11px' }}>
-                  🔍 Показываются только модели с downloadable=true и форматом glTF
+                  🔍 Показываются только AR модели с downloadable=true и форматом glTF
                 </Text>
               </Column>
 
@@ -213,7 +213,7 @@ export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccord
               {state.items.length > 0 && (
                 <Column gap="l" align="start" style={{ width: '100%' }}>
                   <Text variant="body-strong-s" style={{ fontSize: '14px' }}>
-                    Результаты ({state.items.length}) - только AR/VR модели
+                    Результаты ({state.items.length}) - только AR модели
                   </Text>
                   
                   <div className={styles.modelsGrid}>

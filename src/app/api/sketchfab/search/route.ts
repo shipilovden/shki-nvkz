@@ -17,8 +17,8 @@ export async function GET(request: NextRequest) {
       formats: 'glTF',
       sort_by: '-likeCount', // Популярные по умолчанию
       count: count.toString(),
-      // Фильтруем только модели с поддержкой AR/VR
-      features: 'ar,vr',
+      // Фильтруем только модели с поддержкой AR
+      features: 'ar',
     });
     
     // Добавляем поисковый запрос если есть
