@@ -11,7 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 8px 12px;
   cursor: pointer;
   background-color: var(--color-neutral-alpha-weak);
   border-bottom: 1px solid var(--neutral-alpha-strong);
@@ -70,9 +70,9 @@
 .modelsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 12px;
-  padding: 16px;
-  padding-bottom: 20px;
+  gap: 8px;
+  padding: 12px;
+  padding-bottom: 16px;
 }
 
 .modelCard {
@@ -139,12 +139,12 @@
 }
 
 .modelInfo {
-  padding: 8px;
+  padding: 6px;
 }
 
 .modelTitle {
   color: var(--color-neutral-strong);
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1.2;
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -159,7 +159,7 @@
 }
 
 .modelAuthor {
-  font-size: 9px;
+  font-size: 8px;
   color: var(--color-neutral-weak);
   display: -webkit-box;
   -webkit-line-clamp: 1;

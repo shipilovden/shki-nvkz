@@ -154,8 +154,8 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
         className={styles.accordionHeader}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <Text variant="body-strong-s" className={styles.accordionTitle}>
-          Загрузка Sketchfab
+        <Text variant="body-strong-xs" className={styles.accordionTitle}>
+          Загрузка
         </Text>
         <Icon 
           name="chevronDown" 
@@ -166,8 +166,8 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
 
       {/* Содержимое аккордеона */}
       <div className={`${styles.accordionContent} ${isExpanded ? styles.accordionContentExpanded : ''}`}>
-        <div style={{ padding: '16px' }}>
-          <Column gap="m">
+        <div style={{ padding: '12px' }}>
+          <Column gap="s">
             {/* Поле ввода URL */}
             <Input
               placeholder="Вставьте ссылку на модель Sketchfab..."
@@ -175,39 +175,57 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
               onChange={(e) => setSketchfabUrl(e.target.value)}
               onKeyPress={handleKeyPress}
               disabled={isLoading}
-              style={{ width: '100%' }}
+              style={{ 
+                width: '100%',
+                height: '32px',
+                fontSize: '12px',
+                backgroundColor: 'var(--color-neutral-alpha-weak)',
+                border: '1px solid var(--neutral-alpha-strong)',
+                borderRadius: '4px'
+              }}
             />
             
-            {/* Кнопки управления */}
-            <Row gap="s" align="center" justify="space-between">
+            {/* Кнопки управления - только иконки */}
+            <Row gap="s" align="center" justify="center">
               <Button
                 variant="secondary"
                 size="s"
                 onClick={handleClear}
                 disabled={isLoading || !sketchfabUrl.trim()}
-                style={{ minWidth: '80px' }}
+                style={{ 
+                  width: '32px', 
+                  height: '32px', 
+                  padding: '0',
+                  minWidth: '32px'
+                }}
                 prefixIcon="close"
-              >
-                Очистить
-              </Button>
+              />
               
               <Button
                 variant="primary"
                 size="s"
                 onClick={handleLoad}
                 disabled={isLoading || !sketchfabUrl.trim()}
-                style={{ minWidth: '100px' }}
+                style={{ 
+                  width: '32px', 
+                  height: '32px', 
+                  padding: '0',
+                  minWidth: '32px'
+                }}
                 prefixIcon={isLoading ? "gear" : "openLink"}
-              >
-                {isLoading ? "Загрузка..." : "Загрузить"}
-              </Button>
+              />
               
               {onDeviceUpload && (
                 <Button
                   variant="secondary"
                   size="s"
                   onClick={onDeviceUpload}
-                  style={{ minWidth: '40px', height: '40px' }}
+                  style={{ 
+                    width: '32px', 
+                    height: '32px', 
+                    padding: '0',
+                    minWidth: '32px'
+                  }}
                   prefixIcon="download"
                 />
               )}
