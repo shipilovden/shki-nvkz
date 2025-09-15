@@ -169,7 +169,8 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
         <div style={{ padding: '8px' }}>
           <Column gap="xs">
             {/* Поле ввода URL */}
-            <Input
+            <input
+              type="text"
               placeholder="Вставьте ссылку на модель Sketchfab..."
               value={sketchfabUrl}
               onChange={(e) => setSketchfabUrl(e.target.value)}
@@ -177,13 +178,15 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
               disabled={isLoading}
               style={{ 
                 width: '100%',
-                height: '16px',
-                fontSize: '9px',
+                height: '20px',
+                fontSize: '10px',
                 backgroundColor: 'transparent',
                 border: '1px solid var(--neutral-alpha-strong)',
                 borderRadius: '4px',
                 color: 'var(--color-neutral-strong)',
-                padding: '2px 6px'
+                padding: '4px 8px',
+                outline: 'none',
+                fontFamily: 'inherit'
               }}
             />
             
