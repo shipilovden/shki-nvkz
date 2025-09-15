@@ -86,4 +86,4 @@ src/resources/content.tsx
 
 ## Развертывание
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fshipilovden%2Fshki-nvkz&project-name=shki-nvkz&repository-name=shki-nvkz)
+Проект уже развернут на Vercel и автоматически обновляется при каждом коммите в main ветку.
