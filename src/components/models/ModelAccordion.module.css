@@ -11,7 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 6px 10px;
   cursor: pointer;
   background-color: var(--color-neutral-alpha-weak);
   border-bottom: 1px solid var(--neutral-alpha-strong);
@@ -144,7 +144,7 @@
 
 .modelTitle {
   color: var(--color-neutral-strong);
-  font-size: 10px;
+  font-size: 9px;
   line-height: 1.2;
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -159,7 +159,7 @@
 }
 
 .modelAuthor {
-  font-size: 8px;
+  font-size: 7px;
   color: var(--color-neutral-weak);
   display: -webkit-box;
   -webkit-line-clamp: 1;

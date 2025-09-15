@@ -154,7 +154,7 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
         className={styles.accordionHeader}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <Text variant="body-strong-xs" className={styles.accordionTitle}>
+        <Text variant="body-strong-xs" className={styles.accordionTitle} style={{ fontSize: '11px' }}>
           Загрузка
         </Text>
         <Icon 
@@ -166,8 +166,8 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
 
       {/* Содержимое аккордеона */}
       <div className={`${styles.accordionContent} ${isExpanded ? styles.accordionContentExpanded : ''}`}>
-        <div style={{ padding: '12px' }}>
-          <Column gap="s">
+        <div style={{ padding: '8px' }}>
+          <Column gap="xs">
             {/* Поле ввода URL */}
             <Input
               placeholder="Вставьте ссылку на модель Sketchfab..."
@@ -177,40 +177,43 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
               disabled={isLoading}
               style={{ 
                 width: '100%',
-                height: '32px',
-                fontSize: '12px',
-                backgroundColor: 'var(--color-neutral-alpha-weak)',
+                height: '28px',
+                fontSize: '11px',
+                backgroundColor: 'var(--color-neutral-alpha-strong)',
                 border: '1px solid var(--neutral-alpha-strong)',
-                borderRadius: '4px'
+                borderRadius: '8px',
+                color: 'var(--color-neutral-strong)'
               }}
             />
             
             {/* Кнопки управления - только иконки */}
-            <Row gap="s" align="center" justify="center">
+            <Row gap="xs" align="center" justify="center">
               <Button
                 variant="secondary"
-                size="s"
+                size="xs"
                 onClick={handleClear}
                 disabled={isLoading || !sketchfabUrl.trim()}
                 style={{ 
-                  width: '32px', 
-                  height: '32px', 
+                  width: '24px', 
+                  height: '24px', 
                   padding: '0',
-                  minWidth: '32px'
+                  minWidth: '24px',
+                  borderRadius: '4px'
                 }}
                 prefixIcon="close"
               />
               
               <Button
                 variant="primary"
-                size="s"
+                size="xs"
                 onClick={handleLoad}
                 disabled={isLoading || !sketchfabUrl.trim()}
                 style={{ 
-                  width: '32px', 
-                  height: '32px', 
+                  width: '24px', 
+                  height: '24px', 
                   padding: '0',
-                  minWidth: '32px'
+                  minWidth: '24px',
+                  borderRadius: '4px'
                 }}
                 prefixIcon={isLoading ? "gear" : "openLink"}
               />
@@ -218,13 +221,14 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
               {onDeviceUpload && (
                 <Button
                   variant="secondary"
-                  size="s"
+                  size="xs"
                   onClick={onDeviceUpload}
                   style={{ 
-                    width: '32px', 
-                    height: '32px', 
+                    width: '24px', 
+                    height: '24px', 
                     padding: '0',
-                    minWidth: '32px'
+                    minWidth: '24px',
+                    borderRadius: '4px'
                   }}
                   prefixIcon="download"
                 />
