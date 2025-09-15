@@ -71,7 +71,9 @@ export function ModelGallery({ models }: ModelGalleryProps) {
   }, []);
 
   const handleModelSelect = (model: Model3D) => {
+    console.log('ModelGallery handleModelSelect called with:', model);
     setSelectedModel(model);
+    console.log('Selected model set to:', model);
   };
 
   const handleARModelUpload = (model: ARModel) => {
@@ -275,9 +277,13 @@ export function ModelGallery({ models }: ModelGalleryProps) {
         console.log('Rendering check:', { 
           filteredModelsLength: filteredModels.length, 
           selectedModel: selectedModel,
-          hasSelectedModel: !!selectedModel 
+          hasSelectedModel: !!selectedModel,
+          allModels: models,
+          arModels: arModels
         });
-        return filteredModels.length > 0 && selectedModel;
+        const shouldRender = filteredModels.length > 0 && selectedModel;
+        console.log('Should render ModelViewer:', shouldRender);
+        return shouldRender;
       })() ? (
         <>
           {/* Десктопная версия - горизонтальный макет */}

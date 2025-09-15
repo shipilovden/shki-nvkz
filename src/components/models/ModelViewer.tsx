@@ -28,6 +28,7 @@ export function ModelViewer({
   onAREnter, 
   onFullscreen
 }: ModelViewerProps) {
+  console.log('ModelViewer rendered with model:', model);
   const modelViewerRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);

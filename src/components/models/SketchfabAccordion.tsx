@@ -247,9 +247,12 @@ export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccord
                           key={model.uid}
                           className={styles.modelCard}
                           onClick={() => {
+                            console.log('Sketchfab model clicked:', convertedModel);
                             if (onModelSelect) {
+                              console.log('Calling onModelSelect with:', convertedModel);
                               onModelSelect(convertedModel);
                             } else {
+                              console.log('No onModelSelect, calling handleModelClick');
                               handleModelClick(model);
                             }
                           }}
