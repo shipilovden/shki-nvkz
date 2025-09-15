@@ -18,6 +18,10 @@ interface ModelGalleryProps {
 export function ModelGallery({ models }: ModelGalleryProps) {
   const { addToast } = useToast();
   const [selectedModel, setSelectedModel] = useState<Model3D | null>(models.length > 0 ? models[0] : null);
+  
+  // Отладочная информация
+  console.log('ModelGallery mounted with models:', models);
+  console.log('Selected model:', selectedModel);
   const [searchQuery, setSearchQuery] = useState("");
   const [isVRActive, setIsVRActive] = useState(false);
   const [isARActive, setIsARActive] = useState(false);
@@ -266,7 +270,14 @@ export function ModelGallery({ models }: ModelGalleryProps) {
       </Column>
 
       {/* Основной контент - адаптивный макет */}
-      {filteredModels.length > 0 && selectedModel ? (
+      {(() => {
+        console.log('Rendering check:', { 
+          filteredModelsLength: filteredModels.length, 
+          selectedModel: selectedModel,
+          hasSelectedModel: !!selectedModel 
+        });
+        return filteredModels.length > 0 && selectedModel;
+      })() ? (
         <>
           {/* Десктопная версия - горизонтальный макет */}
           <div 

@@ -38,6 +38,31 @@ export function ModelViewer({
   const [isVRActive, setIsVRActive] = useState(false);
   const [isARActive, setIsARActive] = useState(false);
 
+  // Проверяем, что модель существует
+  if (!model) {
+    return (
+      <Column 
+        align="center" 
+        gap="m" 
+        padding="xl"
+        style={{ 
+          width: '100%', 
+          height: '400px',
+          backgroundColor: 'var(--color-neutral-alpha-weak)',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <Icon name="3d" size="l" onBackground="neutral-medium" />
+        <Text variant="body-default-m" onBackground="neutral-medium">
+          Выберите модель для просмотра
+        </Text>
+      </Column>
+    );
+  }
+
   useEffect(() => {
     console.log('ModelViewer mounted, model src:', model.src);
     
@@ -221,13 +246,6 @@ export function ModelViewer({
           height: '500px', // Увеличена высота для мобильных
           maxWidth: '100%', // Полная ширина на мобильных
           minHeight: '400px' // Минимальная высота для мобильных
-        }}
-        style={{
-          // Принудительные стили для мобильных
-          '@media (max-width: 768px)': {
-            height: '400px !important',
-            minHeight: '400px !important'
-          }
         }}
       >
         {/* Убираем индикатор загрузки - model-viewer сам покажет загрузку */}
