@@ -5,6 +5,7 @@ import { Column, Row, Text, Button, Input, useToast, Icon } from "@once-ui-syste
 import { ModelViewer } from "./ModelViewer";
 import { ModelSidebar } from "./ModelSidebar";
 import { ARUploader } from "../ar/ARUploader";
+import { SketchfabLoader } from "./SketchfabLoader";
 import { arStorage, type ARModelData } from "@/utils/arStorage";
 import type { Model3D } from "@/types/models.types";
 import type { ARModel } from "@/types/ar.types";
@@ -27,8 +28,6 @@ export function ModelGallery({ models }: ModelGalleryProps) {
   const [arModels, setArModels] = useState<ARModel[]>([]);
   const [sketchfabModels, setSketchfabModels] = useState<Model3D[]>([]);
   const [showUploader, setShowUploader] = useState(false);
-  const [sketchfabUrl, setSketchfabUrl] = useState("");
-  const [isSketchfabLoading, setIsSketchfabLoading] = useState(false);
 
   // Загружаем AR модели при монтировании
   useEffect(() => {
@@ -99,119 +98,6 @@ export function ModelGallery({ models }: ModelGalleryProps) {
     });
   };
 
-  const handleSketchfabLoad = async () => {
-    if (!sketchfabUrl.trim()) return;
-    
-    setIsSketchfabLoading(true);
-    try {
-      // Извлекаем ID модели из URL
-      const urlMatch = sketchfabUrl.match(/sketchfab\.com\/models\/([a-zA-Z0-9]+)/);
-      if (!urlMatch) {
-        throw new Error('Неверный формат ссылки Sketchfab');
-      }
-      
-      const modelId = urlMatch[1];
-      
-      // API токен Sketchfab
-      const API_TOKEN = 'ce8a7b48e37246239f4df5728b5272d0';
-
-      // Используем Sketchfab API для получения информации о модели
-      const response = await fetch(`https://api.sketchfab.com/v3/models/${modelId}`, {
-        headers: {
-          'Authorization': `Token ${API_TOKEN}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Ошибка загрузки модели: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Sketchfab model data:', data);
-      
-      // Получаем прямую ссылку на GLB файл
-      let glbUrl = null;
-      
-      try {
-        const downloadResponse = await fetch(`https://api.sketchfab.com/v3/models/${modelId}/download`, {
-          headers: {
-            'Authorization': `Token ${API_TOKEN}`
-          }
-        });
-
-        console.log('Download response status:', downloadResponse.status);
-        
-        if (downloadResponse.ok) {
-          const downloadData = await downloadResponse.json();
-          console.log('Download data:', downloadData);
-          
-          // Ищем GLB файл в доступных форматах
-          let glbFile = null;
-          
-          if (downloadData.gltf?.urls?.glb) {
-            glbFile = downloadData.gltf.urls.glb;
-          } else if (downloadData.gltf?.urls?.['glb-draco']) {
-            glbFile = downloadData.gltf.urls['glb-draco'];
-          } else if (downloadData.glb?.url) {
-            glbFile = downloadData.glb.url;
-          }
-          
-          if (glbFile) {
-            glbUrl = glbFile.url;
-            console.log('Found GLB URL:', glbUrl);
-          }
-        }
-      } catch (downloadError) {
-        console.warn('Could not get download URL:', downloadError);
-      }
-      
-      // Создаем embed URL для iframe
-      const embedUrl = `https://sketchfab.com/models/${modelId}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0&ui_stop=0&ui_annotations=0&ui_help=0&ui_settings=0&ui_vr=1&ui_fullscreen=1&ui_ar=1`;
-      
-      // Проверяем, поддерживает ли модель AR/VR
-      const supportsAR = data.viewerFeatures?.includes('ar') || false;
-      const supportsVR = data.viewerFeatures?.includes('vr') || false;
-      
-      console.log('Model AR support:', supportsAR);
-      console.log('Model VR support:', supportsVR);
-      console.log('Model viewer features:', data.viewerFeatures);
-      
-      const model: Model3D = {
-        id: `sketchfab-${modelId}`,
-        title: data.name || "Sketchfab Model",
-        description: data.description || "Модель из Sketchfab",
-        src: glbUrl || embedUrl,
-        thumbnail: data.thumbnails?.images?.[0]?.url || "/images/placeholder-3d.jpg",
-        category: "Sketchfab",
-        format: glbUrl ? "glb" : "sketchfab",
-        author: data.user?.displayName || "Sketchfab User",
-        tags: data.tags?.map((tag: any) => tag.slug) || ["sketchfab"],
-        year: new Date(data.publishedAt || Date.now()).getFullYear(),
-        isSketchfab: !glbUrl, // Если есть GLB, то это не iframe
-        sketchfabId: modelId,
-        originalUrl: sketchfabUrl,
-        arEnabled: !!glbUrl || supportsAR, // AR работает с GLB или если модель поддерживает AR
-        vrEnabled: !!glbUrl || supportsVR  // VR работает с GLB или если модель поддерживает VR
-      };
-      
-      console.log('Created model:', model);
-      console.log('AR enabled:', model.arEnabled);
-      console.log('VR enabled:', model.vrEnabled);
-      console.log('Is Sketchfab iframe:', model.isSketchfab);
-
-      handleSketchfabModelLoad(model);
-      setSketchfabUrl("");
-      
-    } catch (error) {
-      console.error("Ошибка загрузки Sketchfab модели:", error);
-      addToast({
-        variant: "danger",
-        message: error instanceof Error ? error.message : "Ошибка загрузки модели"
-      });
-    } finally {
-      setIsSketchfabLoading(false);
-    }
-  };
 
   const handleSketchfabModelSelect = (model: Model3D) => {
     // Проверяем, есть ли уже такая модель в sketchfabModels
@@ -429,33 +315,10 @@ export function ModelGallery({ models }: ModelGalleryProps) {
             <Column gap="l" style={{ flex: 1, maxWidth: '800px', height: '100%' }} align="center">
               {/* Горизонтальная панель управления */}
               <Row gap="m" align="center" style={{ width: '100%', marginBottom: '16px' }}>
-                {/* Sketchfab инпут */}
-                <Input
-                  placeholder="Вставьте ссылку на модель Sketchfab..."
-                  value={sketchfabUrl}
-                  onChange={(e) => setSketchfabUrl(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      handleSketchfabLoad();
-                    }
-                  }}
-                  style={{ flex: 1, minWidth: '200px' }}
-                  disabled={isSketchfabLoading}
-                />
-                
-                {/* Кнопка загрузки Sketchfab - только иконка */}
-                <Button
-                  variant="secondary"
-                  size="s"
-                  onClick={handleSketchfabLoad}
-                  disabled={isSketchfabLoading || !sketchfabUrl.trim()}
-                  style={{
-                    padding: '8px',
-                    minWidth: '40px',
-                    height: '40px'
-                  }}
-                  prefixIcon={isSketchfabLoading ? "gear" : "openLink"}
-                />
+                {/* Sketchfab загрузчик */}
+                <div style={{ flex: 1 }}>
+                  <SketchfabLoader onModelLoad={handleSketchfabModelLoad} />
+                </div>
                 
                 {/* Разделитель */}
                 <div style={{
@@ -528,33 +391,10 @@ export function ModelGallery({ models }: ModelGalleryProps) {
           >
             {/* Горизонтальная панель управления */}
             <Row gap="m" align="center" style={{ width: '100%', marginBottom: '16px' }}>
-              {/* Sketchfab инпут */}
-              <Input
-                placeholder="Вставьте ссылку на модель Sketchfab..."
-                value={sketchfabUrl}
-                onChange={(e) => setSketchfabUrl(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleSketchfabLoad();
-                  }
-                }}
-                style={{ flex: 1, minWidth: '200px' }}
-                disabled={isSketchfabLoading}
-              />
-              
-              {/* Кнопка загрузки Sketchfab - только иконка */}
-              <Button
-                variant="secondary"
-                size="s"
-                onClick={handleSketchfabLoad}
-                disabled={isSketchfabLoading || !sketchfabUrl.trim()}
-                style={{
-                  padding: '8px',
-                  minWidth: '40px',
-                  height: '40px'
-                }}
-                prefixIcon={isSketchfabLoading ? "gear" : "openLink"}
-              />
+              {/* Sketchfab загрузчик */}
+              <div style={{ flex: 1 }}>
+                <SketchfabLoader onModelLoad={handleSketchfabModelLoad} />
+              </div>
               
               {/* Разделитель */}
               <div style={{
