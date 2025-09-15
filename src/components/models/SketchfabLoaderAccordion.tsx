@@ -154,7 +154,7 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
         className={styles.accordionHeader}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <Text variant="body-strong-xs" className={styles.accordionTitle} style={{ fontSize: '11px' }}>
+        <Text variant="body-strong-xs" className={styles.accordionTitle} style={{ fontSize: '10px' }}>
           Загрузка
         </Text>
         <Icon 
@@ -177,11 +177,11 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
               disabled={isLoading}
               style={{ 
                 width: '100%',
-                height: '28px',
-                fontSize: '11px',
-                backgroundColor: 'var(--color-neutral-alpha-strong)',
+                height: '24px',
+                fontSize: '10px',
+                backgroundColor: 'transparent',
                 border: '1px solid var(--neutral-alpha-strong)',
-                borderRadius: '8px',
+                borderRadius: '4px',
                 color: 'var(--color-neutral-strong)'
               }}
             />
@@ -194,11 +194,12 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
                 onClick={handleClear}
                 disabled={isLoading || !sketchfabUrl.trim()}
                 style={{ 
-                  width: '24px', 
-                  height: '24px', 
+                  width: '20px', 
+                  height: '20px', 
                   padding: '0',
-                  minWidth: '24px',
-                  borderRadius: '4px'
+                  minWidth: '20px',
+                  borderRadius: '3px',
+                  fontSize: '10px'
                 }}
                 prefixIcon="close"
               />
@@ -209,11 +210,12 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
                 onClick={handleLoad}
                 disabled={isLoading || !sketchfabUrl.trim()}
                 style={{ 
-                  width: '24px', 
-                  height: '24px', 
+                  width: '20px', 
+                  height: '20px', 
                   padding: '0',
-                  minWidth: '24px',
-                  borderRadius: '4px'
+                  minWidth: '20px',
+                  borderRadius: '3px',
+                  fontSize: '10px'
                 }}
                 prefixIcon={isLoading ? "gear" : "openLink"}
               />
@@ -224,11 +226,12 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
                   size="xs"
                   onClick={onDeviceUpload}
                   style={{ 
-                    width: '24px', 
-                    height: '24px', 
+                    width: '20px', 
+                    height: '20px', 
                     padding: '0',
-                    minWidth: '24px',
-                    borderRadius: '4px'
+                    minWidth: '20px',
+                    borderRadius: '3px',
+                    fontSize: '10px'
                   }}
                   prefixIcon="download"
                 />

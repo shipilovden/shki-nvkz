@@ -33,7 +33,7 @@ export function ModelAccordion({
         className={styles.accordionHeader}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <Text variant="body-strong-xs" className={styles.accordionTitle} style={{ fontSize: '11px' }}>
+        <Text variant="body-strong-xs" className={styles.accordionTitle} style={{ fontSize: '10px' }}>
           Модели
         </Text>
         <Icon 
