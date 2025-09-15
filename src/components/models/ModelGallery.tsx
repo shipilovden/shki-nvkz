@@ -6,6 +6,7 @@ import { ModelViewer } from "./ModelViewer";
 import { ModelSidebar } from "./ModelSidebar";
 import { ARUploader } from "../ar/ARUploader";
 import { SketchfabLoader } from "./SketchfabLoader";
+import { SketchfabAccordion } from "./SketchfabAccordion";
 import { arStorage, type ARModelData } from "@/utils/arStorage";
 import type { Model3D } from "@/types/models.types";
 import type { ARModel } from "@/types/ar.types";
@@ -445,6 +446,22 @@ export function ModelGallery({ models }: ModelGalleryProps) {
           </Text>
         </Column>
       )}
+
+      {/* Sketchfab поиск - добавляем под основным контентом */}
+      <Column gap="l" style={{ width: '100%', maxWidth: '1200px', marginTop: '40px' }} align="center">
+        <Text 
+          variant="heading-strong-l" 
+          align="center"
+          style={{ 
+            fontWeight: '300',
+            letterSpacing: '0.05em'
+          }}
+        >
+          Поиск на Sketchfab
+        </Text>
+        
+        <SketchfabAccordion />
+      </Column>
     </Column>
   );
 }
