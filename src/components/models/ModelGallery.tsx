@@ -5,7 +5,6 @@ import { Column, Row, Text, Button, Input, useToast, Icon } from "@once-ui-syste
 import { ModelViewer } from "./ModelViewer";
 import { ModelSidebar } from "./ModelSidebar";
 import { ARUploader } from "../ar/ARUploader";
-import { SketchfabLoader } from "./SketchfabLoader";
 import { arStorage, type ARModelData } from "@/utils/arStorage";
 import type { Model3D } from "@/types/models.types";
 import type { ARModel } from "@/types/ar.types";
@@ -28,6 +27,8 @@ export function ModelGallery({ models }: ModelGalleryProps) {
   const [arModels, setArModels] = useState<ARModel[]>([]);
   const [sketchfabModels, setSketchfabModels] = useState<Model3D[]>([]);
   const [showUploader, setShowUploader] = useState(false);
+  const [sketchfabUrl, setSketchfabUrl] = useState("");
+  const [isSketchfabLoading, setIsSketchfabLoading] = useState(false);
 
   // Загружаем AR модели при монтировании
   useEffect(() => {
@@ -96,6 +97,62 @@ export function ModelGallery({ models }: ModelGalleryProps) {
       variant: "success",
       message: "Модель Sketchfab загружена!"
     });
+  };
+
+  const handleSketchfabLoad = async () => {
+    if (!sketchfabUrl.trim()) return;
+    
+    setIsSketchfabLoading(true);
+    try {
+      // Извлекаем ID модели из URL
+      const urlMatch = sketchfabUrl.match(/sketchfab\.com\/models\/([a-zA-Z0-9]+)/);
+      if (!urlMatch) {
+        throw new Error('Неверный формат ссылки Sketchfab');
+      }
+      
+      const modelId = urlMatch[1];
+      
+      // Загружаем модель через API
+      const response = await fetch(`/api/sketchfab/search?q=${modelId}&count=1`);
+      if (!response.ok) {
+        throw new Error('Ошибка загрузки модели');
+      }
+      
+      const data = await response.json();
+      if (data.results && data.results.length > 0) {
+        const model = data.results[0];
+        const convertedModel: Model3D = {
+          id: `sketchfab-${model.uid}`,
+          title: model.name,
+          description: model.description,
+          src: `https://sketchfab.com/models/${model.uid}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0&ui_stop=0&ui_annotations=0&ui_help=0&ui_settings=0&ui_vr=1&ui_fullscreen=1&ui_ar=1`,
+          thumbnail: model.thumbnails.images[0]?.url || '/images/placeholder-3d.jpg',
+          category: 'Sketchfab',
+          format: 'sketchfab' as const,
+          author: model.user.displayName,
+          tags: model.tags?.map(tag => tag.slug) || ['sketchfab'],
+          year: new Date(model.publishedAt).getFullYear(),
+          isSketchfab: true,
+          sketchfabId: model.uid,
+          originalUrl: sketchfabUrl,
+          arEnabled: model.viewerFeatures?.includes('ar') || false,
+          vrEnabled: model.viewerFeatures?.includes('vr') || false,
+        };
+        
+        handleSketchfabModelLoad(convertedModel);
+        setSketchfabUrl("");
+      } else {
+        throw new Error('Модель не найдена');
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки Sketchfab модели:', error);
+      addToast({
+        variant: "danger",
+        message: error instanceof Error ? error.message : "Ошибка загрузки модели"
+      });
+    } finally {
+      setIsSketchfabLoading(false);
+    }
   };
 
   const handleSketchfabModelSelect = (model: Model3D) => {
@@ -330,8 +387,6 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                   </Button>
                 </Row>
                 
-                {/* Sketchfab загрузчик */}
-                <SketchfabLoader onModelLoad={handleSketchfabModelLoad} />
                 
                 {/* Информация о AR для Sketchfab */}
                 <Row 
@@ -399,27 +454,57 @@ export function ModelGallery({ models }: ModelGalleryProps) {
             }}
             className={styles.mobileLayout}
           >
-            {/* Кнопка загрузки AR моделей и Sketchfab загрузчик */}
-            <Column gap="s" style={{ width: '100%', justifyContent: 'flex-start' }}>
-              <Row gap="m" align="start" style={{ width: '100%', justifyContent: 'flex-start' }}>
-                <Button
-                  variant="secondary"
-                  size="xs"
-                  onClick={() => setShowUploader(!showUploader)}
-                  style={{
-                    fontSize: '12px',
-                    padding: '6px 12px',
-                    height: 'auto',
-                    minHeight: '28px'
-                  }}
-                >
-                  {showUploader ? "Скрыть" : "Загрузить!"}
-                </Button>
-              </Row>
+            {/* Горизонтальная панель управления */}
+            <Row gap="m" align="center" style={{ width: '100%', marginBottom: '16px' }}>
+              {/* Sketchfab инпут */}
+              <Input
+                placeholder="Вставьте ссылку на модель Sketchfab..."
+                value={sketchfabUrl}
+                onChange={(e) => setSketchfabUrl(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    handleSketchfabLoad();
+                  }
+                }}
+                style={{ flex: 1, minWidth: '200px' }}
+                disabled={isSketchfabLoading}
+              />
               
-              {/* Sketchfab загрузчик */}
-              <SketchfabLoader onModelLoad={handleSketchfabModelLoad} />
-            </Column>
+              {/* Кнопка загрузки Sketchfab - только иконка */}
+              <Button
+                variant="secondary"
+                size="s"
+                onClick={handleSketchfabLoad}
+                disabled={isSketchfabLoading || !sketchfabUrl.trim()}
+                style={{
+                  padding: '8px',
+                  minWidth: '40px',
+                  height: '40px'
+                }}
+                prefixIcon={isSketchfabLoading ? "gear" : "openLink"}
+              />
+              
+              {/* Разделитель */}
+              <div style={{
+                width: '1px',
+                height: '24px',
+                backgroundColor: 'var(--color-neutral-alpha-strong)',
+                margin: '0 8px'
+              }} />
+              
+              {/* Кнопка загрузки с устройства - только иконка */}
+              <Button
+                variant="secondary"
+                size="s"
+                onClick={() => setShowUploader(!showUploader)}
+                style={{
+                  padding: '8px',
+                  minWidth: '40px',
+                  height: '40px'
+                }}
+                prefixIcon="download"
+              />
+            </Row>
 
             {/* AR Uploader */}
             {showUploader && (
