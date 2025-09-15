@@ -44,7 +44,7 @@ export function ModelAccordion({
       </div>
 
       {/* Содержимое аккордеона */}
-      <div className={`${styles.accordionContent} ${isExpanded ? styles.accordionContentExpanded : ''}`}>
+      <div className={`${styles.accordionContent} ${isExpanded ? styles.accordionContentExpanded : ''} accordion-content`}>
         <div className={styles.modelsGrid}>
           {models.map((model) => (
             <div

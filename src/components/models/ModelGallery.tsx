@@ -212,7 +212,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
   };
 
   return (
-    <Column gap="xl" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '120px' }} align="center">
+    <Column gap="xl" className="model-gallery-container" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '200px', paddingBottom: '40px' }} align="center">
       {/* Заголовок */}
       <Column gap="m" align="center" style={{ width: '100%' }}>
         <Text 

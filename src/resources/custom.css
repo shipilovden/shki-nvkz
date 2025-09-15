@@ -66,3 +66,25 @@
     height: 400px !important;
   }
 }
+
+/* Исправление перекрытия подвала */
+.model-gallery-container {
+  margin-bottom: 200px !important;
+  padding-bottom: 40px !important;
+}
+
+/* Дополнительный отступ для аккордеонов */
+.accordion-content {
+  margin-bottom: 20px;
+}
+
+/* Обеспечиваем достаточное пространство для подвала */
+body {
+  padding-bottom: 0 !important;
+}
+
+/* Убираем фиксированное позиционирование подвала если есть */
+footer {
+  position: relative !important;
+  margin-top: auto;
+}

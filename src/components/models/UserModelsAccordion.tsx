@@ -73,7 +73,7 @@ export function UserModelsAccordion({
 
       {/* Содержимое аккордеона */}
       {isExpanded && (
-        <Column gap="s" style={{ paddingLeft: '16px' }}>
+        <Column gap="s" className="accordion-content" style={{ paddingLeft: '16px' }}>
           {userModels.map((model) => (
             <div
               key={model.id}
