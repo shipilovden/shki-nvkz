@@ -7,9 +7,10 @@ import styles from './ModelAccordion.module.css';
 
 interface SketchfabLoaderAccordionProps {
   onModelLoad: (model: Model3D) => void;
+  onDeviceUpload?: () => void;
 }
 
-export function SketchfabLoaderAccordion({ onModelLoad }: SketchfabLoaderAccordionProps) {
+export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: SketchfabLoaderAccordionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [sketchfabUrl, setSketchfabUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -200,6 +201,16 @@ export function SketchfabLoaderAccordion({ onModelLoad }: SketchfabLoaderAccordi
               >
                 {isLoading ? "Загрузка..." : "Загрузить"}
               </Button>
+              
+              {onDeviceUpload && (
+                <Button
+                  variant="secondary"
+                  size="s"
+                  onClick={onDeviceUpload}
+                  style={{ minWidth: '40px', height: '40px' }}
+                  prefixIcon="download"
+                />
+              )}
             </Row>
             
             {/* Сообщение об ошибке */}

@@ -313,35 +313,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
           >
             {/* Левая часть - 3D Viewer и информация */}
             <Column gap="l" style={{ flex: 1, maxWidth: '800px', height: '100%' }} align="center">
-              {/* Горизонтальная панель управления */}
-              <Row gap="m" align="center" style={{ width: '100%', marginBottom: '16px' }}>
-                {/* Sketchfab загрузчик */}
-                <div style={{ flex: 1 }}>
-                  <SketchfabLoader onModelLoad={handleSketchfabModelLoad} />
-                </div>
-                
-                {/* Разделитель */}
-                <div style={{
-                  width: '1px',
-                  height: '24px',
-                  backgroundColor: 'var(--color-neutral-alpha-strong)',
-                  margin: '0 8px'
-                }} />
-                
-                {/* Кнопка загрузки с устройства - только иконка */}
-                <Button
-                  variant="secondary"
-                  size="s"
-                  onClick={() => setShowUploader(!showUploader)}
-                  style={{
-                    padding: '8px',
-                    minWidth: '40px',
-                    height: '40px'
-                  }}
-                  prefixIcon="download"
-                />
-              </Row>
-
+              
               {/* AR Uploader */}
               {showUploader && (
                 <div style={{ width: '100%', marginBottom: '16px' }}>
@@ -375,6 +347,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                   onDeleteModel={handleDeleteModel}
                   onSketchfabModelSelect={handleSketchfabModelSelect}
                   onSketchfabModelLoad={handleSketchfabModelLoad}
+                  onDeviceUpload={() => setShowUploader(!showUploader)}
                 />
               </div>
             </Column>
@@ -391,35 +364,6 @@ export function ModelGallery({ models }: ModelGalleryProps) {
             }}
             className={styles.mobileLayout}
           >
-            {/* Горизонтальная панель управления */}
-            <Row gap="m" align="center" style={{ width: '100%', marginBottom: '16px' }}>
-              {/* Sketchfab загрузчик */}
-              <div style={{ flex: 1 }}>
-                <SketchfabLoader onModelLoad={handleSketchfabModelLoad} />
-              </div>
-              
-              {/* Разделитель */}
-              <div style={{
-                width: '1px',
-                height: '24px',
-                backgroundColor: 'var(--color-neutral-alpha-strong)',
-                margin: '0 8px'
-              }} />
-              
-              {/* Кнопка загрузки с устройства - только иконка */}
-              <Button
-                variant="secondary"
-                size="s"
-                onClick={() => setShowUploader(!showUploader)}
-                style={{
-                  padding: '8px',
-                  minWidth: '40px',
-                  height: '40px'
-                }}
-                prefixIcon="download"
-              />
-            </Row>
-
             {/* AR Uploader */}
             {showUploader && (
               <div style={{ width: '100%', marginBottom: '16px' }}>
@@ -450,6 +394,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                 onDeleteModel={handleDeleteModel}
                 onSketchfabModelSelect={handleSketchfabModelSelect}
                 onSketchfabModelLoad={handleSketchfabModelLoad}
+                onDeviceUpload={() => setShowUploader(!showUploader)}
               />
             </div>
           </div>
