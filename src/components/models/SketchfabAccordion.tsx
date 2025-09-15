@@ -56,16 +56,21 @@ export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccord
       
       const data = await response.json();
       
+      // Фильтруем только AR модели на клиентской стороне
+      const arModels = data.results.filter((model: any) => 
+        model.viewerFeatures && model.viewerFeatures.includes('ar')
+      );
+      
       setState(prev => ({
         ...prev,
-        items: append ? [...prev.items, ...data.results] : data.results,
+        items: append ? [...prev.items, ...arModels] : arModels,
         nextUrl: data.next,
         loading: false,
         query: query,
       }));
       
-      // Автоматически открываем секцию результатов если есть данные
-      if (data.results.length > 0) {
+      // Автоматически открываем секцию результатов если есть AR модели
+      if (arModels.length > 0) {
         setIsExpanded(true);
       }
       
