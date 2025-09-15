@@ -3,7 +3,7 @@
   border: 1px solid var(--neutral-alpha-strong);
   border-radius: 8px;
   background-color: var(--color-neutral-alpha-strong);
-  overflow: hidden;
+  overflow: visible;
   margin-top: 16px;
 }
 
