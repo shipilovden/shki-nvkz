@@ -99,6 +99,18 @@ export function ModelGallery({ models }: ModelGalleryProps) {
     });
   };
 
+  const handleSketchfabModelSelect = (model: Model3D) => {
+    // Проверяем, есть ли уже такая модель в sketchfabModels
+    const existingModel = sketchfabModels.find(m => m.id === model.id);
+    if (!existingModel) {
+      // Добавляем модель в список, если её там нет
+      setSketchfabModels(prev => [...prev, model]);
+    }
+    // Выбираем модель для отображения
+    setSelectedModel(model);
+    console.log('Sketchfab model selected and added to list:', model);
+  };
+
   const handleARModelDelete = async (modelId: string) => {
     try {
       // Удаляем из IndexedDB
@@ -466,7 +478,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
           Поиск на Sketchfab
         </Text>
         
-        <SketchfabAccordion onModelSelect={handleModelSelect} />
+        <SketchfabAccordion onModelSelect={handleSketchfabModelSelect} />
       </Column>
     </Column>
   );
