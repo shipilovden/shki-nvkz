@@ -467,17 +467,6 @@ export function ModelGallery({ models }: ModelGalleryProps) {
 
       {/* Sketchfab поиск - добавляем под основным контентом */}
       <Column gap="l" style={{ width: '100%', maxWidth: '1200px', marginTop: '40px' }} align="center">
-        <Text 
-          variant="heading-strong-l" 
-          align="center"
-          style={{ 
-            fontWeight: '300',
-            letterSpacing: '0.05em'
-          }}
-        >
-          Поиск на Sketchfab
-        </Text>
-        
         <SketchfabAccordion onModelSelect={handleSketchfabModelSelect} />
       </Column>
     </Column>
