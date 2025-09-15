@@ -335,7 +335,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
               </Column>
               
               {/* 3D Viewer */}
-              <div style={{ flex: 1, width: '100%', height: 'calc(100% - 40px)' }}>
+              <div style={{ flex: 1, width: '100%', minHeight: '500px' }}>
                 <ModelViewer
                   model={selectedModel}
                   onVREnter={handleVREnter}
@@ -413,8 +413,8 @@ export function ModelGallery({ models }: ModelGalleryProps) {
               </div>
             )}
 
-            {/* 3D Viewer - большой на мобильном */}
-            <div style={{ width: '100%', height: '400px' }}>
+            {/* 3D Viewer - адаптивный размер */}
+            <div style={{ width: '100%', minHeight: '400px' }}>
               <ModelViewer
                 model={selectedModel}
                 onVREnter={handleVREnter}
@@ -423,8 +423,8 @@ export function ModelGallery({ models }: ModelGalleryProps) {
               />
             </div>
 
-            {/* Список моделей - компактный внизу */}
-            <div style={{ width: '100%', maxHeight: '200px' }}>
+            {/* Список моделей - адаптивный размер */}
+            <div style={{ width: '100%' }}>
               <ModelSidebar
                 models={filteredModels}
                 selectedModel={selectedModel}

@@ -522,19 +522,16 @@ export function ModelViewer({
 
       {/* Информация о модели под вьювером как на Sketchfab */}
       <Column gap="s" align="start" style={{ width: '100%', maxWidth: '800px' }}>
-        <Text variant="heading-strong-m" align="left" style={{ fontSize: '18px', lineHeight: '1.3' }}>
-          {model.title}
-        </Text>
-        {/* Аккордеон для описания */}
+        {/* Аккордеон для всей информации о модели */}
         <div style={{ width: '100%' }}>
           {/* Заголовок аккордеона */}
           <Row
             gap="s"
             align="center"
             style={{
-              padding: '6px 8px',
+              padding: '8px 12px',
               backgroundColor: 'var(--color-neutral-alpha-weak)',
-              borderRadius: '4px',
+              borderRadius: '6px',
               cursor: 'pointer',
               border: '1px solid var(--neutral-alpha-strong)',
               transition: 'all 0.3s ease'
@@ -547,12 +544,12 @@ export function ModelViewer({
               e.currentTarget.style.backgroundColor = 'var(--color-neutral-alpha-weak)';
             }}
           >
-            <Text variant="body-default-xs" style={{ color: 'var(--color-neutral-strong)', fontSize: '12px' }}>
-              Описание
+            <Text variant="body-strong-s" style={{ color: 'var(--color-neutral-strong)', fontSize: '14px' }}>
+              {model.title}
             </Text>
             <Icon 
               name="chevronDown" 
-              size="xs" 
+              size="s" 
               onBackground="neutral-medium"
               style={{ 
                 transform: isDescriptionExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -565,45 +562,54 @@ export function ModelViewer({
           {/* Содержимое аккордеона */}
           {isDescriptionExpanded && (
             <div style={{ 
-              padding: '8px 12px',
+              padding: '12px 16px',
               backgroundColor: 'var(--color-neutral-alpha-weak)',
               border: '1px solid var(--neutral-alpha-strong)',
               borderTop: 'none',
-              borderRadius: '0 0 4px 4px',
+              borderRadius: '0 0 6px 6px',
               marginTop: '-1px'
             }}>
-              <Text 
-                variant="body-default-s" 
-                onBackground="neutral-weak" 
-                align="left"
-                style={{ 
-                  fontSize: '13px',
-                  lineHeight: '1.4'
-                }}
-              >
-                {model.description}
-              </Text>
+              <Column gap="m" align="start">
+                {/* Описание */}
+                <Text 
+                  variant="body-default-s" 
+                  onBackground="neutral-weak" 
+                  align="left"
+                  style={{ 
+                    fontSize: '13px',
+                    lineHeight: '1.5'
+                  }}
+                >
+                  {model.description}
+                </Text>
+                
+                {/* Информация о модели */}
+                <Row gap="m" align="center" style={{ justifyContent: 'flex-start', flexWrap: 'wrap' }}>
+                  {model.author && (
+                    <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '11px' }}>
+                      Автор: {model.author}
+                    </Text>
+                  )}
+                  {model.year && (
+                    <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '11px' }}>
+                      {model.year}
+                    </Text>
+                  )}
+                  {model.size && (
+                    <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '11px' }}>
+                      {model.size}
+                    </Text>
+                  )}
+                  {model.category && (
+                    <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '11px' }}>
+                      {model.category}
+                    </Text>
+                  )}
+                </Row>
+              </Column>
             </div>
           )}
         </div>
-        
-        <Row gap="s" align="center" style={{ justifyContent: 'flex-start' }}>
-          {model.author && (
-            <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '11px' }}>
-              Автор: {model.author}
-            </Text>
-          )}
-          {model.year && (
-            <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '11px' }}>
-              {model.year}
-            </Text>
-          )}
-          {model.size && (
-            <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '11px' }}>
-              {model.size}
-            </Text>
-          )}
-        </Row>
         
         {/* Информация о AR/VR для Sketchfab моделей без GLB */}
         {model.isSketchfab && !model.arEnabled && (
