@@ -14,11 +14,12 @@ import {
   useToast
 } from "@once-ui-system/core";
 import type { SketchfabModel, SketchfabSearchState } from "@/types/sketchfab.types";
+import type { Model3D } from "@/types/models.types";
 import styles from './ModelAccordion.module.css';
 
 interface SketchfabAccordionProps {
   className?: string;
-  onModelSelect?: (model: any) => void;
+  onModelSelect?: (model: Model3D) => void;
 }
 
 export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccordionProps) {
@@ -65,7 +66,7 @@ export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccord
       
       // Автоматически открываем секцию результатов если есть данные
       if (data.results.length > 0) {
-        setIsResultsExpanded(true);
+        setIsExpanded(true);
       }
       
     } catch (error) {
@@ -218,14 +219,14 @@ export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccord
                   <div className={styles.modelsGrid}>
                     {state.items.map((model) => {
                       // Конвертируем Sketchfab модель в формат Model3D
-                      const convertedModel = {
+                      const convertedModel: Model3D = {
                         id: `sketchfab-${model.uid}`,
                         title: model.name,
                         description: model.description,
                         src: `https://sketchfab.com/models/${model.uid}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0&ui_stop=0&ui_annotations=0&ui_help=0&ui_settings=0&ui_vr=1&ui_fullscreen=1&ui_ar=1`,
                         thumbnail: model.thumbnails.images[0]?.url || '/images/placeholder-3d.jpg',
                         category: 'Sketchfab',
-                        format: 'sketchfab',
+                        format: 'sketchfab' as const,
                         author: model.user.displayName,
                         tags: model.tags?.map(tag => tag.slug) || ['sketchfab'],
                         year: new Date(model.publishedAt).getFullYear(),
@@ -234,8 +235,11 @@ export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccord
                         originalUrl: `https://sketchfab.com/models/${model.uid}`,
                         arEnabled: model.viewerFeatures?.includes('ar') || false,
                         vrEnabled: model.viewerFeatures?.includes('vr') || false,
-                        isUserModel: false,
-                        size: `${Math.round((model.formats?.[0]?.formatSize || 0) / 1024 / 1024 * 100) / 100} MB`
+                        size: `${Math.round((model.formats?.[0]?.formatSize || 0) / 1024 / 1024 * 100) / 100} MB`,
+                        autoRotate: true,
+                        cameraControls: true,
+                        exposure: 1.0,
+                        shadowIntensity: 0.5
                       };
 
                       return (
@@ -252,17 +256,18 @@ export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccord
                         >
                           {/* Мини-вьювер */}
                           <div className={styles.modelThumbnail}>
-                            <model-viewer
+                            <iframe
                               src={convertedModel.src}
-                              alt={model.name}
+                              title={model.name}
                               style={{
                                 width: '100%',
                                 height: '100%',
+                                border: 'none',
+                                borderRadius: '8px',
                                 backgroundColor: 'var(--color-neutral-alpha-weak)'
                               }}
-                              camera-controls
-                              auto-rotate
-                              loading="lazy"
+                              allow="autoplay; fullscreen; xr-spatial-tracking"
+                              allowFullScreen
                             />
                           </div>
 
