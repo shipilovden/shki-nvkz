@@ -5,6 +5,7 @@ import { Column, Row, Text, Icon, Badge, Button } from "@once-ui-system/core";
 import type { Model3D } from "@/types/models.types";
 import { UserModelsAccordion } from './UserModelsAccordion';
 import { ModelAccordion } from './ModelAccordion';
+import { SketchfabAccordion } from './SketchfabAccordion';
 
 interface ModelSidebarProps {
   models: Model3D[];
@@ -12,9 +13,10 @@ interface ModelSidebarProps {
   onModelSelect: (model: Model3D) => void;
   onQRCodeClick?: (model: Model3D) => void;
   onDeleteModel?: (modelId: string) => void;
+  onSketchfabModelSelect?: (model: Model3D) => void;
 }
 
-export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeClick, onDeleteModel }: ModelSidebarProps) {
+export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeClick, onDeleteModel, onSketchfabModelSelect }: ModelSidebarProps) {
   // Разделяем модели на обычные и пользовательские
   const { regularModels, userModels } = useMemo(() => {
     const regular = models.filter(model => !(model as any).isUserModel);
@@ -66,6 +68,11 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
           onQRCodeClick={onQRCodeClick}
           onDeleteModel={onDeleteModel}
         />
+      )}
+
+      {/* Аккордеон поиска Sketchfab */}
+      {onSketchfabModelSelect && (
+        <SketchfabAccordion onModelSelect={onSketchfabModelSelect} />
       )}
       
       {/* Обычные модели - временно скрыты */}

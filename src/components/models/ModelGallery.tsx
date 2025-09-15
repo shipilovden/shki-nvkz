@@ -6,7 +6,6 @@ import { ModelViewer } from "./ModelViewer";
 import { ModelSidebar } from "./ModelSidebar";
 import { ARUploader } from "../ar/ARUploader";
 import { SketchfabLoader } from "./SketchfabLoader";
-import { SketchfabAccordion } from "./SketchfabAccordion";
 import { arStorage, type ARModelData } from "@/utils/arStorage";
 import type { Model3D } from "@/types/models.types";
 import type { ARModel } from "@/types/ar.types";
@@ -450,6 +449,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                 onModelSelect={handleModelSelect}
                 onQRCodeClick={handleQRCodeClick}
                 onDeleteModel={handleDeleteModel}
+                onSketchfabModelSelect={handleSketchfabModelSelect}
               />
             </div>
           </div>
@@ -465,10 +465,6 @@ export function ModelGallery({ models }: ModelGalleryProps) {
         </Column>
       )}
 
-      {/* Sketchfab поиск - добавляем под основным контентом */}
-      <Column gap="l" style={{ width: '100%', maxWidth: '1200px', marginTop: '40px' }} align="center">
-        <SketchfabAccordion onModelSelect={handleSketchfabModelSelect} />
-      </Column>
     </Column>
   );
 }
