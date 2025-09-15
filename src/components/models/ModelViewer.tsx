@@ -37,6 +37,7 @@ export function ModelViewer({
   const [isLightBackground, setIsLightBackground] = useState(true);
   const [isVRActive, setIsVRActive] = useState(false);
   const [isARActive, setIsARActive] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   // Проверяем, что модель существует
   if (!model) {
@@ -524,23 +525,67 @@ export function ModelViewer({
         <Text variant="heading-strong-m" align="left" style={{ fontSize: '18px', lineHeight: '1.3' }}>
           {model.title}
         </Text>
-        <Text 
-          variant="body-default-s" 
-          onBackground="neutral-weak" 
-          align="left"
-          style={{ 
-            fontSize: '13px',
-            lineHeight: '1.4',
-            maxHeight: '60px',
-            overflow: 'hidden',
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
-            textOverflow: 'ellipsis'
-          }}
-        >
-          {model.description}
-        </Text>
+        {/* Аккордеон для описания */}
+        <div style={{ width: '100%' }}>
+          {/* Заголовок аккордеона */}
+          <Row
+            gap="s"
+            align="center"
+            style={{
+              padding: '6px 8px',
+              backgroundColor: 'var(--color-neutral-alpha-weak)',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              border: '1px solid var(--neutral-alpha-strong)',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--color-neutral-alpha-medium)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--color-neutral-alpha-weak)';
+            }}
+          >
+            <Text variant="body-default-xs" style={{ color: 'var(--color-neutral-strong)', fontSize: '12px' }}>
+              Описание
+            </Text>
+            <Icon 
+              name="chevronDown" 
+              size="xs" 
+              onBackground="neutral-medium"
+              style={{ 
+                transform: isDescriptionExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.3s ease',
+                marginLeft: 'auto'
+              }}
+            />
+          </Row>
+
+          {/* Содержимое аккордеона */}
+          {isDescriptionExpanded && (
+            <div style={{ 
+              padding: '8px 12px',
+              backgroundColor: 'var(--color-neutral-alpha-weak)',
+              border: '1px solid var(--neutral-alpha-strong)',
+              borderTop: 'none',
+              borderRadius: '0 0 4px 4px',
+              marginTop: '-1px'
+            }}>
+              <Text 
+                variant="body-default-s" 
+                onBackground="neutral-weak" 
+                align="left"
+                style={{ 
+                  fontSize: '13px',
+                  lineHeight: '1.4'
+                }}
+              >
+                {model.description}
+              </Text>
+            </div>
+          )}
+        </div>
         
         <Row gap="s" align="center" style={{ justifyContent: 'flex-start' }}>
           {model.author && (
