@@ -374,6 +374,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                   onQRCodeClick={handleQRCodeClick}
                   onDeleteModel={handleDeleteModel}
                   onSketchfabModelSelect={handleSketchfabModelSelect}
+                  onSketchfabModelLoad={handleSketchfabModelLoad}
                 />
               </div>
             </Column>
@@ -448,6 +449,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                 onQRCodeClick={handleQRCodeClick}
                 onDeleteModel={handleDeleteModel}
                 onSketchfabModelSelect={handleSketchfabModelSelect}
+                onSketchfabModelLoad={handleSketchfabModelLoad}
               />
             </div>
           </div>
