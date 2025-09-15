@@ -2,10 +2,10 @@ import type { About, Blog, Gallery, Home, Newsletter, Person, Social, Work } fro
 import { Line, Logo, Row, Text } from "@once-ui-system/core";
 
 const person: Person = {
-  firstName: "шки",
-  lastName: "нвкз",
-  name: "шки-нвкз",
-  role: "Дизайнер-разработчик",
+  firstName: "НВКЗ",
+  lastName: "Школа",
+  name: "Новокузнецкая школа креативных индустрий",
+  role: "Образовательное учреждение",
   avatar: "/images/avatar.jpg",
   email: "example@gmail.com",
   location: "Asia/Novokuznetsk", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
@@ -38,7 +38,7 @@ const home: Home = {
   image: "/images/og/home.jpg",
   label: "Главная",
   title: `Портфолио ${person.name}`,
-  description: `Сайт-портфолио, демонстрирующий мою работу как ${person.role}`,
+  description: `Сайт-портфолио Новокузнецкой школы креативных индустрий, демонстрирующий работы студентов в области 3D моделирования, AR/VR технологий, музыки и дизайна`,
   headline: <>Новокузнецкая школа креативных индустрий</>,
   featured: {
     display: true,
@@ -77,12 +77,12 @@ const about: About = {
   },
   intro: {
     display: true,
-    title: "Введение",
+    title: "О школе",
     description: (
       <>
-        шки-нвкз — дизайнер-разработчик из Москвы с страстью к превращению сложных задач
-        в простые и элегантные дизайн-решения. Его работа охватывает цифровые интерфейсы, интерактивные
-        впечатления и сближение дизайна и технологий.
+        Новокузнецкая школа креативных индустрий — образовательное учреждение, где студенты изучают 
+        современные технологии и креативные специальности. Мы обучаем 3D моделированию, AR/VR технологиям, 
+        музыке, дизайну и другим направлениям креативных индустрий.
       </>
     ),
   },

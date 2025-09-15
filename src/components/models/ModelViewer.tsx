@@ -218,7 +218,8 @@ export function ModelViewer({
         }}
         s={{
           height: '500px', // Увеличена высота для мобильных
-          maxWidth: '100%' // Полная ширина на мобильных
+          maxWidth: '100%', // Полная ширина на мобильных
+          minHeight: '400px' // Минимальная высота для мобильных
         }}
       >
         {/* Убираем индикатор загрузки - model-viewer сам покажет загрузку */}
@@ -292,6 +293,7 @@ export function ModelViewer({
             style={{
               width: '100%',
               height: '100%',
+              minHeight: '400px', // Минимальная высота для мобильных
               border: 'none',
               borderRadius: '8px',
               backgroundColor: isLightBackground ? '#ffffff' : '#000000'

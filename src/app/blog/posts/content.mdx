@@ -47,15 +47,15 @@ Your personal details are used across the whole app to render personalized headi
   {
     code:
 `const person = {
-    firstName: "Selene",
-    lastName: "Yu",
+    firstName: "НВКЗ",
+    lastName: "Школа",
     get name() {
-      return "...";
+      return "Новокузнецкая школа креативных индустрий";
     },
-    role: "Design Engineer",
+    role: "Образовательное учреждение",
     avatar: "/images/avatar.jpg",
-    location: "Asia/Jakarta", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
-    languages: ["English", "Bahasa"], // optional: Leave the array empty if you don't want to display languages
+    location: "Asia/Novokuznetsk", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
+    languages: [], // optional: Leave the array empty if you don't want to display languages
 };`,
     language: "tsx",
     label: "src/app/resources/content.js"
@@ -98,14 +98,14 @@ Each page have it's own object that manages the personalized content, such as he
   {
     code:
 `const home = {
-    label: "Home",
-    title: "Selene Yu's Portfolio",
-    description: "Portfolio website showcasing my work as a Design Engineer",
-    headline: <>Design engineer and builder</>,
+    label: "Главная",
+    title: "Портфолио НВКЗ",
+    description: "Сайт-портфолио Новокузнецкой школы креативных индустрий",
+    headline: <>Новокузнецкая школа креативных индустрий</>,
     subline: (
       <>
-        I'm Selene, a design engineer at <InlineCode>FLY</InlineCode>, where I craft intuitive
-        <br /> user experiences. After hours, I build my own projects.
+        Образовательное учреждение, где студенты изучают современные технологии
+        <br /> и креативные специальности.
       </>
     ),
 };`,
