@@ -52,3 +52,17 @@
   --scheme-neutral-600-50: rgba(137,152,159,0.5);
   /*
 }*/
+
+/* Принудительные стили для model-viewer на мобильных устройствах */
+@media (max-width: 768px) {
+  model-viewer {
+    min-height: 400px !important;
+    height: 400px !important;
+  }
+  
+  /* Контейнер вьювера */
+  .model-viewer-container {
+    min-height: 400px !important;
+    height: 400px !important;
+  }
+}

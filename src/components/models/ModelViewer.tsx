@@ -202,6 +202,7 @@ export function ModelViewer({
 
       {/* 3D Viewer */}
       <div 
+        className="model-viewer-container"
         style={{ 
           width: '100%', 
           height: '600px', // Увеличена высота для десктопа
@@ -220,6 +221,13 @@ export function ModelViewer({
           height: '500px', // Увеличена высота для мобильных
           maxWidth: '100%', // Полная ширина на мобильных
           minHeight: '400px' // Минимальная высота для мобильных
+        }}
+        style={{
+          // Принудительные стили для мобильных
+          '@media (max-width: 768px)': {
+            height: '400px !important',
+            minHeight: '400px !important'
+          }
         }}
       >
         {/* Убираем индикатор загрузки - model-viewer сам покажет загрузку */}
@@ -310,6 +318,7 @@ export function ModelViewer({
             style={{
               width: '100%',
               height: '100%',
+              minHeight: '400px', // Принудительная минимальная высота
               backgroundColor: isLightBackground ? '#ffffff' : '#000000',
               borderRadius: '8px',
               display: 'block'
@@ -481,6 +490,16 @@ export function ModelViewer({
           modelViewerRef={modelViewerRef}
         />
       </div>
+
+      {/* CSS стили для принудительного размера на мобильных */}
+      <style jsx>{`
+        @media (max-width: 768px) {
+          model-viewer {
+            min-height: 400px !important;
+            height: 400px !important;
+          }
+        }
+      `}</style>
 
       {/* Информация о модели под вьювером как на Sketchfab */}
       <Column gap="m" align="start" style={{ width: '100%', maxWidth: '800px' }}>
