@@ -520,27 +520,41 @@ export function ModelViewer({
       `}</style>
 
       {/* Информация о модели под вьювером как на Sketchfab */}
-      <Column gap="m" align="start" style={{ width: '100%', maxWidth: '800px' }}>
-        <Text variant="heading-strong-l" align="left">
+      <Column gap="s" align="start" style={{ width: '100%', maxWidth: '800px' }}>
+        <Text variant="heading-strong-m" align="left" style={{ fontSize: '18px', lineHeight: '1.3' }}>
           {model.title}
         </Text>
-        <Text variant="body-default-m" onBackground="neutral-weak" align="left">
+        <Text 
+          variant="body-default-s" 
+          onBackground="neutral-weak" 
+          align="left"
+          style={{ 
+            fontSize: '13px',
+            lineHeight: '1.4',
+            maxHeight: '60px',
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            textOverflow: 'ellipsis'
+          }}
+        >
           {model.description}
         </Text>
         
-        <Row gap="m" align="center" style={{ justifyContent: 'flex-start' }}>
+        <Row gap="s" align="center" style={{ justifyContent: 'flex-start' }}>
           {model.author && (
-            <Text variant="body-default-xs" onBackground="neutral-medium">
+            <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '11px' }}>
               Автор: {model.author}
             </Text>
           )}
           {model.year && (
-            <Text variant="body-default-xs" onBackground="neutral-medium">
+            <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '11px' }}>
               {model.year}
             </Text>
           )}
           {model.size && (
-            <Text variant="body-default-xs" onBackground="neutral-medium">
+            <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '11px' }}>
               {model.size}
             </Text>
           )}
@@ -549,18 +563,18 @@ export function ModelViewer({
         {/* Информация о AR/VR для Sketchfab моделей без GLB */}
         {model.isSketchfab && !model.arEnabled && (
           <Row 
-            gap="s" 
+            gap="xs" 
             align="center" 
             style={{ 
-              padding: '8px 12px',
+              padding: '4px 8px',
               backgroundColor: 'var(--color-warning-alpha-weak)',
               border: '1px solid var(--color-warning-alpha-strong)',
-              borderRadius: '6px',
-              marginTop: '8px'
+              borderRadius: '4px',
+              marginTop: '4px'
             }}
           >
-            <Icon name="warning" size="s" onBackground="warning-medium" />
-            <Text variant="body-default-xs" onBackground="warning-medium">
+            <Icon name="warning" size="xs" onBackground="warning-medium" />
+            <Text variant="body-default-xs" onBackground="warning-medium" style={{ fontSize: '10px' }}>
               AR/VR недоступны для этой модели Sketchfab. Для AR загрузите GLB/GLTF файл через кнопку "Загрузить!"
             </Text>
           </Row>
@@ -569,18 +583,18 @@ export function ModelViewer({
         {/* Информация об успешной загрузке GLB */}
         {model.isSketchfab && model.arEnabled && (
           <Row 
-            gap="s" 
+            gap="xs" 
             align="center" 
             style={{ 
-              padding: '8px 12px',
+              padding: '4px 8px',
               backgroundColor: 'var(--color-success-alpha-weak)',
               border: '1px solid var(--color-success-alpha-strong)',
-              borderRadius: '6px',
-              marginTop: '8px'
+              borderRadius: '4px',
+              marginTop: '4px'
             }}
           >
-            <Icon name="check" size="s" onBackground="success-medium" />
-            <Text variant="body-default-xs" onBackground="success-medium">
+            <Icon name="check" size="xs" onBackground="success-medium" />
+            <Text variant="body-default-xs" onBackground="success-medium" style={{ fontSize: '10px' }}>
               ✅ AR/VR доступны! Модель загружена как GLB файл.
             </Text>
           </Row>
@@ -592,7 +606,7 @@ export function ModelViewer({
             width: '100%',
             height: '1px',
             backgroundColor: '#ddd',
-            margin: '16px 0'
+            margin: '8px 0'
           }}
         />
 
