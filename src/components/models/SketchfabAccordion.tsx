@@ -11,10 +11,10 @@ import {
   Media, 
   Badge, 
   Icon,
-  useToast,
-  AccordionGroup
+  useToast
 } from "@once-ui-system/core";
 import type { SketchfabModel, SketchfabSearchState } from "@/types/sketchfab.types";
+import styles from './ModelAccordion.module.css';
 
 interface SketchfabAccordionProps {
   className?: string;
@@ -33,8 +33,7 @@ export function SketchfabAccordion({ className }: SketchfabAccordionProps) {
   });
 
   const [searchInput, setSearchInput] = useState('');
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [isResultsExpanded, setIsResultsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Функция для поиска моделей
   const searchModels = useCallback(async (query: string = '', cursor: string = '', append: boolean = false) => {
@@ -85,10 +84,10 @@ export function SketchfabAccordion({ className }: SketchfabAccordionProps) {
 
   // Загружаем популярные модели при первом открытии
   useEffect(() => {
-    if (isSearchExpanded && state.items.length === 0 && !state.loading) {
+    if (isExpanded && state.items.length === 0 && !state.loading) {
       searchModels();
     }
-  }, [isSearchExpanded, state.items.length, state.loading, searchModels]);
+  }, [isExpanded, state.items.length, state.loading, searchModels]);
 
   // Обработчик поиска
   const handleSearch = () => {
@@ -123,53 +122,28 @@ export function SketchfabAccordion({ className }: SketchfabAccordionProps) {
 
   return (
     <div className={className}>
-      <AccordionGroup>
-        {/* Секция поиска */}
-        <div style={{ marginBottom: '16px' }}>
-          <Row
-            gap="s"
-            align="center"
-            style={{
-              padding: '8px 12px',
-              backgroundColor: 'var(--color-neutral-alpha-weak)',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              border: '1px solid var(--neutral-alpha-strong)',
-              transition: 'all 0.3s ease'
-            }}
-            onClick={() => setIsSearchExpanded(!isSearchExpanded)}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--color-neutral-alpha-medium)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--color-neutral-alpha-weak)';
-            }}
-          >
-            <Text variant="body-strong-s" style={{ color: 'var(--color-neutral-strong)', fontSize: '14px' }}>
-              Поиск Sketchfab
-            </Text>
-            <Icon 
-              name="chevronDown" 
-              size="s" 
-              onBackground="neutral-medium"
-              style={{ 
-                transform: isSearchExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.3s ease',
-                marginLeft: 'auto'
-              }}
-            />
-          </Row>
+      <div className={styles.accordion}>
+        {/* Заголовок аккордеона */}
+        <div 
+          className={styles.accordionHeader}
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <Text variant="body-strong-s" className={styles.accordionTitle}>
+            Поиск Sketchfab
+          </Text>
+          <Icon 
+            name="chevronDown" 
+            size="s" 
+            className={`${styles.chevron} ${isExpanded ? styles.chevronExpanded : ''}`}
+          />
+        </div>
 
-          {isSearchExpanded && (
-            <div style={{ 
-              padding: '12px 16px',
-              backgroundColor: 'var(--color-neutral-alpha-weak)',
-              border: '1px solid var(--neutral-alpha-strong)',
-              borderTop: 'none',
-              borderRadius: '0 0 6px 6px',
-              marginTop: '-1px'
-            }}>
-              <Column gap="m" align="start">
+        {/* Содержимое аккордеона */}
+        <div className={`${styles.accordionContent} ${isExpanded ? styles.accordionContentExpanded : ''} accordion-content`}>
+          <div style={{ padding: '16px' }}>
+            <Column gap="l" align="start">
+              {/* Поиск */}
+              <Column gap="m" align="start" style={{ width: '100%' }}>
                 <Row gap="s" style={{ width: '100%' }}>
                   <Input
                     placeholder="Поиск моделей на Sketchfab..."
@@ -192,58 +166,54 @@ export function SketchfabAccordion({ className }: SketchfabAccordionProps) {
                   🔍 Показываются только модели с downloadable=true и форматом glTF
                 </Text>
               </Column>
-            </div>
-          )}
-        </div>
 
-        {/* Секция результатов */}
-        {state.items.length > 0 && (
-          <div style={{ marginBottom: '16px' }}>
-            <Row
-              gap="s"
-              align="center"
-              style={{
-                padding: '8px 12px',
-                backgroundColor: 'var(--color-neutral-alpha-weak)',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                border: '1px solid var(--neutral-alpha-strong)',
-                transition: 'all 0.3s ease'
-              }}
-              onClick={() => setIsResultsExpanded(!isResultsExpanded)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--color-neutral-alpha-medium)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--color-neutral-alpha-weak)';
-              }}
-            >
-              <Text variant="body-strong-s" style={{ color: 'var(--color-neutral-strong)', fontSize: '14px' }}>
-                Результаты ({state.items.length})
-              </Text>
-              <Icon 
-                name="chevronDown" 
-                size="s" 
-                onBackground="neutral-medium"
-                style={{ 
-                  transform: isResultsExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.3s ease',
-                  marginLeft: 'auto'
-                }}
-              />
-            </Row>
+              {/* Сообщение об ошибке */}
+              {state.error && (
+                <Row 
+                  gap="xs" 
+                  align="center" 
+                  style={{ 
+                    padding: '8px 12px',
+                    backgroundColor: 'var(--color-danger-alpha-weak)',
+                    border: '1px solid var(--color-danger-alpha-strong)',
+                    borderRadius: '4px',
+                    width: '100%'
+                  }}
+                >
+                  <Icon name="warning" size="xs" onBackground="danger-medium" />
+                  <Text variant="body-default-xs" onBackground="danger-medium" style={{ fontSize: '11px' }}>
+                    {state.error}
+                  </Text>
+                </Row>
+              )}
 
-            {isResultsExpanded && (
-              <div style={{ 
-                padding: '12px 16px',
-                backgroundColor: 'var(--color-neutral-alpha-weak)',
-                border: '1px solid var(--neutral-alpha-strong)',
-                borderTop: 'none',
-                borderRadius: '0 0 6px 6px',
-                marginTop: '-1px'
-              }}>
-                <Column gap="l" align="start">
-                  {/* Сетка моделей */}
+              {/* Сообщение "Ничего не найдено" */}
+              {!state.loading && state.items.length === 0 && state.query && (
+                <Row 
+                  gap="xs" 
+                  align="center" 
+                  style={{ 
+                    padding: '8px 12px',
+                    backgroundColor: 'var(--color-neutral-alpha-weak)',
+                    border: '1px solid var(--neutral-alpha-strong)',
+                    borderRadius: '4px',
+                    width: '100%'
+                  }}
+                >
+                  <Icon name="search" size="xs" onBackground="neutral-medium" />
+                  <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '11px' }}>
+                    Ничего не найдено по запросу "{state.query}"
+                  </Text>
+                </Row>
+              )}
+
+              {/* Сетка моделей */}
+              {state.items.length > 0 && (
+                <Column gap="l" align="start" style={{ width: '100%' }}>
+                  <Text variant="body-strong-s" style={{ fontSize: '14px' }}>
+                    Результаты ({state.items.length})
+                  </Text>
+                  
                   <Grid
                     columns={{ base: 1, sm: 2, lg: 3, xl: 4 }}
                     gap="m"
@@ -320,51 +290,11 @@ export function SketchfabAccordion({ className }: SketchfabAccordionProps) {
                     </Row>
                   )}
                 </Column>
-              </div>
-            )}
+              )}
+            </Column>
           </div>
-        )}
-
-        {/* Сообщение об ошибке */}
-        {state.error && (
-          <Row 
-            gap="xs" 
-            align="center" 
-            style={{ 
-              padding: '8px 12px',
-              backgroundColor: 'var(--color-danger-alpha-weak)',
-              border: '1px solid var(--color-danger-alpha-strong)',
-              borderRadius: '4px',
-              marginBottom: '16px'
-            }}
-          >
-            <Icon name="warning" size="xs" onBackground="danger-medium" />
-            <Text variant="body-default-xs" onBackground="danger-medium" style={{ fontSize: '11px' }}>
-              {state.error}
-            </Text>
-          </Row>
-        )}
-
-        {/* Сообщение "Ничего не найдено" */}
-        {!state.loading && state.items.length === 0 && state.query && (
-          <Row 
-            gap="xs" 
-            align="center" 
-            style={{ 
-              padding: '8px 12px',
-              backgroundColor: 'var(--color-neutral-alpha-weak)',
-              border: '1px solid var(--neutral-alpha-strong)',
-              borderRadius: '4px',
-              marginBottom: '16px'
-            }}
-          >
-            <Icon name="search" size="xs" onBackground="neutral-medium" />
-            <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '11px' }}>
-              Ничего не найдено по запросу "{state.query}"
-            </Text>
-          </Row>
-        )}
-      </AccordionGroup>
+        </div>
+      </div>
 
       {/* Модальное окно с 3D вьювером */}
       {state.opened && (
