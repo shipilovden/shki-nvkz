@@ -18,9 +18,10 @@ import styles from './ModelAccordion.module.css';
 
 interface SketchfabAccordionProps {
   className?: string;
+  onModelSelect?: (model: any) => void;
 }
 
-export function SketchfabAccordion({ className }: SketchfabAccordionProps) {
+export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccordionProps) {
   const { addToast } = useToast();
   
   const [state, setState] = useState<SketchfabSearchState>({
@@ -211,70 +212,73 @@ export function SketchfabAccordion({ className }: SketchfabAccordionProps) {
               {state.items.length > 0 && (
                 <Column gap="l" align="start" style={{ width: '100%' }}>
                   <Text variant="body-strong-s" style={{ fontSize: '14px' }}>
-                    Результаты ({state.items.length})
+                    Результаты ({state.items.length}) - только AR/VR модели
                   </Text>
                   
-                  <Grid
-                    columns={{ base: 1, sm: 2, lg: 3, xl: 4 }}
-                    gap="m"
-                    style={{ width: '100%' }}
-                  >
-                    {state.items.map((model) => (
-                      <div
-                        key={model.uid}
-                        style={{
-                          cursor: 'pointer',
-                          borderRadius: '8px',
-                          overflow: 'hidden',
-                          border: '1px solid var(--neutral-alpha-strong)',
-                          backgroundColor: 'var(--color-neutral-alpha-weak)',
-                          transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-                        }}
-                        onClick={() => handleModelClick(model)}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = 'none';
-                        }}
-                      >
-                        {/* Превью */}
-                        <Media
-                          src={model.thumbnails.images[0]?.url || '/images/placeholder-3d.jpg'}
-                          alt={model.name}
-                          aspectRatio="16/9"
-                          style={{ width: '100%' }}
-                        />
-                        
-                        {/* Информация о модели */}
-                        <Column gap="s" padding="m">
-                          <Text variant="body-strong-s" style={{ fontSize: '13px' }}>
-                            {model.name}
-                          </Text>
-                          
-                          <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '11px' }}>
-                            {model.user.displayName}
-                          </Text>
-                          
-                          <Row gap="s" align="center" style={{ justifyContent: 'space-between' }}>
-                            <Row gap="xs" align="center">
-                              <Icon name="heart" size="xs" onBackground="neutral-medium" />
-                              <Text variant="body-default-xs" onBackground="neutral-medium" style={{ fontSize: '10px' }}>
-                                {model.likeCount}
-                              </Text>
-                            </Row>
-                            
-                            <Row gap="xs">
-                              <Badge variant="success" size="xs">GLTF</Badge>
-                              <Badge variant="info" size="xs">Download</Badge>
-                            </Row>
-                          </Row>
-                        </Column>
-                      </div>
-                    ))}
-                  </Grid>
+                  <div className={styles.modelsGrid}>
+                    {state.items.map((model) => {
+                      // Конвертируем Sketchfab модель в формат Model3D
+                      const convertedModel = {
+                        id: `sketchfab-${model.uid}`,
+                        title: model.name,
+                        description: model.description,
+                        src: `https://sketchfab.com/models/${model.uid}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0&ui_stop=0&ui_annotations=0&ui_help=0&ui_settings=0&ui_vr=1&ui_fullscreen=1&ui_ar=1`,
+                        thumbnail: model.thumbnails.images[0]?.url || '/images/placeholder-3d.jpg',
+                        category: 'Sketchfab',
+                        format: 'sketchfab',
+                        author: model.user.displayName,
+                        tags: model.tags?.map(tag => tag.slug) || ['sketchfab'],
+                        year: new Date(model.publishedAt).getFullYear(),
+                        isSketchfab: true,
+                        sketchfabId: model.uid,
+                        originalUrl: `https://sketchfab.com/models/${model.uid}`,
+                        arEnabled: model.viewerFeatures?.includes('ar') || false,
+                        vrEnabled: model.viewerFeatures?.includes('vr') || false,
+                        isUserModel: false,
+                        size: `${Math.round((model.formats?.[0]?.formatSize || 0) / 1024 / 1024 * 100) / 100} MB`
+                      };
+
+                      return (
+                        <div
+                          key={model.uid}
+                          className={styles.modelCard}
+                          onClick={() => {
+                            if (onModelSelect) {
+                              onModelSelect(convertedModel);
+                            } else {
+                              handleModelClick(model);
+                            }
+                          }}
+                        >
+                          {/* Мини-вьювер */}
+                          <div className={styles.modelThumbnail}>
+                            <model-viewer
+                              src={convertedModel.src}
+                              alt={model.name}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                backgroundColor: 'var(--color-neutral-alpha-weak)'
+                              }}
+                              camera-controls
+                              auto-rotate
+                              loading="lazy"
+                            />
+                          </div>
+
+                          {/* Информация о модели */}
+                          <div className={styles.modelInfo}>
+                            <div className={styles.modelTitle}>
+                              {model.name}
+                            </div>
+                            <div className={styles.modelAuthor}>
+                              {model.user.displayName} • {model.likeCount} ❤️
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
 
                   {/* Кнопка "Загрузить ещё" */}
                   {state.nextUrl && (

@@ -460,7 +460,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
           Поиск на Sketchfab
         </Text>
         
-        <SketchfabAccordion />
+        <SketchfabAccordion onModelSelect={handleModelSelect} />
       </Column>
     </Column>
   );

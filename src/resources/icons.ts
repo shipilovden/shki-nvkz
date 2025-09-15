@@ -18,6 +18,7 @@ import {
   HiOutlineCube,
   HiOutlineCog6Tooth,
   HiOutlineExclamationTriangle,
+  HiOutlineHeart,
 } from "react-icons/hi2";
 
 import {
@@ -103,6 +104,7 @@ export const iconLibrary: Record<string, IconType> = {
   warning: HiOutlineExclamationTriangle,
   moon: FaMoon,
   sun: FaSun,
+  heart: HiOutlineHeart,
 };
 
 export type IconLibrary = typeof iconLibrary;
