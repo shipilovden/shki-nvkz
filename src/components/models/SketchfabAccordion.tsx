@@ -56,10 +56,19 @@ export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccord
       
       const data = await response.json();
       
-      // Фильтруем только AR модели на клиентской стороне
-      const arModels = data.results.filter((model: any) => 
-        model.viewerFeatures && model.viewerFeatures.includes('ar')
-      );
+      console.log('API Response:', data);
+      console.log('Total models:', data.results?.length || 0);
+      
+      // Временно показываем все модели для отладки
+      const arModels = data.results.map((model: any) => {
+        console.log('Model:', model.name, 'viewerFeatures:', model.viewerFeatures);
+        return {
+          ...model,
+          hasAR: model.viewerFeatures && model.viewerFeatures.includes('ar')
+        };
+      });
+      
+      console.log('AR models after filter:', arModels.length);
       
       setState(prev => ({
         ...prev,
@@ -283,6 +292,11 @@ export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccord
                           <div className={styles.modelInfo}>
                             <div className={styles.modelTitle}>
                               {model.name}
+                              {model.hasAR && (
+                                <Badge variant="success" size="xs" style={{ marginLeft: '8px' }}>
+                                  AR
+                                </Badge>
+                              )}
                             </div>
                             <div className={styles.modelAuthor}>
                               {model.user.displayName} • {model.likeCount} ❤️
