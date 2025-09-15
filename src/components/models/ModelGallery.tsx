@@ -112,40 +112,98 @@ export function ModelGallery({ models }: ModelGalleryProps) {
       
       const modelId = urlMatch[1];
       
-      // Загружаем модель через API
-      const response = await fetch(`/api/sketchfab/search?q=${modelId}&count=1`);
+      // API токен Sketchfab
+      const API_TOKEN = 'ce8a7b48e37246239f4df5728b5272d0';
+
+      // Используем Sketchfab API для получения информации о модели
+      const response = await fetch(`https://api.sketchfab.com/v3/models/${modelId}`, {
+        headers: {
+          'Authorization': `Token ${API_TOKEN}`
+        }
+      });
+      
       if (!response.ok) {
-        throw new Error('Ошибка загрузки модели');
+        throw new Error(`Ошибка загрузки модели: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Sketchfab model data:', data);
+      
+      // Получаем прямую ссылку на GLB файл
+      let glbUrl = null;
+      
+      try {
+        const downloadResponse = await fetch(`https://api.sketchfab.com/v3/models/${modelId}/download`, {
+          headers: {
+            'Authorization': `Token ${API_TOKEN}`
+          }
+        });
+
+        console.log('Download response status:', downloadResponse.status);
+        
+        if (downloadResponse.ok) {
+          const downloadData = await downloadResponse.json();
+          console.log('Download data:', downloadData);
+          
+          // Ищем GLB файл в доступных форматах
+          let glbFile = null;
+          
+          if (downloadData.gltf?.urls?.glb) {
+            glbFile = downloadData.gltf.urls.glb;
+          } else if (downloadData.gltf?.urls?.['glb-draco']) {
+            glbFile = downloadData.gltf.urls['glb-draco'];
+          } else if (downloadData.glb?.url) {
+            glbFile = downloadData.glb.url;
+          }
+          
+          if (glbFile) {
+            glbUrl = glbFile.url;
+            console.log('Found GLB URL:', glbUrl);
+          }
+        }
+      } catch (downloadError) {
+        console.warn('Could not get download URL:', downloadError);
       }
       
-      const data = await response.json();
-      if (data.results && data.results.length > 0) {
-        const model = data.results[0];
-        const convertedModel: Model3D = {
-          id: `sketchfab-${model.uid}`,
-          title: model.name,
-          description: model.description,
-          src: `https://sketchfab.com/models/${model.uid}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0&ui_stop=0&ui_annotations=0&ui_help=0&ui_settings=0&ui_vr=1&ui_fullscreen=1&ui_ar=1`,
-          thumbnail: model.thumbnails.images[0]?.url || '/images/placeholder-3d.jpg',
-          category: 'Sketchfab',
-          format: 'sketchfab' as const,
-          author: model.user.displayName,
-          tags: model.tags?.map(tag => tag.slug) || ['sketchfab'],
-          year: new Date(model.publishedAt).getFullYear(),
-          isSketchfab: true,
-          sketchfabId: model.uid,
-          originalUrl: sketchfabUrl,
-          arEnabled: model.viewerFeatures?.includes('ar') || false,
-          vrEnabled: model.viewerFeatures?.includes('vr') || false,
-        };
-        
-        handleSketchfabModelLoad(convertedModel);
-        setSketchfabUrl("");
-      } else {
-        throw new Error('Модель не найдена');
-      }
+      // Создаем embed URL для iframe
+      const embedUrl = `https://sketchfab.com/models/${modelId}/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0&ui_stop=0&ui_annotations=0&ui_help=0&ui_settings=0&ui_vr=1&ui_fullscreen=1&ui_ar=1`;
+      
+      // Проверяем, поддерживает ли модель AR/VR
+      const supportsAR = data.viewerFeatures?.includes('ar') || false;
+      const supportsVR = data.viewerFeatures?.includes('vr') || false;
+      
+      console.log('Model AR support:', supportsAR);
+      console.log('Model VR support:', supportsVR);
+      console.log('Model viewer features:', data.viewerFeatures);
+      
+      const model: Model3D = {
+        id: `sketchfab-${modelId}`,
+        title: data.name || "Sketchfab Model",
+        description: data.description || "Модель из Sketchfab",
+        src: glbUrl || embedUrl,
+        thumbnail: data.thumbnails?.images?.[0]?.url || "/images/placeholder-3d.jpg",
+        category: "Sketchfab",
+        format: glbUrl ? "glb" : "sketchfab",
+        author: data.user?.displayName || "Sketchfab User",
+        tags: data.tags?.map((tag: any) => tag.slug) || ["sketchfab"],
+        year: new Date(data.publishedAt || Date.now()).getFullYear(),
+        isSketchfab: !glbUrl, // Если есть GLB, то это не iframe
+        sketchfabId: modelId,
+        originalUrl: sketchfabUrl,
+        arEnabled: !!glbUrl || supportsAR, // AR работает с GLB или если модель поддерживает AR
+        vrEnabled: !!glbUrl || supportsVR  // VR работает с GLB или если модель поддерживает VR
+      };
+      
+      console.log('Created model:', model);
+      console.log('AR enabled:', model.arEnabled);
+      console.log('VR enabled:', model.vrEnabled);
+      console.log('Is Sketchfab iframe:', model.isSketchfab);
+
+      handleSketchfabModelLoad(model);
+      setSketchfabUrl("");
+      
     } catch (error) {
-      console.error('Ошибка загрузки Sketchfab модели:', error);
+      console.error("Ошибка загрузки Sketchfab модели:", error);
       addToast({
         variant: "danger",
         message: error instanceof Error ? error.message : "Ошибка загрузки модели"
@@ -369,43 +427,67 @@ export function ModelGallery({ models }: ModelGalleryProps) {
           >
             {/* Левая часть - 3D Viewer и информация */}
             <Column gap="l" style={{ flex: 1, maxWidth: '800px', height: '100%' }} align="center">
-              {/* Кнопка загрузки AR моделей и Sketchfab загрузчик - над вьювером */}
-              <Column gap="s" style={{ width: '100%', justifyContent: 'flex-start' }}>
-                <Row gap="m" align="start" style={{ width: '100%', justifyContent: 'flex-start' }}>
-                  <Button
-                    variant="secondary"
-                    size="xs"
-                    onClick={() => setShowUploader(!showUploader)}
-                    style={{
-                      fontSize: '12px',
-                      padding: '6px 12px',
-                      height: 'auto',
-                      minHeight: '28px'
-                    }}
-                  >
-                    {showUploader ? "Скрыть" : "Загрузить!"}
-                  </Button>
-                </Row>
-                
-                
-                {/* Информация о AR для Sketchfab */}
-                <Row 
-                  gap="s" 
-                  align="center" 
-                  style={{ 
-                    padding: '6px 10px',
-                    backgroundColor: 'var(--color-info-alpha-weak)',
-                    border: '1px solid var(--color-info-alpha-strong)',
-                    borderRadius: '4px',
-                    marginTop: '4px'
+              {/* Горизонтальная панель управления */}
+              <Row gap="m" align="center" style={{ width: '100%', marginBottom: '16px' }}>
+                {/* Sketchfab инпут */}
+                <Input
+                  placeholder="Вставьте ссылку на модель Sketchfab..."
+                  value={sketchfabUrl}
+                  onChange={(e) => setSketchfabUrl(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleSketchfabLoad();
+                    }
                   }}
-                >
-                  <Icon name="info" size="xs" onBackground="info-medium" />
-                  <Text variant="body-default-xs" onBackground="info-medium">
-                    Sketchfab модели с API токеном поддерживают AR! Если AR недоступен, загрузите GLB/GLTF файл выше.
-                  </Text>
-                </Row>
-              </Column>
+                  style={{ flex: 1, minWidth: '200px' }}
+                  disabled={isSketchfabLoading}
+                />
+                
+                {/* Кнопка загрузки Sketchfab - только иконка */}
+                <Button
+                  variant="secondary"
+                  size="s"
+                  onClick={handleSketchfabLoad}
+                  disabled={isSketchfabLoading || !sketchfabUrl.trim()}
+                  style={{
+                    padding: '8px',
+                    minWidth: '40px',
+                    height: '40px'
+                  }}
+                  prefixIcon={isSketchfabLoading ? "gear" : "openLink"}
+                />
+                
+                {/* Разделитель */}
+                <div style={{
+                  width: '1px',
+                  height: '24px',
+                  backgroundColor: 'var(--color-neutral-alpha-strong)',
+                  margin: '0 8px'
+                }} />
+                
+                {/* Кнопка загрузки с устройства - только иконка */}
+                <Button
+                  variant="secondary"
+                  size="s"
+                  onClick={() => setShowUploader(!showUploader)}
+                  style={{
+                    padding: '8px',
+                    minWidth: '40px',
+                    height: '40px'
+                  }}
+                  prefixIcon="download"
+                />
+              </Row>
+
+              {/* AR Uploader */}
+              {showUploader && (
+                <div style={{ width: '100%', marginBottom: '16px' }}>
+                  <ARUploader 
+                    onModelUpload={handleARModelUpload} 
+                    ngrokUrl="" 
+                  />
+                </div>
+              )}
               
               {/* 3D Viewer */}
               <div style={{ flex: 1, width: '100%', minHeight: '500px' }}>
@@ -420,18 +502,8 @@ export function ModelGallery({ models }: ModelGalleryProps) {
 
             {/* Правая часть - боковая панель с моделями */}
             <Column gap="l" style={{ width: '300px', minWidth: '300px', height: '100%' }} align="start">
-              {/* AR Uploader - фиксированная высота */}
-              {showUploader && (
-                <div style={{ height: '80px', marginBottom: '16px' }}>
-                  <ARUploader 
-                    onModelUpload={handleARModelUpload} 
-                    ngrokUrl="" 
-                  />
-                </div>
-              )}
-
-              {/* Список всех моделей с миниатюрами - всегда на одном уровне */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: showUploader ? 'calc(100% - 96px)' : '100%' }}>
+              {/* Список всех моделей с миниатюрами */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <ModelSidebar
                   models={filteredModels}
                   selectedModel={selectedModel}
