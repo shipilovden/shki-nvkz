@@ -177,8 +177,8 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
               disabled={isLoading}
               style={{ 
                 width: '100%',
-                height: '24px',
-                fontSize: '10px',
+                height: '20px',
+                fontSize: '9px',
                 backgroundColor: 'transparent',
                 border: '1px solid var(--neutral-alpha-strong)',
                 borderRadius: '4px',
