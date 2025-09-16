@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Column, Row, Text, Button, Icon } from '@once-ui-system/core';
 import { Model3D } from '@/types/models.types';
+import styles from './ModelAccordion.module.css';
 
 interface UserModelsAccordionProps {
   userModels: Model3D[];
@@ -26,54 +27,26 @@ export function UserModelsAccordion({
   }
 
   return (
-    <Column gap="s" style={{ marginBottom: '16px' }}>
+    <div className={styles.accordion}>
       {/* Заголовок аккордеона */}
-      <Row
-        gap="s"
-        align="center"
-        style={{
-          padding: '8px 12px',
-          backgroundColor: 'var(--color-neutral-alpha-weak)',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          border: '1px solid var(--neutral-alpha-strong)',
-          transition: 'all 0.3s ease'
-        }}
+      <div 
+        className={styles.accordionHeader}
         onClick={() => setIsExpanded(!isExpanded)}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--color-neutral-alpha-medium)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--color-neutral-alpha-weak)';
-        }}
       >
-        <Icon 
-          name="user" 
-          size="s" 
-          onBackground="neutral-medium"
-          style={{ 
-            transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
-            transition: 'transform 0.3s ease'
-          }}
-        />
-        <Text variant="body-strong-s" style={{ color: 'var(--color-neutral-strong)' }}>
+        <Text variant="body-strong-xs" className={styles.accordionTitle} style={{ fontSize: '10px' }}>
           Загруженные модели ({userModels.length})
         </Text>
         <Icon 
           name="chevronDown" 
           size="s" 
-          onBackground="neutral-medium"
-          style={{ 
-            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.3s ease',
-            marginLeft: 'auto'
-          }}
+          className={`${styles.chevron} ${isExpanded ? styles.chevronExpanded : ''}`}
         />
-      </Row>
+      </div>
 
       {/* Содержимое аккордеона */}
-      {isExpanded && (
-        <Column gap="s" className="accordion-content" style={{ paddingLeft: '16px' }}>
+      <div className={`${styles.accordionContent} ${isExpanded ? styles.accordionContentExpanded : ''}`}>
+        <div style={{ padding: '12px' }}>
+          <Column gap="s">
           {userModels.map((model) => (
             <div
               key={model.id}
@@ -247,8 +220,9 @@ export function UserModelsAccordion({
               </Row>
             </div>
           ))}
-        </Column>
-      )}
-    </Column>
+          </Column>
+        </div>
+      </div>
+    </div>
   );
 }

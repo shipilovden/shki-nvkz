@@ -144,7 +144,7 @@ export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccord
           className={styles.accordionHeader}
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          <Text variant="body-strong-s" className={styles.accordionTitle}>
+          <Text variant="body-strong-xs" className={styles.accordionTitle} style={{ fontSize: '10px' }}>
             Поиск Sketchfab
           </Text>
           <Icon 
