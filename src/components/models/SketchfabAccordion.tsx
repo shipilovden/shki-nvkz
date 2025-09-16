@@ -161,21 +161,45 @@ export function SketchfabAccordion({ className, onModelSelect }: SketchfabAccord
               {/* Поиск */}
               <Column gap="m" align="start" style={{ width: '100%' }}>
                 <Row gap="s" style={{ width: '100%' }}>
-                  <Input
+                  <input
+                    type="text"
                     placeholder="Поиск моделей на Sketchfab..."
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    style={{ flex: 1 }}
+                    style={{ 
+                      flex: 1,
+                      height: '20px',
+                      fontSize: '10px',
+                      backgroundColor: 'transparent',
+                      border: '1px solid var(--neutral-alpha-strong)',
+                      borderRadius: '4px',
+                      color: 'var(--color-neutral-strong)',
+                      padding: '4px 8px',
+                      outline: 'none',
+                      fontFamily: 'inherit'
+                    }}
                   />
-                  <Button 
-                    variant="primary" 
-                    size="s"
+                  <button
                     onClick={handleSearch}
                     disabled={state.loading}
+                    style={{ 
+                      width: '20px', 
+                      height: '20px',
+                      backgroundColor: 'var(--color-primary-alpha-weak)',
+                      border: '1px solid var(--color-primary-alpha-strong)',
+                      borderRadius: '4px',
+                      color: 'var(--color-primary-strong)',
+                      cursor: state.loading ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '8px',
+                      fontFamily: 'inherit'
+                    }}
                   >
-                    {state.loading ? 'Поиск...' : 'Найти'}
-                  </Button>
+                    {state.loading ? '...' : '🔍'}
+                  </button>
                 </Row>
                 
                 <Text variant="body-default-xs" onBackground="neutral-weak" style={{ fontSize: '11px' }}>
