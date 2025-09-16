@@ -27,6 +27,16 @@ const DEFAULT_MODEL_SETTINGS = {
  */
 const AVAILABLE_MODELS = [
   {
+    id: "3",
+    title: "Робот",
+    description: "3D модель робота-андроида",
+    src: "https://modelviewer.dev/shared-assets/models/RobotExpressive.glb",
+    thumbnail: "/images/models/robot-thumb.svg",
+    category: "technical",
+    tags: ["робот", "техника", "андроид"],
+    size: "3.5 MB"
+  },
+  {
     id: "1",
     title: "Астронавт",
     description: "3D модель астронавта в скафандре",
@@ -45,16 +55,6 @@ const AVAILABLE_MODELS = [
     category: "animals",
     tags: ["животные", "лошадь", "природа"],
     size: "2.1 MB"
-  },
-  {
-    id: "3",
-    title: "Робот",
-    description: "3D модель робота-андроида",
-    src: "https://modelviewer.dev/shared-assets/models/RobotExpressive.glb",
-    thumbnail: "/images/models/robot-thumb.svg",
-    category: "technical",
-    tags: ["робот", "техника", "андроид"],
-    size: "3.5 MB"
   },
   {
     id: "4",
