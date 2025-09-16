@@ -23,12 +23,8 @@ interface ModelSidebarProps {
 }
 
 export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeClick, onDeleteModel, onSketchfabModelSelect, onSketchfabModelLoad, onDeviceUpload, onModelUpload, searchQuery, onSearchChange }: ModelSidebarProps) {
-  // Разделяем модели на обычные и пользовательские
-  const { regularModels, userModels } = useMemo(() => {
-    const regular = models.filter(model => !(model as any).isUserModel);
-    const user = models.filter(model => (model as any).isUserModel);
-    return { regularModels: regular, userModels: user };
-  }, [models]);
+  // Показываем все модели в одном аккордеоне
+  const allModels = models;
 
   if (models.length === 0) {
     return (

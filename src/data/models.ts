@@ -65,6 +65,76 @@ const AVAILABLE_MODELS = [
     category: "characters",
     tags: ["космос", "астронавт", "скафандр"],
     size: "1.0 MB"
+  },
+  {
+    id: "5",
+    title: "Анимированный кот",
+    description: "3D модель анимированного кота",
+    src: "/models/animated_cat.glb",
+    thumbnail: "/images/models/cat-thumb.svg",
+    category: "animals",
+    tags: ["животные", "кот", "анимация"],
+    size: "2.5 MB"
+  },
+  {
+    id: "6",
+    title: "Денис",
+    description: "3D модель персонажа Денис",
+    src: "/models/Denis.glb",
+    thumbnail: "/images/models/astronaut-thumb.svg",
+    category: "characters",
+    tags: ["персонаж", "человек", "Денис"],
+    size: "3.0 MB"
+  },
+  {
+    id: "7",
+    title: "Натараджа Шива",
+    description: "3D модель индуистского божества",
+    src: "/models/nataraja_shiva.glb",
+    thumbnail: "/images/models/astronaut2-thumb.svg",
+    category: "characters",
+    tags: ["религия", "индуизм", "божество"],
+    size: "4.2 MB"
+  },
+  {
+    id: "8",
+    title: "Цифра 2",
+    description: "3D модель цифры 2",
+    src: "/models/number_2.glb",
+    thumbnail: "/images/models/table-thumb.svg",
+    category: "technical",
+    tags: ["цифры", "математика", "образование"],
+    size: "0.8 MB"
+  },
+  {
+    id: "9",
+    title: "Пицца",
+    description: "3D модель пиццы",
+    src: "/models/pizza.glb",
+    thumbnail: "/images/models/table-thumb.svg",
+    category: "objects",
+    tags: ["еда", "пицца", "кулинария"],
+    size: "1.5 MB"
+  },
+  {
+    id: "10",
+    title: "Портал",
+    description: "3D модель портала",
+    src: "/models/portal.glb",
+    thumbnail: "/images/models/blue-house-pool-thumb.svg",
+    category: "technical",
+    tags: ["портал", "фантастика", "технологии"],
+    size: "2.8 MB"
+  },
+  {
+    id: "11",
+    title: "Девушка в купальнике",
+    description: "3D модель девушки в купальнике",
+    src: "/models/swimsuit_girl.glb",
+    thumbnail: "/images/models/astronaut-thumb.svg",
+    category: "characters",
+    tags: ["персонаж", "девушка", "пляж"],
+    size: "3.5 MB"
   }
 ];
 
