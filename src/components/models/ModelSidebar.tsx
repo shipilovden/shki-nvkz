@@ -17,9 +17,10 @@ interface ModelSidebarProps {
   onSketchfabModelSelect?: (model: Model3D) => void;
   onSketchfabModelLoad?: (model: Model3D) => void;
   onDeviceUpload?: () => void;
+  onModelUpload?: (model: Model3D) => void;
 }
 
-export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeClick, onDeleteModel, onSketchfabModelSelect, onSketchfabModelLoad, onDeviceUpload }: ModelSidebarProps) {
+export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeClick, onDeleteModel, onSketchfabModelSelect, onSketchfabModelLoad, onDeviceUpload, onModelUpload }: ModelSidebarProps) {
   // Разделяем модели на обычные и пользовательские
   const { regularModels, userModels } = useMemo(() => {
     const regular = models.filter(model => !(model as any).isUserModel);
@@ -56,6 +57,7 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
         <SketchfabLoaderAccordion 
           onModelLoad={onSketchfabModelLoad} 
           onDeviceUpload={onDeviceUpload}
+          onModelUpload={onModelUpload}
         />
       )}
 

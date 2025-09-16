@@ -3,18 +3,21 @@
 import React, { useState } from 'react';
 import { Column, Row, Text, Icon, Input, Button } from '@once-ui-system/core';
 import { Model3D } from '@/types/models.types';
+import { ARUploader } from '../ar/ARUploader';
 import styles from './ModelAccordion.module.css';
 
 interface SketchfabLoaderAccordionProps {
   onModelLoad: (model: Model3D) => void;
   onDeviceUpload?: () => void;
+  onModelUpload?: (model: Model3D) => void;
 }
 
-export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: SketchfabLoaderAccordionProps) {
+export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload, onModelUpload }: SketchfabLoaderAccordionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [sketchfabUrl, setSketchfabUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showUploader, setShowUploader] = useState(false);
 
   // Извлекаем ID модели из URL Sketchfab
   const extractSketchfabId = (url: string): string | null => {
@@ -224,23 +227,31 @@ export function SketchfabLoaderAccordion({ onModelLoad, onDeviceUpload }: Sketch
                 prefixIcon={isLoading ? "gear" : "openLink"}
               />
               
-              {onDeviceUpload && (
-                <Button
-                  variant="secondary"
-                  size="xs"
-                  onClick={onDeviceUpload}
-                  style={{ 
-                    width: '20px', 
-                    height: '20px', 
-                    padding: '0',
-                    minWidth: '20px',
-                    borderRadius: '3px',
-                    fontSize: '10px'
-                  }}
-                  prefixIcon="download"
-                />
-              )}
+              <Button
+                variant="secondary"
+                size="xs"
+                onClick={() => setShowUploader(!showUploader)}
+                style={{ 
+                  width: '20px', 
+                  height: '20px', 
+                  padding: '0',
+                  minWidth: '20px',
+                  borderRadius: '3px',
+                  fontSize: '10px'
+                }}
+                prefixIcon="download"
+              />
             </Row>
+            
+            {/* AR Uploader - появляется внутри аккордеона */}
+            {showUploader && (
+              <div style={{ marginTop: '8px' }}>
+                <ARUploader 
+                  onModelUpload={onModelUpload || (() => {})} 
+                  ngrokUrl="" 
+                />
+              </div>
+            )}
             
             {/* Сообщение об ошибке */}
             {error && (

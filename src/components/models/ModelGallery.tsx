@@ -314,16 +314,6 @@ export function ModelGallery({ models }: ModelGalleryProps) {
             {/* Левая часть - 3D Viewer и информация */}
             <Column gap="l" style={{ flex: 1, maxWidth: '800px', height: '100%' }} align="center">
               
-              {/* AR Uploader */}
-              {showUploader && (
-                <div style={{ width: '100%', marginBottom: '16px' }}>
-                  <ARUploader 
-                    onModelUpload={handleARModelUpload} 
-                    ngrokUrl="" 
-                  />
-                </div>
-              )}
-              
               {/* 3D Viewer */}
               <div style={{ flex: 1, width: '100%', minHeight: '500px' }}>
                 <ModelViewer
@@ -348,6 +338,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                   onSketchfabModelSelect={handleSketchfabModelSelect}
                   onSketchfabModelLoad={handleSketchfabModelLoad}
                   onDeviceUpload={() => setShowUploader(!showUploader)}
+                  onModelUpload={handleARModelUpload}
                 />
               </div>
             </Column>
@@ -364,16 +355,6 @@ export function ModelGallery({ models }: ModelGalleryProps) {
             }}
             className={styles.mobileLayout}
           >
-            {/* AR Uploader */}
-            {showUploader && (
-              <div style={{ width: '100%', marginBottom: '16px' }}>
-                <ARUploader 
-                  onModelUpload={handleARModelUpload} 
-                  ngrokUrl="" 
-                />
-              </div>
-            )}
-
             {/* 3D Viewer - адаптивный размер */}
             <div style={{ width: '100%', minHeight: '400px' }}>
               <ModelViewer
@@ -395,6 +376,7 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                 onSketchfabModelSelect={handleSketchfabModelSelect}
                 onSketchfabModelLoad={handleSketchfabModelLoad}
                 onDeviceUpload={() => setShowUploader(!showUploader)}
+                onModelUpload={handleARModelUpload}
               />
             </div>
           </div>
