@@ -43,7 +43,7 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
 
   return (
     <Column 
-      gap="s" 
+      gap="xs" 
       style={{ 
         width: '100%',
         maxHeight: '500px', // Увеличена высота для десктопа
