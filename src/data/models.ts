@@ -145,6 +145,36 @@ const AVAILABLE_MODELS = [
     category: "animals",
     tags: ["животные", "носорог", "природа", "африка"],
     size: "4.8 MB"
+  },
+  {
+    id: "13",
+    title: "Торт Maison Alyzee",
+    description: "3D модель торта Maison Alyzee",
+    src: "/models/cake_maison_alyzee.glb",
+    thumbnail: "/images/models/table-thumb.svg",
+    category: "objects",
+    tags: ["еда", "торт", "десерт", "кулинария"],
+    size: "2.1 MB"
+  },
+  {
+    id: "14",
+    title: "Кусок торта",
+    description: "3D модель куска торта",
+    src: "/models/piece_of_cake.glb",
+    thumbnail: "/images/models/table-thumb.svg",
+    category: "objects",
+    tags: ["еда", "торт", "десерт", "кулинария"],
+    size: "1.8 MB"
+  },
+  {
+    id: "15",
+    title: "Кусок фруктового торта",
+    description: "3D модель куска фруктового торта",
+    src: "/models/fruit_cake_slice.glb",
+    thumbnail: "/images/models/table-thumb.svg",
+    category: "objects",
+    tags: ["еда", "торт", "фрукты", "десерт"],
+    size: "2.3 MB"
   }
 ];
 
