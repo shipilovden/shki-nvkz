@@ -135,6 +135,16 @@ const AVAILABLE_MODELS = [
     category: "characters",
     tags: ["персонаж", "девушка", "пляж"],
     size: "3.5 MB"
+  },
+  {
+    id: "12",
+    title: "Южный белый носорог",
+    description: "3D модель южного белого носорога",
+    src: "/models/southern_white_rhino.glb",
+    thumbnail: "/images/models/horse-thumb.svg",
+    category: "animals",
+    tags: ["животные", "носорог", "природа", "африка"],
+    size: "4.8 MB"
   }
 ];
 
