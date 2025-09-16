@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { bindCameraUI, startCamera, stopCamera } from "./camera-block";
 
 const AR_CONFIG = {
   TARGET: { lat: 53.759072, lon: 87.122719, alt: 280.0, activationRadiusM: 50 },
@@ -59,15 +60,10 @@ export function ARQuest(): JSX.Element {
     cameraRef.current = camera;
     rendererRef.current = renderer;
 
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+    // Привязка UI кнопок камеры и запуск задней камеры как видео-фона
+    bindCameraUI(scene, renderer);
+    const stream = await startCamera(scene, "environment");
     videoStreamRef.current = stream;
-    const video = document.createElement("video");
-    video.srcObject = stream;
-    await video.play();
-    const texture = new THREE.VideoTexture(video);
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    scene.background = texture;
 
     scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.0));
     const dir = new THREE.DirectionalLight(0xffffff, 0.6);
@@ -169,7 +165,7 @@ export function ARQuest(): JSX.Element {
   useEffect(() => {
     return () => {
       try { if (watchIdRef.current != null) navigator.geolocation.clearWatch(watchIdRef.current); } catch {}
-      try { videoStreamRef.current?.getTracks().forEach((t) => t.stop()); } catch {}
+      try { stopCamera(); } catch {}
       try { rendererRef.current?.dispose(); } catch {}
     };
   }, []);
@@ -184,6 +180,7 @@ export function ARQuest(): JSX.Element {
         <button id="btn-photo" onClick={capturePhoto}>📸 Фото</button>
         <button id="btn-video" onClick={startVideo}>🎥 Видео</button>
         <button id="btn-stop" onClick={stopVideo}>⏹ Стоп</button>
+        <button id="btn-switch">🔄 Камера</button>
       </div>
 
       <div id="status" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 9, padding: "6px 10px", borderRadius: 8, background: "rgba(0,0,0,.5)", color: "#fff", fontSize: 12, display: status ? "block" : "none" }}>{status}</div>
