@@ -5,8 +5,7 @@ import {
 } from "@once-ui-system/core";
 import { baseURL, threeD, person } from "@/resources";
 import { ModelGallery } from "@/components/models/ModelGallery";
-import Script from "next/script";
-import dynamic from "next/dynamic";
+import ARQuestSection from "@/components/ar/ARQuestSection";
 import { models3D } from "@/data/models";
 import { Metadata } from "next";
 
@@ -21,10 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function ThreeDPage() {
-  const ARQuest = dynamic(() => import("@/components/ar/ARQuest"), { ssr: false });
   return (
     <Column maxWidth="l" paddingTop="24" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }} align="center">
-      <Script src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_API_KEY}&libraries=geometry`} strategy="beforeInteractive" />
       <Schema
         as="webPage"
         baseURL={baseURL}
@@ -45,7 +42,7 @@ export default function ThreeDPage() {
       />
 
       {/* AR Quest (GPS fallback) */}
-      <ARQuest />
+      <ARQuestSection />
     </Column>
   );
 }
