@@ -18,9 +18,11 @@ interface ModelSidebarProps {
   onSketchfabModelLoad?: (model: Model3D) => void;
   onDeviceUpload?: () => void;
   onModelUpload?: (model: Model3D) => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
-export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeClick, onDeleteModel, onSketchfabModelSelect, onSketchfabModelLoad, onDeviceUpload, onModelUpload }: ModelSidebarProps) {
+export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeClick, onDeleteModel, onSketchfabModelSelect, onSketchfabModelLoad, onDeviceUpload, onModelUpload, searchQuery, onSearchChange }: ModelSidebarProps) {
   // Разделяем модели на обычные и пользовательские
   const { regularModels, userModels } = useMemo(() => {
     const regular = models.filter(model => !(model as any).isUserModel);
@@ -80,6 +82,8 @@ export function ModelSidebar({ models, selectedModel, onModelSelect, onQRCodeCli
           onModelSelect={onModelSelect}
           onQRCodeClick={onQRCodeClick}
           onDeleteModel={onDeleteModel}
+          searchQuery={searchQuery}
+          onSearchChange={onSearchChange}
         />
       )}
 

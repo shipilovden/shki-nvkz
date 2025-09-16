@@ -267,22 +267,6 @@ export function ModelGallery({ models }: ModelGalleryProps) {
         </Text>
       </Column>
 
-      {/* Поиск - отцентрирован */}
-      <Column gap="m" style={{ width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }} align="center">
-        <Row gap="m" vertical="center" align="center" style={{ width: '100%', justifyContent: 'center' }}>
-          <Input
-            placeholder="Поиск по названию, описанию, тегам..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ flex: 1, maxWidth: '500px' }}
-          />
-          {searchQuery && (
-            <Button variant="secondary" size="s" onClick={clearSearch}>
-              Очистить
-            </Button>
-          )}
-        </Row>
-      </Column>
 
       {/* Основной контент - адаптивный макет */}
       {(() => {
@@ -339,6 +323,8 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                   onSketchfabModelLoad={handleSketchfabModelLoad}
                   onDeviceUpload={() => setShowUploader(!showUploader)}
                   onModelUpload={handleARModelUpload}
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
                 />
               </div>
             </Column>
@@ -377,6 +363,8 @@ export function ModelGallery({ models }: ModelGalleryProps) {
                 onSketchfabModelLoad={handleSketchfabModelLoad}
                 onDeviceUpload={() => setShowUploader(!showUploader)}
                 onModelUpload={handleARModelUpload}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
               />
             </div>
           </div>

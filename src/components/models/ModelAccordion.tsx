@@ -11,6 +11,8 @@ interface ModelAccordionProps {
   onModelSelect: (model: Model3D) => void;
   onQRCodeClick?: (model: Model3D) => void;
   onDeleteModel?: (model: Model3D) => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 export function ModelAccordion({
@@ -18,7 +20,9 @@ export function ModelAccordion({
   selectedModel,
   onModelSelect,
   onQRCodeClick,
-  onDeleteModel
+  onDeleteModel,
+  searchQuery,
+  onSearchChange
 }: ModelAccordionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -45,6 +49,29 @@ export function ModelAccordion({
 
       {/* Содержимое аккордеона */}
       <div className={`${styles.accordionContent} ${isExpanded ? styles.accordionContentExpanded : ''} accordion-content`}>
+        {/* Поиск внутри аккордеона */}
+        {onSearchChange && (
+          <div style={{ padding: '12px 12px 0 12px' }}>
+            <input
+              type="text"
+              placeholder="Поиск по названию, описанию, тегам..."
+              value={searchQuery || ''}
+              onChange={(e) => onSearchChange(e.target.value)}
+              style={{ 
+                width: '100%',
+                height: '20px',
+                fontSize: '10px',
+                backgroundColor: 'transparent',
+                border: '1px solid var(--neutral-alpha-strong)',
+                borderRadius: '4px',
+                color: 'var(--color-neutral-strong)',
+                padding: '4px 8px',
+                outline: 'none',
+                fontFamily: 'inherit'
+              }}
+            />
+          </div>
+        )}
         <div className={styles.modelsGrid}>
           {models.map((model) => (
             <div
