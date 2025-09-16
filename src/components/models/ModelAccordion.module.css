@@ -1,5 +1,6 @@
 .accordion {
   width: 100%;
+  min-width: 280px; /* Фиксированная минимальная ширина для всех аккордеонов */
   border: 1px solid var(--neutral-alpha-strong);
   border-radius: 8px;
   background-color: var(--color-neutral-alpha-strong);
