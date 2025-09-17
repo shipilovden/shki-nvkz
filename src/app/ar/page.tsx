@@ -41,9 +41,6 @@ export default function ARPage() {
         <Heading variant="display-strong-xl" horizontal="center">
           🚀 AR Квест
         </Heading>
-        <Text variant="body-default-l" onBackground="neutral-weak" horizontal="center" style={{ maxWidth: '600px' }}>
-          Интерактивный квест с дополненной реальностью. Найдите 3D модели в реальном мире с помощью GPS навигации и камеры телефона.
-        </Text>
       </Column>
 
       {/* AR Quest компонент */}
