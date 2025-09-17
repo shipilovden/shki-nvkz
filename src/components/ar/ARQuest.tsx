@@ -288,6 +288,11 @@ export function ARQuest(): React.JSX.Element {
       
       // Тестовый маркер удалён
       
+      // Обновляем мировые матрицы перед проекцией в 2D
+      if (sceneRef.current) {
+        sceneRef.current.updateMatrixWorld(true);
+      }
+
       AR_CONFIG.TARGETS.forEach(target => {
         const marker = markersRef.current[target.id];
         if (marker) {
