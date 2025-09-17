@@ -107,6 +107,21 @@ export function ARQuest(): React.JSX.Element {
       model.position.set(dx, dy, dz);
       model.rotation.y = THREE.MathUtils.degToRad(target.model.headingDeg);
       
+      // ВСЕГДА вычисляем азимут для компаса (независимо от расстояния)
+      const dLon = (target.lon - userLon) * Math.PI / 180;
+      const lat1 = userLat * Math.PI / 180;
+      const lat2 = target.lat * Math.PI / 180;
+      
+      const y = Math.sin(dLon) * Math.cos(lat2);
+      const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+      
+      let bearingRad = Math.atan2(y, x);
+      let bearingDeg = (bearingRad * 180 / Math.PI + 360) % 360;
+      
+      console.log(`🧭 Compass ${target.name}: bearing=${bearingDeg.toFixed(1)}°, distance=${distance.toFixed(1)}m`);
+      
+      if (!closest || distance < closest.distance) closest = { id: target.id, angle: bearingDeg, distance };
+
       // Обновляем позицию красного маркера над моделью
       if (marker) {
         // Маркер появляется только если пользователь близко к объекту (менее 50 метров)
@@ -122,23 +137,6 @@ export function ARQuest(): React.JSX.Element {
           console.log(`🔴 Marker ${target.name} positioned above model: (${dx.toFixed(1)}, ${markerY.toFixed(1)}, ${dz.toFixed(1)})`);
           console.log(`🔴 GPS coordinates: ${target.lat}, ${target.lon}, ${target.alt}m`);
           console.log(`🔴 User GPS: ${userLat}, ${userLon}, ${userAlt}m`);
-          // вычисляем азимут для компаса (правильная формула)
-          const dLon = (target.lon - userLon) * Math.PI / 180;
-          const lat1 = userLat * Math.PI / 180;
-          const lat2 = target.lat * Math.PI / 180;
-          
-          const y = Math.sin(dLon) * Math.cos(lat2);
-          const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-          
-          let bearingRad = Math.atan2(y, x);
-          let bearingDeg = (bearingRad * 180 / Math.PI + 360) % 360;
-          
-          // Корректируем для компаса (0° = север, 90° = восток)
-          bearingDeg = (bearingDeg + 360) % 360;
-          
-          console.log(`🧭 Compass ${target.name}: bearing=${bearingDeg.toFixed(1)}°, distance=${distance.toFixed(1)}m`);
-          
-          if (!closest || distance < closest.distance) closest = { id: target.id, angle: bearingDeg, distance };
         } else {
           // Скрываем маркер если далеко
           marker.visible = false;
@@ -340,6 +338,9 @@ export function ARQuest(): React.JSX.Element {
             
             // Используем позицию маркера напрямую (он уже правильно позиционирован в updateModelPositionGPS)
             if (marker && marker.visible && markersVisibleRef.current) {
+              // Обновляем мировые матрицы перед получением позиции
+              scene.updateMatrixWorld(true);
+              
               const worldPosition = new THREE.Vector3();
               marker.getWorldPosition(worldPosition);
               
@@ -354,17 +355,18 @@ export function ARQuest(): React.JSX.Element {
                   const x = (screenPosition.x * 0.5 + 0.5) * rect.width;
                   const y = (-screenPosition.y * 0.5 + 0.5) * rect.height;
                   
-                  // Проверяем, что точка в пределах экрана
-                  if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
-                    dot.style.left = `${x}px`;
-                    dot.style.top = `${y}px`;
-                    dot.style.display = 'block';
-                    // пульсация (CSS-анимация для стабильности)
-                    dot.style.animation = 'apulse 1s infinite ease-in-out';
-                    dot.style.width = '16px'; 
-                    dot.style.height = '16px';
-                  } else {
-                    dot.style.display = 'none';
+                  // Показываем точку даже если она за пределами экрана (для отладки)
+                  dot.style.left = `${x}px`;
+                  dot.style.top = `${y}px`;
+                  dot.style.display = 'block';
+                  // пульсация (CSS-анимация для стабильности)
+                  dot.style.animation = 'apulse 1s infinite ease-in-out';
+                  dot.style.width = '16px'; 
+                  dot.style.height = '16px';
+                  
+                  // Логируем позицию для отладки
+                  if (Math.floor(time * 10) % 10 === 0) { // каждые 10 кадров
+                    console.log(`🔴 Overlay ${target.name}: screen(${x.toFixed(1)}, ${y.toFixed(1)}), world(${worldPosition.x.toFixed(1)}, ${worldPosition.y.toFixed(1)}, ${worldPosition.z.toFixed(1)})`);
                   }
                 }
               } else {
@@ -472,8 +474,8 @@ export function ARQuest(): React.JSX.Element {
         },
         { 
           enableHighAccuracy: true, 
-          maximumAge: 1000, // Обновляем каждую секунду
-          timeout: 10000 
+          maximumAge: 500, // Обновляем каждые 500мс
+          timeout: 5000 
         }
       );
     } catch (e) {
