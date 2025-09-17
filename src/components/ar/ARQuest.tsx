@@ -239,6 +239,9 @@ export function ARQuest(): React.JSX.Element {
           updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt);
         }
         
+        // Принудительно обновляем компас для 2D точки
+        console.log(`🧭 Device orientation changed: α=${e.alpha?.toFixed(1)}°`);
+        
         // Преобразуем в кватернион камеры
         const euler = new THREE.Euler(beta, alpha, -gamma, "YXZ");
         camera.quaternion.setFromEuler(euler);
@@ -572,32 +575,17 @@ export function ARQuest(): React.JSX.Element {
             const newLon = p.coords.longitude;
             const newAlt = p.coords.altitude ?? 0;
             
-            // Проверяем, действительно ли координаты изменились
-            const prevPos = userPosRef.current;
-            const latChanged = Math.abs(newLat - prevPos.lat) > 0.000001; // ~0.1м
-            const lonChanged = Math.abs(newLon - prevPos.lon) > 0.000001; // ~0.1м
-            const altChanged = Math.abs(newAlt - prevPos.alt) > 0.5; // 0.5м
+            // ВСЕГДА обновляем координаты без проверки изменений
+            console.log("🔄 GPS Update received:", {
+              lat: newLat.toFixed(6),
+              lon: newLon.toFixed(6),
+              alt: newAlt.toFixed(1),
+              accuracy: p.coords.accuracy?.toFixed(1) + "m"
+            });
             
-            if (latChanged || lonChanged || altChanged) {
-              console.log("🔄 GPS Update received:", {
-                lat: newLat.toFixed(6),
-                lon: newLon.toFixed(6),
-                alt: newAlt.toFixed(1),
-                accuracy: p.coords.accuracy?.toFixed(1) + "m",
-                changes: { lat: latChanged, lon: lonChanged, alt: altChanged }
-              });
-              
-              userPosRef.current = { lat: newLat, lon: newLon, alt: newAlt };
-              updateModelPositionGPS(newLat, newLon, newAlt);
-              setStatus(""); // очищаем статус при первом валидном апдейте
-            } else {
-              console.log("🔄 GPS Update received but no significant change:", {
-                lat: newLat.toFixed(6),
-                lon: newLon.toFixed(6),
-                alt: newAlt.toFixed(1),
-                accuracy: p.coords.accuracy?.toFixed(1) + "m"
-              });
-            }
+            userPosRef.current = { lat: newLat, lon: newLon, alt: newAlt };
+            updateModelPositionGPS(newLat, newLon, newAlt);
+            setStatus(""); // очищаем статус при первом валидном апдейте
           },
           (err) => {
             console.error("❌ GPS Error:", err);
@@ -605,10 +593,22 @@ export function ARQuest(): React.JSX.Element {
           },
           { 
             enableHighAccuracy: true, 
-            maximumAge: 100, // Обновляем каждые 100мс
-            timeout: 5000 
+            maximumAge: 0, // НЕ кэшируем, всегда свежие данные
+            timeout: 3000 
           }
         );
+      } else {
+        // В debug режиме тоже обновляем каждую секунду
+        const debugInterval = setInterval(() => {
+          if (userPosRef.current.lat !== 0) {
+            updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt);
+          }
+        }, 1000);
+        
+        // Очищаем интервал при остановке
+        const originalStopQuest = stopQuest;
+        // Сохраняем интервал для очистки
+        (window as any).debugInterval = debugInterval;
       }
   }, [startAR, started, updateModelPositionGPS, useDebugCoords]);
 
@@ -821,6 +821,25 @@ export function ARQuest(): React.JSX.Element {
           }}
         >
           🧪 Debug GPS
+        </button>
+        <button 
+          onClick={() => {
+            if (userPosRef.current.lat !== 0) {
+              updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt);
+              console.log("🔄 Manual GPS update triggered");
+            }
+          }} 
+          style={{ 
+            padding: "6px 8px", 
+            background: "rgba(0,255,0,0.7)", 
+            color: "white", 
+            border: "none", 
+            borderRadius: "4px", 
+            fontSize: "10px",
+            whiteSpace: "nowrap"
+          }}
+        >
+          🔄 Update
         </button>
         </div>
 
