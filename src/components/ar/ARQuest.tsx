@@ -55,6 +55,8 @@ export function ARQuest(): React.JSX.Element {
   const [objectInfo, setObjectInfo] = useState<{[key: string]: {distance: number, inRange: boolean, coordinates: {lat: number, lon: number, alt: number}}}>({});
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
+  const [showModelsInfo, setShowModelsInfo] = useState(false);
+  const [showSystemInfo, setShowSystemInfo] = useState(false);
   const [compassAngle, setCompassAngle] = useState<number | null>(null);
   const useDirectionalOverlayRef = useRef(true);
   const [useDebugCoords, setUseDebugCoords] = useState(false);
@@ -813,8 +815,8 @@ export function ARQuest(): React.JSX.Element {
             <button onClick={toggleFullscreen} style={{ padding: "4px 6px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>📱 Экран</button>
             <button onClick={() => setUseDebugCoords(!useDebugCoords)} style={{ padding: "4px 6px", background: useDebugCoords ? "rgba(255,165,0,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🧪 Debug GPS</button>
             <button onClick={() => { if (userPosRef.current.lat !== 0) { updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt); console.log("🔄 Manual GPS update triggered"); } }} style={{ padding: "4px 6px", background: "rgba(0,255,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🔄 Update</button>
-            <button onClick={() => { console.log("📍 Current GPS:", userPosRef.current); console.log("🧭 Compass angle:", compassAngle); console.log("📷 Camera:", extendedDebug.cameraInfo); }} style={{ padding: "4px 6px", background: "rgba(0,100,255,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>📊 Info</button>
-            <button onClick={() => { const shiva = AR_CONFIG.TARGETS.find(t => t.id === 'shiva'); if (shiva) { console.log("🎯 Shiva position:", shiva); console.log("🎯 Shiva model:", modelsRef.current['shiva']); } }} style={{ padding: "4px 6px", background: "rgba(255,0,255,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🎯 Shiva</button>
+            <button onClick={() => setShowSystemInfo(!showSystemInfo)} style={{ padding: "4px 6px", background: showSystemInfo ? "rgba(0,100,255,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>📊 Info</button>
+            <button onClick={() => setShowModelsInfo(!showModelsInfo)} style={{ padding: "4px 6px", background: showModelsInfo ? "rgba(255,0,255,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>📦 Модели</button>
           </div>
         </div>
 
@@ -1234,6 +1236,216 @@ export function ARQuest(): React.JSX.Element {
               {info}
             </div>
           ))}
+          </div>
+        </div>
+      )}
+
+      {/* Окно информации о моделях */}
+      {showModelsInfo && (
+        <div style={{ 
+          position: fullscreenMode ? "fixed" : "absolute", 
+          top: 120, 
+          left: "10px", 
+          right: "10px",
+          zIndex: fullscreenMode ? 10000 : 9, 
+          padding: "8px 12px", 
+          borderRadius: 8, 
+          background: "rgba(0,0,0,0.9)", 
+          color: "#fff", 
+          fontSize: 9,
+          maxHeight: "400px",
+          overflowY: "auto"
+        }}>
+          <div style={{ fontWeight: "bold", marginBottom: "6px", color: "#ff00ff" }}>
+            📦 Информация о моделях:
+          </div>
+          
+          {AR_CONFIG.TARGETS.map(target => {
+            const model = modelsRef.current[target.id];
+            const marker = markersRef.current[target.id];
+            const info = objectInfo[target.id];
+            const loaded = extendedDebug.modelsLoaded[target.id];
+            
+            return (
+              <div key={target.id} style={{ marginBottom: "8px", padding: "6px", background: "rgba(255,0,255,0.1)", borderRadius: "4px" }}>
+                <div style={{ fontWeight: "bold", color: "#ff00ff", marginBottom: "4px" }}>
+                  🎯 {target.name} ({target.id})
+                </div>
+                
+                <div style={{ fontSize: "8px", color: "#cccccc" }}>
+                  <div style={{ marginBottom: "2px" }}>
+                    <strong>📁 Файл:</strong> {target.model.url}
+                  </div>
+                  <div style={{ marginBottom: "2px" }}>
+                    <strong>📏 Масштаб:</strong> {target.model.scale}x
+                  </div>
+                  <div style={{ marginBottom: "2px" }}>
+                    <strong>📍 GPS координаты:</strong> {target.lat.toFixed(6)}, {target.lon.toFixed(6)}, {target.alt.toFixed(1)}м
+                  </div>
+                  <div style={{ marginBottom: "2px" }}>
+                    <strong>🎯 Радиус активации:</strong> {target.activationRadiusM}м
+                  </div>
+                  <div style={{ marginBottom: "2px" }}>
+                    <strong>📐 Поворот:</strong> {target.model.headingDeg}°
+                  </div>
+                  <div style={{ marginBottom: "2px" }}>
+                    <strong>⬆️ Смещение по Y:</strong> {target.model.yOffset}м
+                  </div>
+                  
+                  <div style={{ marginTop: "4px", padding: "4px", background: "rgba(0,0,0,0.3)", borderRadius: "3px" }}>
+                    <div style={{ fontWeight: "bold", color: loaded ? "#00ff00" : "#ff6666", marginBottom: "2px" }}>
+                      📦 Статус загрузки: {loaded ? "✅ Загружена" : "❌ Не загружена"}
+                    </div>
+                    
+                    {model && (
+                      <div>
+                        <div style={{ marginBottom: "2px" }}>
+                          <strong>📍 3D Позиция:</strong> ({model.position.x.toFixed(1)}, {model.position.y.toFixed(1)}, {model.position.z.toFixed(1)})
+                        </div>
+                        <div style={{ marginBottom: "2px" }}>
+                          <strong>👁️ Видимость:</strong> {model.visible ? "✅ Видима" : "❌ Скрыта"}
+                        </div>
+                        <div style={{ marginBottom: "2px" }}>
+                          <strong>📏 Размер:</strong> {model.scale.x.toFixed(2)}x{model.scale.y.toFixed(2)}x{model.scale.z.toFixed(2)}
+                        </div>
+                        <div style={{ marginBottom: "2px" }}>
+                          <strong>🔄 Поворот:</strong> ({model.rotation.x.toFixed(2)}, {model.rotation.y.toFixed(2)}, {model.rotation.z.toFixed(2)})
+                        </div>
+                      </div>
+                    )}
+                    
+                    {marker && (
+                      <div style={{ marginTop: "4px", padding: "4px", background: "rgba(255,0,0,0.1)", borderRadius: "3px" }}>
+                        <div style={{ fontWeight: "bold", color: "#ff6666", marginBottom: "2px" }}>
+                          🔴 Маркер:
+                        </div>
+                        <div style={{ marginBottom: "2px" }}>
+                          <strong>📍 Позиция:</strong> ({marker.position.x.toFixed(1)}, {marker.position.y.toFixed(1)}, {marker.position.z.toFixed(1)})
+                        </div>
+                        <div style={{ marginBottom: "2px" }}>
+                          <strong>👁️ Видимость:</strong> {marker.visible ? "✅ Видим" : "❌ Скрыт"}
+                        </div>
+                        <div style={{ marginBottom: "2px" }}>
+                          <strong>📏 Размер:</strong> {marker.scale.x.toFixed(2)}x{marker.scale.y.toFixed(2)}x{marker.scale.z.toFixed(2)}
+                        </div>
+                        <div style={{ marginBottom: "2px" }}>
+                          <strong>📊 Базовый размер:</strong> {marker.userData.baseScale?.toFixed(2) || "N/A"}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {info && (
+                      <div style={{ marginTop: "4px", padding: "4px", background: "rgba(0,255,0,0.1)", borderRadius: "3px" }}>
+                        <div style={{ fontWeight: "bold", color: "#00ff00", marginBottom: "2px" }}>
+                          📊 Информация об объекте:
+                        </div>
+                        <div style={{ marginBottom: "2px" }}>
+                          <strong>📏 Расстояние:</strong> {info.distance.toFixed(1)}м
+                        </div>
+                        <div style={{ marginBottom: "2px" }}>
+                          <strong>🎯 В радиусе:</strong> {info.inRange ? "✅ Да" : "❌ Нет"}
+                        </div>
+                        <div style={{ marginBottom: "2px" }}>
+                          <strong>📍 Координаты:</strong> {info.coordinates.lat.toFixed(6)}, {info.coordinates.lon.toFixed(6)}, {info.coordinates.alt.toFixed(1)}м
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Окно системной информации */}
+      {showSystemInfo && (
+        <div style={{ 
+          position: fullscreenMode ? "fixed" : "absolute", 
+          top: 120, 
+          left: "10px", 
+          right: "10px",
+          zIndex: fullscreenMode ? 10000 : 9, 
+          padding: "8px 12px", 
+          borderRadius: 8, 
+          background: "rgba(0,0,0,0.9)", 
+          color: "#fff", 
+          fontSize: 9,
+          maxHeight: "400px",
+          overflowY: "auto"
+        }}>
+          <div style={{ fontWeight: "bold", marginBottom: "6px", color: "#0066ff" }}>
+            📊 Системная информация:
+          </div>
+          
+          {/* GPS информация */}
+          <div style={{ marginBottom: "6px", padding: "4px", background: "rgba(0,255,0,0.1)", borderRadius: "4px" }}>
+            <div style={{ fontWeight: "bold", color: "#00ff00", marginBottom: "2px" }}>📍 GPS:</div>
+            <div style={{ fontSize: "8px", color: "#cccccc" }}>
+              <div>Lat: {extendedDebug.userGPS.lat.toFixed(6)}</div>
+              <div>Lon: {extendedDebug.userGPS.lon.toFixed(6)}</div>
+              <div>Alt: {extendedDebug.userGPS.alt.toFixed(1)}м</div>
+              <div>Accuracy: {extendedDebug.userGPS.accuracy?.toFixed(1) || 'N/A'}м</div>
+              <div>Updates: {extendedDebug.gpsUpdateCount}</div>
+              <div>Last: {new Date(extendedDebug.lastUpdateTime).toLocaleTimeString()}</div>
+            </div>
+          </div>
+          
+          {/* Камера информация */}
+          <div style={{ marginBottom: "6px", padding: "4px", background: "rgba(0,100,255,0.1)", borderRadius: "4px" }}>
+            <div style={{ fontWeight: "bold", color: "#0066ff", marginBottom: "2px" }}>📷 Камера:</div>
+            <div style={{ fontSize: "8px", color: "#cccccc" }}>
+              <div>Pos: ({extendedDebug.cameraInfo.position.x.toFixed(1)}, {extendedDebug.cameraInfo.position.y.toFixed(1)}, {extendedDebug.cameraInfo.position.z.toFixed(1)})</div>
+              <div>Rot: ({extendedDebug.cameraInfo.rotation.x.toFixed(3)}, {extendedDebug.cameraInfo.rotation.y.toFixed(3)}, {extendedDebug.cameraInfo.rotation.z.toFixed(3)})</div>
+              <div>FOV: 75°, Near: 0.01, Far: 2000</div>
+              <div>Aspect: {(window.innerWidth / window.innerHeight).toFixed(2)}</div>
+            </div>
+          </div>
+          
+          {/* Device Orientation */}
+          <div style={{ marginBottom: "6px", padding: "4px", background: "rgba(255,165,0,0.1)", borderRadius: "4px" }}>
+            <div style={{ fontWeight: "bold", color: "#ffa500", marginBottom: "2px" }}>📱 Device Orientation:</div>
+            <div style={{ fontSize: "8px", color: "#cccccc" }}>
+              <div>α (Alpha): {deviceOrientationRef.current.alpha.toFixed(1)}°</div>
+              <div>β (Beta): {deviceOrientationRef.current.beta.toFixed(1)}°</div>
+              <div>γ (Gamma): {deviceOrientationRef.current.gamma.toFixed(1)}°</div>
+            </div>
+          </div>
+          
+          {/* Компас информация */}
+          <div style={{ marginBottom: "6px", padding: "4px", background: "rgba(255,0,255,0.1)", borderRadius: "4px" }}>
+            <div style={{ fontWeight: "bold", color: "#ff00ff", marginBottom: "2px" }}>🧭 Компас:</div>
+            <div style={{ fontSize: "8px", color: "#cccccc" }}>
+              <div>Угол: {compassAngle !== null ? `${compassAngle.toFixed(1)}°` : "N/A"}</div>
+              <div>Направление: {compassAngle !== null ? 
+                (compassAngle > 315 || compassAngle < 45 ? "⬆️ Север" :
+                 compassAngle >= 45 && compassAngle < 135 ? "➡️ Восток" :
+                 compassAngle >= 135 && compassAngle < 225 ? "⬇️ Юг" : "⬅️ Запад") : "N/A"}
+              </div>
+            </div>
+          </div>
+          
+          {/* Производительность */}
+          <div style={{ marginBottom: "6px", padding: "4px", background: "rgba(128,128,128,0.1)", borderRadius: "4px" }}>
+            <div style={{ fontWeight: "bold", color: "#808080", marginBottom: "2px" }}>⚡ Производительность:</div>
+            <div style={{ fontSize: "8px", color: "#cccccc" }}>
+              <div>Разрешение: {window.innerWidth}x{window.innerHeight}</div>
+              <div>User Agent: {navigator.userAgent.split(' ')[0]}</div>
+              <div>Платформа: {navigator.platform}</div>
+              <div>Язык: {navigator.language}</div>
+              <div>Онлайн: {navigator.onLine ? "✅" : "❌"}</div>
+            </div>
+          </div>
+          
+          {/* Сцена */}
+          <div style={{ marginBottom: "6px", padding: "4px", background: "rgba(255,0,0,0.1)", borderRadius: "4px" }}>
+            <div style={{ fontWeight: "bold", color: "#ff6666", marginBottom: "2px" }}>🎬 Сцена:</div>
+            <div style={{ fontSize: "8px", color: "#cccccc" }}>
+              <div>Детей: {extendedDebug.sceneInfo.childrenCount}</div>
+              <div>Фон: {extendedDebug.sceneInfo.backgroundSet ? "✅ Установлен" : "❌ Не установлен"}</div>
+              <div>Маркеры видны: {markersVisible ? "✅" : "❌"}</div>
+              <div>Debug режим: {useDebugCoords ? "✅" : "❌"}</div>
+            </div>
           </div>
         </div>
       )}
