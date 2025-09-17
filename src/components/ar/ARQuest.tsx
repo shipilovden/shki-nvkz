@@ -109,7 +109,8 @@ export function ARQuest(): React.JSX.Element {
           // Маркер должен следовать за GPS координатами объекта
           const markerY = Math.max(dy + target.model.yOffset + 2, 2); // +2 метра над моделью
           marker.position.set(dx, markerY, dz);
-          marker.visible = markersVisibleRef.current;
+          // Форс-показ маркера в радиусе; переключатель действует как доп. фильтр
+          marker.visible = true && markersVisibleRef.current;
           
           // Добавляем информацию о GPS координатах для отладки
           console.log(`🔴 Marker ${target.name} positioned above model: (${dx.toFixed(1)}, ${markerY.toFixed(1)}, ${dz.toFixed(1)})`);
@@ -136,7 +137,9 @@ export function ARQuest(): React.JSX.Element {
         // Сохраняем базовый размер для пульсации
         marker.userData.baseScale = markerSize;
         marker.scale.setScalar(markerSize);
-        marker.visible = markersVisibleRef.current;
+        if (distance <= target.activationRadiusM) {
+          marker.visible = true && markersVisibleRef.current;
+        }
         
         if (distance <= target.activationRadiusM) {
           const markerY = Math.max(dy + target.model.yOffset + 2, 2);
@@ -388,7 +391,7 @@ export function ARQuest(): React.JSX.Element {
           });
           userPosRef.current = { lat: p.coords.latitude, lon: p.coords.longitude, alt: p.coords.altitude ?? 0 };
           updateModelPositionGPS(p.coords.latitude, p.coords.longitude, p.coords.altitude ?? 0);
-          if (status) setStatus(""); // очищаем статус при первом валидном апдейте
+          setStatus(""); // очищаем статус при первом валидном апдейте
         },
         (err) => {
           console.error("❌ GPS Error:", err);
@@ -434,6 +437,16 @@ export function ARQuest(): React.JSX.Element {
 
   const stopVideo = useCallback(() => {
     try { recorderRef.current?.stop(); } catch {}
+  }, []);
+
+  // Полное завершение AR-квеста
+  const stopQuest = useCallback(() => {
+    try { if (watchIdRef.current != null) navigator.geolocation.clearWatch(watchIdRef.current); } catch {}
+    watchIdRef.current = null;
+    try { stopCamera(); } catch {}
+    try { rendererRef.current?.dispose(); } catch {}
+    sceneRef.current = null; cameraRef.current = null; rendererRef.current = null;
+    setStarted(false); setUiVisible(false); setFullscreenMode(false); setStatus("");
   }, []);
 
   const toggleFullscreen = useCallback(() => {
@@ -696,6 +709,26 @@ export function ARQuest(): React.JSX.Element {
           }}
         >
           ✕ Выход
+        </button>
+      )}
+      {!fullscreenMode && started && (
+        <button
+          onClick={stopQuest}
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            zIndex: 10001,
+            padding: "6px 10px",
+            background: "rgba(0,0,0,0.7)",
+            color: "white",
+            border: "none",
+            borderRadius: 6,
+            fontSize: 10,
+            marginTop: 6
+          }}
+        >
+          ✕ Закрыть квест
         </button>
       )}
     </div>
