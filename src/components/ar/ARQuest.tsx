@@ -23,7 +23,7 @@ const AR_CONFIG = {
       lon: 87.432858, 
       alt: 389.0, 
       activationRadiusM: 50,
-      model: { url: "/models/nataraja_shiva.glb", scale: 2.0, headingDeg: 0, yOffset: 0.0 }
+      model: { url: "/models/nataraja_shiva.glb", scale: 4.0, headingDeg: 0, yOffset: 2.0 }
     }
   ]
 };
@@ -100,6 +100,8 @@ export function ARQuest(): React.JSX.Element {
         marker.userData.baseScale = markerSize;
         marker.scale.setScalar(markerSize);
         marker.visible = markersVisible;
+        
+        console.log(`🔴 Marker ${target.name} visibility set to: ${markersVisible}, size: ${markerSize.toFixed(2)}`);
         
         // Обновляем информацию об объекте
         setObjectInfo(prev => ({
@@ -325,10 +327,12 @@ export function ARQuest(): React.JSX.Element {
       if (!document.fullscreenElement) {
         // Входим в полный экран
         await document.documentElement.requestFullscreen();
+        setFullscreenMode(true);
         console.log("📱 Fullscreen: ON");
       } else {
         // Выходим из полного экрана
         await document.exitFullscreen();
+        setFullscreenMode(false);
         console.log("📱 Fullscreen: OFF");
       }
     } catch (error) {
@@ -360,7 +364,17 @@ export function ARQuest(): React.JSX.Element {
   }, []);
 
   useEffect(() => {
+    // Обработчик изменения состояния полного экрана
+    const handleFullscreenChange = () => {
+      const isFullscreen = !!document.fullscreenElement;
+      setFullscreenMode(isFullscreen);
+      console.log("📱 Fullscreen state changed:", isFullscreen ? "ON" : "OFF");
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    
     return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
       try { if (watchIdRef.current != null) navigator.geolocation.clearWatch(watchIdRef.current); } catch {}
       try { stopCamera(); } catch {}
       try { rendererRef.current?.dispose(); } catch {}
@@ -428,10 +442,10 @@ export function ARQuest(): React.JSX.Element {
         </button>
       </div>
 
-      <div id="status" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 9, padding: "6px 10px", borderRadius: 8, background: "rgba(0,0,0,.5)", color: "#fff", fontSize: 12, display: status ? "block" : "none" }}>{status}</div>
+      <div id="status" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 9, padding: "6px 10px", borderRadius: 8, background: "rgba(0,0,0,.5)", color: "#fff", fontSize: 12, display: status && !fullscreenMode ? "block" : "none" }}>{status}</div>
       
       {/* Информация об объектах */}
-      {started && (
+      {started && !fullscreenMode && (
         <div style={{ 
           position: "absolute", 
           top: 60, 
@@ -459,6 +473,27 @@ export function ARQuest(): React.JSX.Element {
             );
           })}
         </div>
+      )}
+      
+      {/* Кнопка выхода из полного экрана */}
+      {fullscreenMode && (
+        <button 
+          onClick={toggleFullscreen}
+          style={{ 
+            position: "absolute", 
+            top: 20, 
+            right: 20, 
+            zIndex: 10, 
+            padding: "8px 12px", 
+            background: "rgba(0,0,0,0.7)", 
+            color: "white", 
+            border: "none", 
+            borderRadius: "4px",
+            fontSize: "12px"
+          }}
+        >
+          ✕ Выход
+        </button>
       )}
     </div>
   );
