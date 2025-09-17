@@ -25,7 +25,13 @@ const AR_CONFIG = {
       activationRadiusM: 50,
       model: { url: "/models/nataraja_shiva.glb", scale: 4.0, headingDeg: 0, yOffset: 2.0 }
     }
-  ]
+  ],
+  // Тестовые координаты для отладки (рядом с Шивой)
+  DEBUG_COORDS: {
+    lat: 53.691667, // Точно на Шиве
+    lon: 87.432778,
+    alt: 389.0
+  }
 };
 
 export function ARQuest(): React.JSX.Element {
@@ -50,6 +56,7 @@ export function ARQuest(): React.JSX.Element {
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
   const [compassAngle, setCompassAngle] = useState<number | null>(null);
+  const [useDebugCoords, setUseDebugCoords] = useState(false);
   const userPosRef = useRef<{lat:number, lon:number, alt:number}>({lat:0,lon:0,alt:0});
   const deviceOrientationRef = useRef<{alpha: number, beta: number, gamma: number}>({alpha: 0, beta: 0, gamma: 0});
   // Авто-очистка статуса через 3 секунды, чтобы не залипал баннер
@@ -232,6 +239,11 @@ export function ARQuest(): React.JSX.Element {
           beta: e.beta || 0,
           gamma: e.gamma || 0
         };
+        
+        // Обновляем компас при изменении ориентации
+        if (userPosRef.current.lat !== 0 && userPosRef.current.lon !== 0) {
+          updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt);
+        }
         
         // Преобразуем в кватернион камеры
         const euler = new THREE.Euler(beta, alpha, -gamma, "YXZ");
@@ -425,26 +437,49 @@ export function ARQuest(): React.JSX.Element {
 
   const startQuest = useCallback(async () => {
     if (started) return;
-    if (!navigator.geolocation) {
-      alert("Геолокация не поддерживается");
-      return;
-    }
     
     console.log("🚀 Starting AR Quest...");
     setStatus("");
     addDebugInfo("🚀 Starting AR Quest...");
     
-    try {
-      const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true, timeout: 30000, maximumAge: 0,
-        })
-      );
+    let userLat: number, userLon: number, userAlt: number;
+    
+    if (useDebugCoords) {
+      // Используем тестовые координаты
+      userLat = AR_CONFIG.DEBUG_COORDS.lat;
+      userLon = AR_CONFIG.DEBUG_COORDS.lon;
+      userAlt = AR_CONFIG.DEBUG_COORDS.alt;
+      console.log("🧪 Using DEBUG coordinates:", { userLat, userLon, userAlt });
+      addDebugInfo("🧪 Using DEBUG coordinates");
+    } else {
+      if (!navigator.geolocation) {
+        alert("Геолокация не поддерживается");
+        return;
+      }
       
-      const userLat = pos.coords.latitude;
-      const userLon = pos.coords.longitude;
-      const userAlt = pos.coords.altitude ?? 0;
-      userPosRef.current = { lat: userLat, lon: userLon, alt: userAlt };
+      try {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true, timeout: 30000, maximumAge: 0,
+          })
+        );
+        
+        userLat = pos.coords.latitude;
+        userLon = pos.coords.longitude;
+        userAlt = pos.coords.altitude ?? 0;
+      } catch (e) {
+        console.error("❌ GPS Error:", e);
+        if ((e as any)?.code === 1) {
+          setStatus("Разрешите доступ к геолокации");
+          alert("Разрешите доступ к геолокации");
+        } else {
+          setStatus("Не удалось получить геолокацию. Повторите попытку.");
+        }
+        return;
+      }
+    }
+    
+    userPosRef.current = { lat: userLat, lon: userLon, alt: userAlt };
       
       // Проверяем расстояние до всех точек
       const distances = AR_CONFIG.TARGETS.map(target => ({
@@ -459,8 +494,22 @@ export function ARQuest(): React.JSX.Element {
       
       console.log("📍 Location Check:", {
         user: { lat: userLat.toFixed(6), lon: userLon.toFixed(6), alt: userAlt.toFixed(1) },
+        targets: AR_CONFIG.TARGETS.map(t => ({ 
+          name: t.name, 
+          lat: t.lat, 
+          lon: t.lon, 
+          alt: t.alt 
+        })),
         distances: distances.map(d => `${d.name}: ${d.distance.toFixed(1)}m (${d.inRange ? 'в радиусе' : 'далеко'})`),
         closest: `${closestTarget.name}: ${closestTarget.distance.toFixed(1)}m`
+      });
+      
+      // Дополнительная отладочная информация
+      console.log("🔍 GPS Debug Info:");
+      console.log(`  User position: ${userLat.toFixed(6)}, ${userLon.toFixed(6)}, ${userAlt.toFixed(1)}m`);
+      AR_CONFIG.TARGETS.forEach(target => {
+        const dist = haversine(userLat, userLon, target.lat, target.lon);
+        console.log(`  ${target.name}: ${target.lat}, ${target.lon}, ${target.alt}m -> ${dist.toFixed(1)}m`);
       });
       
       addDebugInfo(`📍 User: ${userLat.toFixed(6)}, ${userLon.toFixed(6)}, ${userAlt.toFixed(1)}m`);
@@ -482,60 +531,53 @@ export function ARQuest(): React.JSX.Element {
       setUiVisible(true);
       await startAR(userLat, userLon, userAlt);
       
-      watchIdRef.current = navigator.geolocation.watchPosition(
-        (p) => {
-          const newLat = p.coords.latitude;
-          const newLon = p.coords.longitude;
-          const newAlt = p.coords.altitude ?? 0;
-          
-          // Проверяем, действительно ли координаты изменились
-          const prevPos = userPosRef.current;
-          const latChanged = Math.abs(newLat - prevPos.lat) > 0.000001; // ~0.1м
-          const lonChanged = Math.abs(newLon - prevPos.lon) > 0.000001; // ~0.1м
-          const altChanged = Math.abs(newAlt - prevPos.alt) > 0.5; // 0.5м
-          
-          if (latChanged || lonChanged || altChanged) {
-            console.log("🔄 GPS Update received:", {
-              lat: newLat.toFixed(6),
-              lon: newLon.toFixed(6),
-              alt: newAlt.toFixed(1),
-              accuracy: p.coords.accuracy?.toFixed(1) + "m",
-              changes: { lat: latChanged, lon: lonChanged, alt: altChanged }
-            });
+      // Запускаем GPS отслеживание только если не используем debug координаты
+      if (!useDebugCoords) {
+        watchIdRef.current = navigator.geolocation.watchPosition(
+          (p) => {
+            const newLat = p.coords.latitude;
+            const newLon = p.coords.longitude;
+            const newAlt = p.coords.altitude ?? 0;
             
-            userPosRef.current = { lat: newLat, lon: newLon, alt: newAlt };
-            updateModelPositionGPS(newLat, newLon, newAlt);
-            setStatus(""); // очищаем статус при первом валидном апдейте
-          } else {
-            console.log("🔄 GPS Update received but no significant change:", {
-              lat: newLat.toFixed(6),
-              lon: newLon.toFixed(6),
-              alt: newAlt.toFixed(1),
-              accuracy: p.coords.accuracy?.toFixed(1) + "m"
-            });
+            // Проверяем, действительно ли координаты изменились
+            const prevPos = userPosRef.current;
+            const latChanged = Math.abs(newLat - prevPos.lat) > 0.000001; // ~0.1м
+            const lonChanged = Math.abs(newLon - prevPos.lon) > 0.000001; // ~0.1м
+            const altChanged = Math.abs(newAlt - prevPos.alt) > 0.5; // 0.5м
+            
+            if (latChanged || lonChanged || altChanged) {
+              console.log("🔄 GPS Update received:", {
+                lat: newLat.toFixed(6),
+                lon: newLon.toFixed(6),
+                alt: newAlt.toFixed(1),
+                accuracy: p.coords.accuracy?.toFixed(1) + "m",
+                changes: { lat: latChanged, lon: lonChanged, alt: altChanged }
+              });
+              
+              userPosRef.current = { lat: newLat, lon: newLon, alt: newAlt };
+              updateModelPositionGPS(newLat, newLon, newAlt);
+              setStatus(""); // очищаем статус при первом валидном апдейте
+            } else {
+              console.log("🔄 GPS Update received but no significant change:", {
+                lat: newLat.toFixed(6),
+                lon: newLon.toFixed(6),
+                alt: newAlt.toFixed(1),
+                accuracy: p.coords.accuracy?.toFixed(1) + "m"
+              });
+            }
+          },
+          (err) => {
+            console.error("❌ GPS Error:", err);
+            if (err.code === 1) setStatus("Разрешите доступ к геолокации");
+          },
+          { 
+            enableHighAccuracy: true, 
+            maximumAge: 0, // Не кэшируем, всегда получаем свежие данные
+            timeout: 10000 
           }
-        },
-        (err) => {
-          console.error("❌ GPS Error:", err);
-          if (err.code === 1) setStatus("Разрешите доступ к геолокации");
-        },
-        { 
-          enableHighAccuracy: true, 
-          maximumAge: 0, // Не кэшируем, всегда получаем свежие данные
-          timeout: 10000 
-        }
-      );
-    } catch (e) {
-      console.error("❌ Start Quest Error:", e);
-      // Только показываем сообщение, если действительно ошибка доступа
-      if ((e as any)?.code === 1) { // PERMISSION_DENIED
-        setStatus("Разрешите доступ к геолокации");
-        alert("Разрешите доступ к геолокации");
-      } else {
-        setStatus("Не удалось получить геолокацию. Повторите попытку.");
+        );
       }
-    }
-  }, [startAR, started, updateModelPositionGPS]);
+  }, [startAR, started, updateModelPositionGPS, useDebugCoords]);
 
   const capturePhoto = useCallback(() => {
     const renderer = rendererRef.current;
@@ -732,6 +774,20 @@ export function ARQuest(): React.JSX.Element {
           style={{ padding: "6px 8px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px", whiteSpace: "nowrap" }}
         >
           📱 Полный экран
+        </button>
+        <button 
+          onClick={() => setUseDebugCoords(!useDebugCoords)} 
+          style={{ 
+            padding: "6px 8px", 
+            background: useDebugCoords ? "rgba(255,165,0,0.7)" : "rgba(0,0,0,0.7)", 
+            color: "white", 
+            border: "none", 
+            borderRadius: "4px", 
+            fontSize: "10px",
+            whiteSpace: "nowrap"
+          }}
+        >
+          🧪 Debug GPS
         </button>
         </div>
 
