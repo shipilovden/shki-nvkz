@@ -46,7 +46,7 @@ export async function startCamera(scene: THREE.Scene, facing: "environment" | "u
 
   // Основной путь: используем видео как фон сцены
   try {
-    if (scene) scene.background = videoTexture as any;
+    if (scene) scene.background = videoTexture;
   } catch {}
 
   // Надёжный фоллбэк: HTMLVideo под канвасом (на случай, если видео-текстура не рисуется на некоторых устройствах)
@@ -134,12 +134,12 @@ export function stopVideo(): void {
 }
 
 export function toastStatus(text: string): void {
-  const el = document.getElementById("status") as any;
+  const el = document.getElementById("status") as HTMLElement;
   if (!el) return;
   el.style.display = "block";
   el.textContent = text;
-  clearTimeout(el._t);
-  el._t = setTimeout(() => (el.style.display = "none"), 2000);
+  clearTimeout((el as any)._t);
+  (el as any)._t = setTimeout(() => (el.style.display = "none"), 2000);
 }
 
 
