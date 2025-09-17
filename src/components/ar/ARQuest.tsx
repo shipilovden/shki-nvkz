@@ -19,18 +19,18 @@ const AR_CONFIG = {
     { 
       id: "shiva", 
       name: "Шива",
-      lat: 53.691667, 
-      lon: 87.432778, 
-      alt: 389.0, 
-      activationRadiusM: 50,
+      lat: 53.691700, // Переместили ближе к пользователю
+      lon: 87.432900, // Переместили ближе к пользователю
+      alt: 350.0, // Высота как у пользователя
+      activationRadiusM: 100, // Увеличили радиус
       model: { url: "/models/nataraja_shiva.glb", scale: 4.0, headingDeg: 0, yOffset: 2.0 }
     }
   ],
   // Тестовые координаты для отладки (рядом с Шивой)
   DEBUG_COORDS: {
-    lat: 53.691667, // Точно на Шиве
-    lon: 87.432778,
-    alt: 389.0
+    lat: 53.691700, // Ближе к пользователю
+    lon: 87.432900, // Ближе к пользователю
+    alt: 350.0
   }
 };
 
@@ -640,10 +640,10 @@ export function ARQuest(): React.JSX.Element {
           console.error("❌ GPS Error:", err);
           if (err.code === 1) setStatus("Разрешите доступ к геолокации");
         },
-        { 
-          enableHighAccuracy: true, 
-            maximumAge: 0, // НЕ кэшируем, всегда свежие данные
-            timeout: 3000 
+          { 
+            enableHighAccuracy: true, 
+            maximumAge: 100, // Обновляем каждые 100мс
+            timeout: 1000 // Быстрый таймаут
           }
         );
       } else {
