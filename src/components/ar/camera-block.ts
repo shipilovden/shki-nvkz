@@ -63,6 +63,7 @@ export async function startCamera(scene: THREE.Scene, facing: "environment" | "u
       videoBgEl.style.height = "100vh";
       videoBgEl.style.objectFit = "cover";
       videoBgEl.style.zIndex = "9998";
+      videoBgEl.style.display = "none"; // скрыт по умолчанию
       videoBgEl.id = "ar-bg-video";
       document.body.appendChild(videoBgEl);
     }
@@ -92,6 +93,11 @@ export function stopCamera(): void {
     }
   } catch {}
   videoBgEl = null;
+}
+
+// Управление видимостью HTML-видео фона (ползунок включаем только в fullscreen при необходимости)
+export function setBackgroundVideoVisible(visible: boolean): void {
+  try { if (videoBgEl) videoBgEl.style.display = visible ? "block" : "none"; } catch {}
 }
 
 export function capturePhoto(): void {

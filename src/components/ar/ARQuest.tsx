@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { bindCameraUI, startCamera, stopCamera } from "./camera-block";
+import { bindCameraUI, startCamera, stopCamera, setBackgroundVideoVisible } from "./camera-block";
 
 const AR_CONFIG = {
   TARGETS: [
@@ -388,6 +388,7 @@ export function ARQuest(): React.JSX.Element {
           });
           userPosRef.current = { lat: p.coords.latitude, lon: p.coords.longitude, alt: p.coords.altitude ?? 0 };
           updateModelPositionGPS(p.coords.latitude, p.coords.longitude, p.coords.altitude ?? 0);
+          if (status) setStatus(""); // очищаем статус при первом валидном апдейте
         },
         (err) => {
           console.error("❌ GPS Error:", err);
@@ -440,9 +441,11 @@ export function ARQuest(): React.JSX.Element {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen?.();
         setFullscreenMode(true);
+        setBackgroundVideoVisible(true);
       } else {
         document.exitFullscreen?.();
         setFullscreenMode(false);
+        setBackgroundVideoVisible(false);
       }
       console.log("📱 Fullscreen toggled");
     } catch {}
