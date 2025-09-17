@@ -109,7 +109,7 @@ export function ARQuest(): React.JSX.Element {
           // Маркер должен следовать за GPS координатами объекта
           const markerY = Math.max(dy + target.model.yOffset + 2, 2); // +2 метра над моделью
           marker.position.set(dx, markerY, dz);
-          marker.visible = markersVisible;
+          marker.visible = markersVisibleRef.current;
           
           // Добавляем информацию о GPS координатах для отладки
           console.log(`🔴 Marker ${target.name} positioned above model: (${dx.toFixed(1)}, ${markerY.toFixed(1)}, ${dz.toFixed(1)})`);
@@ -136,7 +136,7 @@ export function ARQuest(): React.JSX.Element {
         // Сохраняем базовый размер для пульсации
         marker.userData.baseScale = markerSize;
         marker.scale.setScalar(markerSize);
-        marker.visible = markersVisible;
+        marker.visible = markersVisibleRef.current;
         
         if (distance <= target.activationRadiusM) {
           const markerY = Math.max(dy + target.model.yOffset + 2, 2);
@@ -223,6 +223,7 @@ export function ARQuest(): React.JSX.Element {
         depthTest: false // всегда поверх видео
       });
       const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+      marker.renderOrder = 9999;
       // При создании не показываем маркер, пока не придёт первый GPS апдейт
       marker.position.set(0, 0, -5); // Временная позиция
       marker.visible = false;
@@ -392,8 +393,13 @@ export function ARQuest(): React.JSX.Element {
       );
     } catch (e) {
       console.error("❌ Start Quest Error:", e);
-      setStatus("Разрешите доступ к геолокации");
-      alert("Разрешите доступ к геолокации");
+      // Только показываем сообщение, если действительно ошибка доступа
+      if ((e as any)?.code === 1) { // PERMISSION_DENIED
+        setStatus("Разрешите доступ к геолокации");
+        alert("Разрешите доступ к геолокации");
+      } else {
+        setStatus("Не удалось получить геолокацию. Повторите попытку.");
+      }
     }
   }, [startAR, started, updateModelPositionGPS]);
 
