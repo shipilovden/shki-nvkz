@@ -775,25 +775,30 @@ export function ARQuest(): React.JSX.Element {
           display: uiVisible ? "flex" : "none", 
           position: fullscreenMode ? "fixed" : "absolute", 
           bottom: 12, 
-          left: fullscreenMode ? "50%" : "50%", 
+          left: "50%", 
           transform: "translateX(-50%)", 
           zIndex: 10000, 
-          gap: 4,
-          overflowX: "hidden",
-          padding: "0 10px",
+          gap: 6,
+          overflow: "hidden",
+          padding: "6px 10px",
           maxWidth: fullscreenMode ? "calc(100vw - 20px)" : "calc(100% - 20px)",
           boxSizing: "border-box",
-          justifyContent: "center"
+          justifyContent: "center",
+          flexWrap: "wrap"
         }}>
-        <button id="btn-photo" onClick={capturePhoto} style={{ padding: "6px 8px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}>📸</button>
-        <button id="btn-video" onClick={startVideo} style={{ padding: "6px 8px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}>🎥</button>
-        <button id="btn-stop" onClick={stopVideo} style={{ padding: "6px 8px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}>⏹</button>
-        <button id="btn-switch" style={{ padding: "6px 8px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}>🔄</button>
-        <button onClick={toggleMarkers} style={{ padding: "6px 8px", background: markersVisible ? "rgba(255,0,0,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}>🔴</button>
-        <button onClick={() => setShowDebug(!showDebug)} style={{ padding: "6px 8px", background: showDebug ? "rgba(0,255,0,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}>🐛</button>
-        <button onClick={toggleFullscreen} style={{ padding: "6px 8px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}>📱</button>
-        <button onClick={() => setUseDebugCoords(!useDebugCoords)} style={{ padding: "6px 8px", background: useDebugCoords ? "rgba(255,165,0,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}>🧪</button>
-        <button onClick={() => { if (userPosRef.current.lat !== 0) { updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt); console.log("🔄 Manual GPS update triggered"); } }} style={{ padding: "6px 8px", background: "rgba(0,255,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}>🔄</button>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button id="btn-photo" onClick={capturePhoto} style={{ padding: "4px 6px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>📸 Фото</button>
+            <button id="btn-video" onClick={startVideo} style={{ padding: "4px 6px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🎥 Видео</button>
+            <button id="btn-stop" onClick={stopVideo} style={{ padding: "4px 6px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>⏹ Стоп</button>
+            <button id="btn-switch" style={{ padding: "4px 6px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🔄 Камера</button>
+          </div>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={toggleMarkers} style={{ padding: "4px 6px", background: markersVisible ? "rgba(255,0,0,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🔴 Маркеры</button>
+            <button onClick={() => setShowDebug(!showDebug)} style={{ padding: "4px 6px", background: showDebug ? "rgba(0,255,0,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🐛 Debug</button>
+            <button onClick={toggleFullscreen} style={{ padding: "4px 6px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>📱 Экран</button>
+            <button onClick={() => setUseDebugCoords(!useDebugCoords)} style={{ padding: "4px 6px", background: useDebugCoords ? "rgba(255,165,0,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🧪 Debug GPS</button>
+            <button onClick={() => { if (userPosRef.current.lat !== 0) { updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt); console.log("🔄 Manual GPS update triggered"); } }} style={{ padding: "4px 6px", background: "rgba(0,255,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🔄 Update</button>
+          </div>
         </div>
 
         {/* Локальный статус поверх viewport */}
