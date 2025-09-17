@@ -28,7 +28,7 @@ const AR_CONFIG = {
   ]
 };
 
-export function ARQuest(): JSX.Element {
+export function ARQuest(): React.JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [status, setStatus] = useState<string>("");
   const [uiVisible, setUiVisible] = useState(false);
@@ -44,6 +44,7 @@ export function ARQuest(): JSX.Element {
   const watchIdRef = useRef<number | null>(null);
   const [fullscreenMode, setFullscreenMode] = useState(false);
   const [markersVisible, setMarkersVisible] = useState(true);
+  const [objectInfo, setObjectInfo] = useState<{[key: string]: {distance: number, inRange: boolean}}>({});
 
   const haversine = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -95,15 +96,27 @@ export function ARQuest(): JSX.Element {
         const normalizedDistance = Math.min(distance / maxDistance, 1);
         const markerSize = maxSize - (normalizedDistance * (maxSize - minSize));
         
+        // Сохраняем базовый размер для пульсации
+        marker.userData.baseScale = markerSize;
         marker.scale.setScalar(markerSize);
         marker.visible = markersVisible;
+        
+        // Обновляем информацию об объекте
+        setObjectInfo(prev => ({
+          ...prev,
+          [target.id]: {
+            distance: distance,
+            inRange: distance <= target.activationRadiusM
+          }
+        }));
         
         console.log(`🔴 Marker ${target.name} updated:`, { 
           x: dx.toFixed(1), 
           y: (dy + 3).toFixed(1), 
           z: dz.toFixed(1),
           size: markerSize.toFixed(2),
-          distance: distance.toFixed(1) + "m"
+          distance: distance.toFixed(1) + "m",
+          visible: markersVisible
         });
       } else {
         console.log(`❌ Marker ${target.name} not found for position update`);
@@ -177,11 +190,16 @@ export function ARQuest(): JSX.Element {
       AR_CONFIG.TARGETS.forEach(target => {
         const marker = markersRef.current[target.id];
         if (marker && markersVisible) {
-          const baseScale = marker.scale.x; // сохраняем базовый размер
+          // Получаем базовый размер из материала (сохраняем в userData)
+          if (!marker.userData.baseScale) {
+            marker.userData.baseScale = 0.5; // базовый размер маркера
+          }
+          const baseScale = marker.userData.baseScale;
           const pulseScale = baseScale * (1 + Math.sin(time) * 0.3);
           const opacity = 0.6 + Math.sin(time * 1.5) * 0.2;
           marker.scale.setScalar(pulseScale);
-          marker.material.opacity = opacity;
+          const material = (marker as THREE.Mesh).material as THREE.MeshBasicMaterial;
+          material.opacity = opacity;
         }
       });
       
@@ -344,17 +362,86 @@ export function ARQuest(): JSX.Element {
       <canvas ref={canvasRef} id="ar-canvas" style={{ display: started ? "block" : "none", width: "100vw", height: "100vh" }} />
 
       <div id="ar-controls" style={{ display: uiVisible && !fullscreenMode ? "flex" : "none", position: "absolute", bottom: 20, left: "50%", transform: "translateX(-50%)", zIndex: 9, gap: 8 }}>
-        <button id="btn-photo" onClick={capturePhoto}>📸 Фото</button>
-        <button id="btn-video" onClick={startVideo}>🎥 Видео</button>
-        <button id="btn-stop" onClick={stopVideo}>⏹ Стоп</button>
-        <button id="btn-switch">🔄 Камера</button>
-        <button onClick={toggleMarkers} style={{ backgroundColor: markersVisible ? "rgba(255,0,0,0.3)" : "rgba(0,0,0,0.3)" }}>
+        <button 
+          id="btn-photo" 
+          onClick={capturePhoto}
+          style={{ padding: "8px 12px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}
+        >
+          📸 Фото
+        </button>
+        <button 
+          id="btn-video" 
+          onClick={startVideo}
+          style={{ padding: "8px 12px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}
+        >
+          🎥 Видео
+        </button>
+        <button 
+          id="btn-stop" 
+          onClick={stopVideo}
+          style={{ padding: "8px 12px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}
+        >
+          ⏹ Стоп
+        </button>
+        <button 
+          id="btn-switch"
+          style={{ padding: "8px 12px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}
+        >
+          🔄 Камера
+        </button>
+        <button 
+          onClick={toggleMarkers} 
+          style={{ 
+            padding: "8px 12px", 
+            background: markersVisible ? "rgba(255,0,0,0.7)" : "rgba(0,0,0,0.7)", 
+            color: "white", 
+            border: "none", 
+            borderRadius: "4px", 
+            fontSize: "12px" 
+          }}
+        >
           🔴 Маркеры
         </button>
-        <button onClick={toggleFullscreen}>📱 Полный экран</button>
+        <button 
+          onClick={toggleFullscreen}
+          style={{ padding: "8px 12px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}
+        >
+          📱 Полный экран
+        </button>
       </div>
 
       <div id="status" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 9, padding: "6px 10px", borderRadius: 8, background: "rgba(0,0,0,.5)", color: "#fff", fontSize: 12, display: status && !fullscreenMode ? "block" : "none" }}>{status}</div>
+      
+      {/* Информация об объектах */}
+      {started && !fullscreenMode && (
+        <div style={{ 
+          position: "absolute", 
+          top: 60, 
+          left: "50%", 
+          transform: "translateX(-50%)", 
+          zIndex: 9, 
+          padding: "8px 12px", 
+          borderRadius: 8, 
+          background: "rgba(0,0,0,0.7)", 
+          color: "#fff", 
+          fontSize: 11,
+          minWidth: "200px",
+          textAlign: "center"
+        }}>
+          {AR_CONFIG.TARGETS.map(target => {
+            const info = objectInfo[target.id];
+            if (!info) return null;
+            return (
+              <div key={target.id} style={{ marginBottom: "4px" }}>
+                <span style={{ color: info.inRange ? "#00ff00" : "#ff6666" }}>
+                  {target.name}: {info.distance.toFixed(1)}м
+                </span>
+                {info.inRange && <span style={{ color: "#00ff00", marginLeft: "8px" }}>✓</span>}
+              </div>
+            );
+          })}
+        </div>
+      )}
       
       {/* Кнопка выхода из полного экрана */}
       {fullscreenMode && (
