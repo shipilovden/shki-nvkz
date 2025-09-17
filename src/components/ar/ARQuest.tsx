@@ -356,6 +356,17 @@ export function ARQuest(): React.JSX.Element {
             overlayRoot.appendChild(dirDot);
             console.log(`🔴 Created new direction dot`);
           }
+          // Доп. подпись для мобильной отладки
+          let dirLabel = overlayRoot.querySelector('.dot-direction-label') as HTMLDivElement | null;
+          if (!dirLabel) {
+            dirLabel = document.createElement('div');
+            dirLabel.className = 'dot-direction-label';
+            Object.assign(dirLabel.style, {
+              position: 'absolute', color: '#0f0', fontSize: '10px', transform: 'translate(-50%, -120%)',
+              textShadow: '0 0 4px rgba(0,0,0,0.8)', pointerEvents: 'none', display: 'none', zIndex: '10001'
+            } as CSSStyleDeclaration);
+            overlayRoot.appendChild(dirLabel);
+          }
 
           const canvas = canvasRef.current;
           if (canvas) {
@@ -372,6 +383,7 @@ export function ARQuest(): React.JSX.Element {
             dirDot.style.left = `${x}px`;
             dirDot.style.top = `${y}px`;
             dirDot.style.display = 'block';
+            if (dirLabel) { dirLabel.style.left = `${x}px`; dirLabel.style.top = `${y}px`; dirLabel.textContent = `${compassAngle?.toFixed(0)}°`; dirLabel.style.display = 'block'; }
             
             // Логируем каждые 30 кадров
             if (Math.floor(time * 30) % 30 === 0) {
@@ -454,7 +466,9 @@ export function ARQuest(): React.JSX.Element {
                     
                     // Логируем позицию для отладки (реже, чтобы не спамить)
                     if (Math.floor(time * 30) % 30 === 0) { // каждые 30 кадров
-                      console.log(`🔴 MARKER screenXY: x=${x.toFixed(1)}, y=${y.toFixed(1)} | worldXYZ: ${worldPosition.x.toFixed(1)}, ${worldPosition.y.toFixed(1)}, ${worldPosition.z.toFixed(1)} | z=${screenPosition.z.toFixed(3)} | visible=${marker.visible}`);
+                      const logMsg = `🔴 MARKER screenXY: x=${x.toFixed(1)}, y=${y.toFixed(1)} | worldXYZ: ${worldPosition.x.toFixed(1)}, ${worldPosition.y.toFixed(1)}, ${worldPosition.z.toFixed(1)} | z=${screenPosition.z.toFixed(3)} | visible=${marker.visible}`;
+                      console.log(logMsg);
+                      addDebugInfo(logMsg);
                     }
                   } else {
                     dot.style.display = 'none';
@@ -464,7 +478,9 @@ export function ARQuest(): React.JSX.Element {
                 dot.style.display = 'none';
                 // Логируем когда объект за камерой
                 if (Math.floor(time * 60) % 60 === 0) { // каждые 60 кадров
-                  console.log(`🔴 Overlay ${target.name}: behind camera, z=${screenPosition.z.toFixed(3)}`);
+                  const logMsg = `🔴 Overlay ${target.name}: behind camera, z=${screenPosition.z.toFixed(3)}`;
+                  console.log(logMsg);
+                  addDebugInfo(logMsg);
                 }
               }
             } else {
