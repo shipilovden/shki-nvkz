@@ -326,10 +326,13 @@ export function ARQuest(): React.JSX.Element {
               } as CSSStyleDeclaration);
               overlay.appendChild(dot);
             }
-            // Для устойчивого поведения берём 3D позицию цели (модель) — маркер всегда над моделью
-            const v3 = new THREE.Vector3();
-            v3.setFromMatrixPosition(modelsRef.current[target.id]?.matrixWorld || new THREE.Matrix4());
-            const v = v3.project(camera);
+            // 3D позиция: сначала модель, затем сам маркер, иначе точка по центру камеры
+            const world = new THREE.Vector3();
+            const modelObj = modelsRef.current[target.id];
+            if (modelObj) modelObj.getWorldPosition(world);
+            else if (marker) (marker as THREE.Object3D).getWorldPosition(world);
+            else world.set(0, 0, -5);
+            const v = world.project(camera);
             const rectW = (canvasRef.current?.clientWidth || 1);
             const rectH = (canvasRef.current?.clientHeight || 1);
             const x = (v.x * 0.5 + 0.5) * rectW;
@@ -573,7 +576,7 @@ export function ARQuest(): React.JSX.Element {
         {/* HTML-оверлей для маркеров (на случай, если WebGL-маркер не виден) */}
         <div
           id="overlay-markers"
-          style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
+          style={{ position: "absolute", inset: 0, pointerEvents: "none", display: markersVisible ? 'block' : 'none' }}
         />
 
         <div id="ar-controls" style={{ 
