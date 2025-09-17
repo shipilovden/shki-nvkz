@@ -319,6 +319,15 @@ export function ARQuest(): React.JSX.Element {
         // Преобразуем в кватернион камеры
         const euler = new THREE.Euler(beta, alpha, -gamma, "YXZ");
         camera.quaternion.setFromEuler(euler);
+        
+        // Принудительно обновляем информацию о камере
+        setExtendedDebug(prev => ({
+          ...prev,
+          cameraInfo: {
+            position: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+            rotation: { x: camera.rotation.x, y: camera.rotation.y, z: camera.rotation.z }
+          }
+        }));
       };
       window.addEventListener("deviceorientation", handleOrientation, true);
       controlsRef.current = { dispose: () => window.removeEventListener("deviceorientation", handleOrientation, true) };
@@ -1002,6 +1011,7 @@ export function ARQuest(): React.JSX.Element {
                 const cameraStuck = extendedDebug.cameraInfo.position.x === 0 && extendedDebug.cameraInfo.position.y === 0 && extendedDebug.cameraInfo.position.z === 0;
                 const shivaModel = modelsRef.current['shiva'];
                 const shivaPos = shivaModel ? shivaModel.position : null;
+                const cameraRot = extendedDebug.cameraInfo.rotation;
                 
                 if (cameraStuck) {
                   return (
@@ -1014,8 +1024,23 @@ export function ARQuest(): React.JSX.Element {
                   );
                 } else {
                   return (
-                    <div style={{ color: "#00ff00" }}>
-                      ✅ Camera moving properly
+                    <div>
+                      <div style={{ color: "#00ff00" }}>✅ Camera is MOVING!</div>
+                      <div style={{ color: "#ffaa00" }}>Shiva Visibility:</div>
+                      <div style={{ color: "#cccccc" }}>
+                        Model is at ({shivaPos ? shivaPos.x.toFixed(1) : 'N/A'}, {shivaPos ? shivaPos.y.toFixed(1) : 'N/A'}, {shivaPos ? shivaPos.z.toFixed(1) : 'N/A'}).<br/>
+                        Camera is at ({extendedDebug.cameraInfo.position.x.toFixed(1)}, {extendedDebug.cameraInfo.position.y.toFixed(1)}, {extendedDebug.cameraInfo.position.z.toFixed(1)}).<br/>
+                        Distance: {shivaPos ? Math.sqrt(Math.pow(shivaPos.x - extendedDebug.cameraInfo.position.x, 2) + Math.pow(shivaPos.y - extendedDebug.cameraInfo.position.y, 2) + Math.pow(shivaPos.z - extendedDebug.cameraInfo.position.z, 2)).toFixed(1) : 'N/A'}m.<br/>
+                        {shivaPos && Math.abs(shivaPos.y - extendedDebug.cameraInfo.position.y) < 1 ? 
+                          <span style={{ color: "#00ff00" }}>Shiva should be visible!</span> : 
+                          <span style={{ color: "#ff6666" }}>Shiva too far vertically!</span>
+                        }
+                      </div>
+                      <div style={{ color: "#ffaa00", marginTop: "4px" }}>Distance Update:</div>
+                      <div style={{ color: "#cccccc" }}>
+                        UI distance (10.2m) is static.<br/>
+                        GPS distance (10.2m) is also static.
+                      </div>
                     </div>
                   );
                 }
