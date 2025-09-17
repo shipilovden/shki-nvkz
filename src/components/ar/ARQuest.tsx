@@ -102,6 +102,7 @@ export function ARQuest(): React.JSX.Element {
         marker.visible = markersVisible;
         
         console.log(`🔴 Marker ${target.name} updated: position=(${dx.toFixed(1)}, ${(dy + 3).toFixed(1)}, ${dz.toFixed(1)}), size=${markerSize.toFixed(2)}, visible=${marker.visible}`);
+        console.log(`🔴 Marker ${target.name} distance from camera: ${Math.sqrt(dx*dx + dy*dy + dz*dz).toFixed(1)}m`);
         
         // Обновляем информацию об объекте
         setObjectInfo((prev: any) => ({
@@ -159,17 +160,32 @@ export function ARQuest(): React.JSX.Element {
         opacity: 0.8 
       });
       const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-      marker.position.set(0, 0, 0); // Начальная позиция
+      marker.position.set(0, 0, -10); // Начальная позиция - 10 метров перед камерой
       marker.visible = markersVisible; // Устанавливаем видимость
       marker.userData.baseScale = 0.5; // Базовый размер
       marker.userData.targetId = target.id; // Добавляем ID цели для отладки
+      marker.name = `MARKER_${target.id}`; // Добавляем имя для отладки
       scene.add(marker);
       markersRef.current[target.id] = marker;
-      console.log(`🔴 Red marker for ${target.name} created and added to scene, visible: ${markersVisible}, position: (0,0,0), inScene: ${scene.children.includes(marker)}`);
+      console.log(`🔴 Red marker for ${target.name} created and added to scene, visible: ${markersVisible}, position: (0,0,-10), inScene: ${scene.children.includes(marker)}`);
     });
     
     console.log(`🔴 Total markers created: ${Object.keys(markersRef.current).length}`);
     console.log(`🔴 Scene children count: ${scene.children.length}`);
+    
+    // Создаем тестовый маркер прямо перед камерой для проверки видимости
+    const testMarkerGeometry = new THREE.SphereGeometry(1.0, 16, 16);
+    const testMarkerMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0x00ff00, // Зеленый цвет для отличия
+      transparent: true, 
+      opacity: 1.0 
+    });
+    const testMarker = new THREE.Mesh(testMarkerGeometry, testMarkerMaterial);
+    testMarker.position.set(0, 0, -5); // 5 метров перед камерой
+    testMarker.name = "TEST_MARKER";
+    scene.add(testMarker);
+    (window as any).testMarker = testMarker; // Сохраняем в глобальной переменной
+    console.log(`🟢 Test marker created at position (0, 0, -5) - should be visible!`);
 
     // Загружаем все модели
     const loader = new GLTFLoader();
@@ -192,10 +208,27 @@ export function ARQuest(): React.JSX.Element {
     });
 
     setStatus("GPS mode (~meters)");
+    
+    // Отладочная информация о камере и сцене
+    console.log(`📷 Camera position: (${camera.position.x}, ${camera.position.y}, ${camera.position.z})`);
+    console.log(`📷 Camera rotation: (${camera.rotation.x}, ${camera.rotation.y}, ${camera.rotation.z})`);
+    console.log(`📷 Camera near: ${camera.near}, far: ${camera.far}`);
+    console.log(`🎬 Scene background: ${scene.background ? 'SET' : 'NOT SET'}`);
+    console.log(`🎬 Scene children: ${scene.children.map(child => child.name || child.type).join(', ')}`);
 
     function tick() {
       // Пульсирующий эффект для всех красных маркеров
       const time = Date.now() * 0.003;
+      
+      // Проверяем тестовый маркер
+      const testMarker = scene.getObjectByName("TEST_MARKER");
+      if (testMarker) {
+        testMarker.rotation.y += 0.01; // Вращаем для видимости
+        if (Math.floor(time * 100) % 100 === 0) {
+          console.log(`🟢 Test marker visible: ${testMarker.visible}, position: (${testMarker.position.x}, ${testMarker.position.y}, ${testMarker.position.z})`);
+        }
+      }
+      
       AR_CONFIG.TARGETS.forEach(target => {
         const marker = markersRef.current[target.id];
         if (marker) {
@@ -355,11 +388,13 @@ export function ARQuest(): React.JSX.Element {
         const marker = markersRef.current[target.id];
         if (marker) {
           marker.visible = newMode;
-          console.log(`🔴 Marker ${target.name} visibility set to: ${newMode}`);
+          console.log(`🔴 Marker ${target.name} visibility set to: ${newMode}, position: (${marker.position.x.toFixed(1)}, ${marker.position.y.toFixed(1)}, ${marker.position.z.toFixed(1)})`);
         } else {
           console.log(`❌ Marker ${target.name} not found when toggling!`);
         }
       });
+      
+      // Тестовый маркер обновляется в функции tick
       
       return newMode;
     });
