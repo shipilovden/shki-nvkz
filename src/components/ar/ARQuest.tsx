@@ -877,7 +877,18 @@ export function ARQuest(): React.JSX.Element {
               Alt: {extendedDebug.userGPS.alt.toFixed(1)}m<br/>
               Accuracy: {extendedDebug.userGPS.accuracy?.toFixed(1) || 'N/A'}m<br/>
               Updates: {extendedDebug.gpsUpdateCount}<br/>
-              Last: {new Date(extendedDebug.lastUpdateTime).toLocaleTimeString()}
+              Last: {new Date(extendedDebug.lastUpdateTime).toLocaleTimeString()}<br/>
+              <div style={{ color: "#ffaa00", marginTop: "2px" }}>
+                <strong>Distance to Shiva:</strong><br/>
+                {(() => {
+                  const shiva = AR_CONFIG.TARGETS.find(t => t.id === 'shiva');
+                  if (shiva) {
+                    const dist = haversine(extendedDebug.userGPS.lat, extendedDebug.userGPS.lon, shiva.lat, shiva.lon);
+                    return `${dist.toFixed(1)}m`;
+                  }
+                  return 'N/A';
+                })()}
+              </div>
             </div>
           </div>
           
@@ -909,7 +920,16 @@ export function ARQuest(): React.JSX.Element {
             <div style={{ fontWeight: "bold", color: "#0066ff", marginBottom: "2px" }}>📷 Camera:</div>
             <div style={{ fontSize: "8px", color: "#cccccc" }}>
               Pos: ({extendedDebug.cameraInfo.position.x.toFixed(1)}, {extendedDebug.cameraInfo.position.y.toFixed(1)}, {extendedDebug.cameraInfo.position.z.toFixed(1)})<br/>
-              Rot: ({extendedDebug.cameraInfo.rotation.x.toFixed(1)}, {extendedDebug.cameraInfo.rotation.y.toFixed(1)}, {extendedDebug.cameraInfo.rotation.z.toFixed(1)})
+              Rot: ({extendedDebug.cameraInfo.rotation.x.toFixed(1)}, {extendedDebug.cameraInfo.rotation.y.toFixed(1)}, {extendedDebug.cameraInfo.rotation.z.toFixed(1)})<br/>
+              <div style={{ color: extendedDebug.cameraInfo.position.x === 0 && extendedDebug.cameraInfo.position.y === 0 && extendedDebug.cameraInfo.position.z === 0 ? "#ff6666" : "#00ff00", marginTop: "2px" }}>
+                <strong>Status:</strong> {extendedDebug.cameraInfo.position.x === 0 && extendedDebug.cameraInfo.position.y === 0 && extendedDebug.cameraInfo.position.z === 0 ? "❌ STUCK AT ORIGIN" : "✅ MOVING"}
+              </div>
+              <div style={{ color: "#ffaa00", marginTop: "2px" }}>
+                <strong>Device Orientation:</strong><br/>
+                α: {deviceOrientationRef.current.alpha.toFixed(1)}°<br/>
+                β: {deviceOrientationRef.current.beta.toFixed(1)}°<br/>
+                γ: {deviceOrientationRef.current.gamma.toFixed(1)}°
+              </div>
             </div>
           </div>
           
@@ -919,6 +939,35 @@ export function ARQuest(): React.JSX.Element {
             <div style={{ fontSize: "8px", color: "#cccccc" }}>
               Children: {extendedDebug.sceneInfo.childrenCount}<br/>
               Background: {extendedDebug.sceneInfo.backgroundSet ? "✅ Set" : "❌ Not Set"}
+            </div>
+          </div>
+          
+          {/* Анализ проблемы */}
+          <div style={{ marginBottom: "8px", padding: "4px", background: "rgba(255,0,0,0.1)", borderRadius: "4px" }}>
+            <div style={{ fontWeight: "bold", color: "#ff6666", marginBottom: "2px" }}>🚨 Problem Analysis:</div>
+            <div style={{ fontSize: "8px", color: "#cccccc" }}>
+              {(() => {
+                const cameraStuck = extendedDebug.cameraInfo.position.x === 0 && extendedDebug.cameraInfo.position.y === 0 && extendedDebug.cameraInfo.position.z === 0;
+                const shivaModel = modelsRef.current['shiva'];
+                const shivaPos = shivaModel ? shivaModel.position : null;
+                
+                if (cameraStuck) {
+                  return (
+                    <div>
+                      <div style={{ color: "#ff6666" }}>❌ Camera stuck at origin (0,0,0)</div>
+                      <div style={{ color: "#ffaa00" }}>• 3D models not visible</div>
+                      <div style={{ color: "#ffaa00" }}>• Distance UI not updating</div>
+                      <div style={{ color: "#ffaa00" }}>• Need to move camera to user position</div>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div style={{ color: "#00ff00" }}>
+                      ✅ Camera moving properly
+                    </div>
+                  );
+                }
+              })()}
             </div>
           </div>
           
