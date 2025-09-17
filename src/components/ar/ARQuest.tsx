@@ -113,7 +113,20 @@ export function ARQuest(): React.JSX.Element {
       ...prev,
       userGPS: {lat: userLat, lon: userLon, alt: userAlt, accuracy, timestamp: Date.now()},
       gpsUpdateCount: prev.gpsUpdateCount + 1,
-      lastUpdateTime: Date.now()
+      lastUpdateTime: Date.now(),
+      // Принудительно обновляем камеру
+      cameraInfo: cameraRef.current ? {
+        position: { 
+          x: cameraRef.current.position.x, 
+          y: cameraRef.current.position.y, 
+          z: cameraRef.current.position.z 
+        },
+        rotation: { 
+          x: cameraRef.current.rotation.x, 
+          y: cameraRef.current.rotation.y, 
+          z: cameraRef.current.rotation.z 
+        }
+      } : prev.cameraInfo
     }));
     
     let closest: {id:string; angle:number; distance:number} | null = null as any;
@@ -273,6 +286,15 @@ export function ARQuest(): React.JSX.Element {
         if (userPosRef.current.lat !== 0 && userPosRef.current.lon !== 0) {
           updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt);
         }
+        
+        // Принудительно обновляем информацию о камере
+        setExtendedDebug(prev => ({
+          ...prev,
+          cameraInfo: {
+            position: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+            rotation: { x: camera.rotation.x, y: camera.rotation.y, z: camera.rotation.z }
+          }
+        }));
         
         // Принудительно обновляем компас для 2D точки
         console.log(`🧭 Device orientation changed: α=${e.alpha?.toFixed(1)}°`);
@@ -839,7 +861,7 @@ export function ARQuest(): React.JSX.Element {
           background: "rgba(0,0,0,0.9)", 
           color: "#fff", 
           fontSize: 9,
-          maxHeight: "300px",
+          maxHeight: "500px",
           overflowY: "auto"
         }}>
           <div style={{ fontWeight: "bold", marginBottom: "6px", color: "#00ff00" }}>
@@ -863,11 +885,22 @@ export function ARQuest(): React.JSX.Element {
           <div style={{ marginBottom: "8px", padding: "4px", background: "rgba(255,165,0,0.1)", borderRadius: "4px" }}>
             <div style={{ fontWeight: "bold", color: "#ffa500", marginBottom: "2px" }}>📦 Models:</div>
             <div style={{ fontSize: "8px", color: "#cccccc" }}>
-              {Object.entries(extendedDebug.modelsLoaded).map(([id, loaded]) => (
-                <div key={id} style={{ color: loaded ? "#00ff00" : "#ff6666" }}>
-                  {id}: {loaded ? "✅ Loaded" : "❌ Failed"}
-                </div>
-              ))}
+              {Object.entries(extendedDebug.modelsLoaded).map(([id, loaded]) => {
+                const model = modelsRef.current[id];
+                const marker = markersRef.current[id];
+                return (
+                  <div key={id} style={{ color: loaded ? "#00ff00" : "#ff6666" }}>
+                    {id}: {loaded ? "✅ Loaded" : "❌ Failed"}
+                    {model && (
+                      <div style={{ marginLeft: "10px", fontSize: "7px" }}>
+                        Pos: ({model.position.x.toFixed(1)}, {model.position.y.toFixed(1)}, {model.position.z.toFixed(1)})<br/>
+                        Visible: {model.visible ? "✅" : "❌"}<br/>
+                        Marker: {marker ? (marker.visible ? "✅" : "❌") : "❌"}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
           
