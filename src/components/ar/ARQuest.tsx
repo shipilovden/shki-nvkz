@@ -219,7 +219,8 @@ export function ARQuest(): React.JSX.Element {
       const markerMaterial = new THREE.MeshBasicMaterial({ 
         color: 0xff0000, 
         transparent: true, 
-        opacity: 0.8 
+        opacity: 0.8, 
+        depthTest: false // всегда поверх видео
       });
       const marker = new THREE.Mesh(markerGeometry, markerMaterial);
       // При создании не показываем маркер, пока не придёт первый GPS апдейт
@@ -326,7 +327,7 @@ export function ARQuest(): React.JSX.Element {
     }
     
     console.log("🚀 Starting AR Quest...");
-    setStatus("Проверяем локацию...");
+    setStatus("");
     addDebugInfo("🚀 Starting AR Quest...");
     
     try {
@@ -371,7 +372,7 @@ export function ARQuest(): React.JSX.Element {
       }
       
       console.log("✅ Location approved, starting AR...");
-      setStatus("Запускаем камеру...");
+      setStatus("");
       setStarted(true);
       setUiVisible(true);
       await startAR(userLat, userLon, userAlt);
@@ -425,11 +426,16 @@ export function ARQuest(): React.JSX.Element {
   }, []);
 
   const toggleFullscreen = useCallback(() => {
-    setFullscreenMode(prev => {
-      const newMode = !prev;
-      console.log("📱 Camera Fullscreen toggle:", newMode ? "ON" : "OFF");
-      return newMode;
-    });
+    try {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.();
+        setFullscreenMode(true);
+      } else {
+        document.exitFullscreen?.();
+        setFullscreenMode(false);
+      }
+      console.log("📱 Fullscreen toggled");
+    } catch {}
   }, []);
 
   const toggleMarkers = useCallback(() => {
@@ -486,7 +492,7 @@ export function ARQuest(): React.JSX.Element {
         transform: "translateX(-50%)", 
         zIndex: 10000, 
         gap: 4,
-        overflowX: "auto",
+        overflowX: "hidden",
         padding: "0 10px",
         maxWidth: "calc(100vw - 20px)",
         boxSizing: "border-box",
