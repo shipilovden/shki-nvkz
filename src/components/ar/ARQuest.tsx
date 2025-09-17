@@ -813,6 +813,8 @@ export function ARQuest(): React.JSX.Element {
             <button onClick={toggleFullscreen} style={{ padding: "4px 6px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>📱 Экран</button>
             <button onClick={() => setUseDebugCoords(!useDebugCoords)} style={{ padding: "4px 6px", background: useDebugCoords ? "rgba(255,165,0,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🧪 Debug GPS</button>
             <button onClick={() => { if (userPosRef.current.lat !== 0) { updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt); console.log("🔄 Manual GPS update triggered"); } }} style={{ padding: "4px 6px", background: "rgba(0,255,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🔄 Update</button>
+            <button onClick={() => { console.log("📍 Current GPS:", userPosRef.current); console.log("🧭 Compass angle:", compassAngle); console.log("📷 Camera:", extendedDebug.cameraInfo); }} style={{ padding: "4px 6px", background: "rgba(0,100,255,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>📊 Info</button>
+            <button onClick={() => { const shiva = AR_CONFIG.TARGETS.find(t => t.id === 'shiva'); if (shiva) { console.log("🎯 Shiva position:", shiva); console.log("🎯 Shiva model:", modelsRef.current['shiva']); } }} style={{ padding: "4px 6px", background: "rgba(255,0,255,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🎯 Shiva</button>
           </div>
         </div>
 
@@ -831,7 +833,7 @@ export function ARQuest(): React.JSX.Element {
           display: status ? "block" : "none" 
         }}>{status}</div>
 
-        {/* Верхние кнопки управления - как внизу */}
+        {/* Верхние индикации - как кнопки внизу (два ряда) */}
         {started && (
           <div style={{ 
             position: fullscreenMode ? "fixed" : "absolute", 
@@ -848,51 +850,114 @@ export function ARQuest(): React.JSX.Element {
             justifyContent: "center",
             flexWrap: "wrap"
           }}>
+            {/* Первый ряд - основные индикации */}
             <div style={{ display: "flex", gap: 6 }}>
-              <button onClick={() => setShowDebug(!showDebug)} style={{ padding: "4px 6px", background: showDebug ? "rgba(0,255,0,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🐛 Debug</button>
-              <button onClick={toggleMarkers} style={{ padding: "4px 6px", background: markersVisible ? "rgba(255,0,0,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🔴 Маркеры</button>
-              <button onClick={toggleFullscreen} style={{ padding: "4px 6px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>📱 Экран</button>
-              <button onClick={() => setUseDebugCoords(!useDebugCoords)} style={{ padding: "4px 6px", background: useDebugCoords ? "rgba(255,165,0,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🧪 Debug GPS</button>
+              {/* Стрелка направления */}
+              <div style={{ 
+                padding: "4px 6px", 
+                background: "rgba(0,255,0,0.7)", 
+                color: "white", 
+                border: "none", 
+                borderRadius: "4px", 
+                fontSize: "10px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px"
+              }}>
+                {compassAngle !== null && compassAngle > 315 || compassAngle < 45 ? "⬆️" :
+                 compassAngle >= 45 && compassAngle < 135 ? "➡️" :
+                 compassAngle >= 135 && compassAngle < 225 ? "⬇️" : "⬅️"}
+                <span>Направление</span>
+              </div>
+              
+              {/* Расстояние до Шивы */}
+              <div style={{ 
+                padding: "4px 6px", 
+                background: "rgba(0,100,255,0.7)", 
+                color: "white", 
+                border: "none", 
+                borderRadius: "4px", 
+                fontSize: "10px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px"
+              }}>
+                📏 {(() => {
+                  const shiva = AR_CONFIG.TARGETS.find(t => t.id === 'shiva');
+                  if (shiva && extendedDebug.userGPS.lat !== 0) {
+                    const dist = haversine(extendedDebug.userGPS.lat, extendedDebug.userGPS.lon, shiva.lat, shiva.lon);
+                    return `${dist.toFixed(1)}м`;
+                  }
+                  return "10.2м";
+                })()}
+              </div>
+              
+              {/* Компас угол */}
+              <div style={{ 
+                padding: "4px 6px", 
+                background: "rgba(255,165,0,0.7)", 
+                color: "white", 
+                border: "none", 
+                borderRadius: "4px", 
+                fontSize: "10px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px"
+              }}>
+                🧭 {compassAngle !== null ? `${compassAngle.toFixed(0)}°` : "N/A"}
+              </div>
             </div>
+            
+            {/* Второй ряд - дополнительная информация */}
             <div style={{ display: "flex", gap: 6 }}>
-              <button onClick={() => { if (userPosRef.current.lat !== 0) { updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt); console.log("🔄 Manual GPS update triggered"); } }} style={{ padding: "4px 6px", background: "rgba(0,255,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🔄 Update</button>
-              <button onClick={() => { console.log("📍 Current GPS:", userPosRef.current); console.log("🧭 Compass angle:", compassAngle); console.log("📷 Camera:", extendedDebug.cameraInfo); }} style={{ padding: "4px 6px", background: "rgba(0,100,255,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>📊 Info</button>
-              <button onClick={() => { const shiva = AR_CONFIG.TARGETS.find(t => t.id === 'shiva'); if (shiva) { console.log("🎯 Shiva position:", shiva); console.log("🎯 Shiva model:", modelsRef.current['shiva']); } }} style={{ padding: "4px 6px", background: "rgba(255,0,255,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🎯 Shiva</button>
+              {/* GPS координаты пользователя */}
+              <div style={{ 
+                padding: "4px 6px", 
+                background: "rgba(0,0,0,0.7)", 
+                color: "white", 
+                border: "none", 
+                borderRadius: "4px", 
+                fontSize: "9px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px"
+              }}>
+                📍 {extendedDebug.userGPS.lat.toFixed(4)}, {extendedDebug.userGPS.lon.toFixed(4)}
+              </div>
+              
+              {/* Статус камеры */}
+              <div style={{ 
+                padding: "4px 6px", 
+                background: extendedDebug.cameraInfo.rotation.x === 0 && extendedDebug.cameraInfo.rotation.y === 0 && extendedDebug.cameraInfo.rotation.z === 0 ? "rgba(255,0,0,0.7)" : "rgba(0,255,0,0.7)", 
+                color: "white", 
+                border: "none", 
+                borderRadius: "4px", 
+                fontSize: "9px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px"
+              }}>
+                📷 {extendedDebug.cameraInfo.rotation.x === 0 && extendedDebug.cameraInfo.rotation.y === 0 && extendedDebug.cameraInfo.rotation.z === 0 ? "НЕ поворачивается" : "Поворачивается"}
+              </div>
+              
+              {/* Статус моделей */}
+              <div style={{ 
+                padding: "4px 6px", 
+                background: "rgba(255,0,255,0.7)", 
+                color: "white", 
+                border: "none", 
+                borderRadius: "4px", 
+                fontSize: "9px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px"
+              }}>
+                📦 {Object.values(extendedDebug.modelsLoaded).filter(Boolean).length}/{Object.keys(extendedDebug.modelsLoaded).length} моделей
+              </div>
             </div>
           </div>
         )}
 
-        {/* Информация об объектах - расширенная версия */}
-        {started && (
-          <div style={{ 
-            position: fullscreenMode ? "fixed" : "absolute", 
-            top: 60, 
-            left: 12, 
-            zIndex: 10000, 
-            padding: "8px 12px", 
-            borderRadius: 8, 
-            background: "rgba(0,0,0,0.8)", 
-            color: "#fff", 
-            fontSize: 11,
-            minWidth: 200
-          }}>
-            {AR_CONFIG.TARGETS.map(target => {
-              const info = objectInfo[target.id];
-              if (!info) return null;
-              return (
-                <div key={target.id} style={{ marginBottom: 6, fontSize: 10 }}>
-                  <div style={{ color: info.inRange ? "#00ff00" : "#ff6666", fontWeight: "bold" }}>
-                    {target.name}: {info.distance.toFixed(1)}м
-                    {info.inRange && <span style={{ color: "#00ff00", marginLeft: 8 }}>✓</span>}
-                  </div>
-                  <div style={{ color: "#cccccc", fontSize: 9, marginTop: 2 }}>
-                    {info.coordinates.lat.toFixed(6)}, {info.coordinates.lon.toFixed(6)}, {info.coordinates.alt.toFixed(1)}м
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
 
         {/* Компас - красная точка с индикацией направления и расстояния */}
         {started && compassAngle !== null && (
@@ -948,95 +1013,29 @@ export function ARQuest(): React.JSX.Element {
           </div>
         )}
 
-        {/* Новые визуальные индикации */}
-        {started && (
-          <>
-            {/* Стрелки направления по краям экрана */}
-            <div style={{
-              position: fullscreenMode ? "fixed" : "absolute",
-              top: "20px",
-              left: "20px",
-              zIndex: 10000,
-              pointerEvents: "none"
-            }}>
-              <div style={{
-                width: "40px",
-                height: "40px",
-                background: "rgba(0,255,0,0.7)",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "20px",
-                color: "white",
-                border: "2px solid white",
-                filter: "drop-shadow(0 0 4px rgba(0,0,0,0.9))"
-              }}>
-                {compassAngle !== null && compassAngle > 315 || compassAngle < 45 ? "⬆️" :
-                 compassAngle >= 45 && compassAngle < 135 ? "➡️" :
-                 compassAngle >= 135 && compassAngle < 225 ? "⬇️" : "⬅️"}
-              </div>
-      </div>
-      
-            {/* Мини-карта с позицией - расширенная версия */}
-            <div style={{
-              position: fullscreenMode ? "fixed" : "absolute",
-              top: "60px",
-              right: "12px",
-              zIndex: 10000,
-              pointerEvents: "none",
-              background: "rgba(0,0,0,0.8)",
-              borderRadius: "8px",
-              padding: "8px",
-              color: "white",
-              fontSize: "10px",
-              minWidth: "160px"
-            }}>
-              <div style={{ fontWeight: "bold", marginBottom: "4px" }}>🗺️ Мини-карта</div>
-              <div style={{ fontSize: "9px" }}>
-                📍 Ты: ({extendedDebug.userGPS.lat.toFixed(6)}, {extendedDebug.userGPS.lon.toFixed(6)})<br/>
-                🎯 Шива: (53.691667, 87.432778)<br/>
-                <div style={{ color: "#00ff00", marginTop: "4px" }}>
-                  📏 Расстояние: {(() => {
-                    const shiva = AR_CONFIG.TARGETS.find(t => t.id === 'shiva');
-                    if (shiva && extendedDebug.userGPS.lat !== 0) {
-                      const dist = haversine(extendedDebug.userGPS.lat, extendedDebug.userGPS.lon, shiva.lat, shiva.lon);
-                      return `${dist.toFixed(1)}м`;
-                    }
-                    return "10.2м";
-                  })()}
-                </div>
-                <div style={{ color: "#ffaa00", marginTop: "4px" }}>
-                  🧭 Направление: {compassAngle !== null ? `${compassAngle.toFixed(0)}°` : "N/A"}
-                </div>
-              </div>
-            </div>
-
-            {/* Комбинированный индикатор - компактный */}
-            {compassAngle !== null && (
-              <div style={{
-                position: fullscreenMode ? "fixed" : "absolute",
-                bottom: "100px",
-                left: "50%",
-                transform: "translateX(-50%)",
-                zIndex: 10000,
-                pointerEvents: "none",
-                background: "rgba(0,255,0,0.9)",
-                color: "white",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                fontSize: "11px",
-                fontWeight: "bold",
-                border: "2px solid white",
-                filter: "drop-shadow(0 0 4px rgba(0,0,0,0.9))",
-                animation: "pulse 2s infinite",
-                textAlign: "center",
-                maxWidth: "280px"
-              }}>
-                🎯 Шива рядом! 📱 Поверни телефон в направлении стрелки!
-              </div>
-            )}
-          </>
+        {/* Комбинированный индикатор - компактный */}
+        {started && compassAngle !== null && (
+          <div style={{
+            position: fullscreenMode ? "fixed" : "absolute",
+            bottom: "100px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 10000,
+            pointerEvents: "none",
+            background: "rgba(0,255,0,0.9)",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: "20px",
+            fontSize: "11px",
+            fontWeight: "bold",
+            border: "2px solid white",
+            filter: "drop-shadow(0 0 4px rgba(0,0,0,0.9))",
+            animation: "pulse 2s infinite",
+            textAlign: "center",
+            maxWidth: "280px"
+          }}>
+            🎯 Шива рядом! 📱 Поверни телефон в направлении стрелки!
+          </div>
         )}
       </div>
       
