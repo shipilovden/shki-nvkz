@@ -51,6 +51,12 @@ export function ARQuest(): React.JSX.Element {
   const [showDebug, setShowDebug] = useState(false);
   const [compassAngle, setCompassAngle] = useState<number | null>(null);
   const userPosRef = useRef<{lat:number, lon:number, alt:number}>({lat:0,lon:0,alt:0});
+  // Авто-очистка статуса через 3 секунды, чтобы не залипал баннер
+  useEffect(() => {
+    if (!status) return;
+    const t = setTimeout(() => setStatus(""), 3000);
+    return () => clearTimeout(t);
+  }, [status]);
 
   // Функция для добавления отладочной информации
   const addDebugInfo = useCallback((message: string) => {
@@ -321,7 +327,7 @@ export function ARQuest(): React.JSX.Element {
             const x = (v.x * 0.5 + 0.5) * rectW;
             const y = (-v.y * 0.5 + 0.5) * rectH;
             const inFront = v.z < 1 && v.z > -1;
-            if (marker.visible && markersVisibleRef.current && inFront) {
+            if (markersVisibleRef.current && inFront && marker.visible) {
               dot.style.left = `${x}px`;
               dot.style.top = `${y}px`;
               dot.style.display = 'block';
