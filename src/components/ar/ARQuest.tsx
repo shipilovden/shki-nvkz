@@ -320,6 +320,14 @@ export function ARQuest(): React.JSX.Element {
         const euler = new THREE.Euler(beta, alpha, -gamma, "YXZ");
         camera.quaternion.setFromEuler(euler);
         
+        // КРИТИЧЕСКАЯ ОТЛАДКА: логируем поворот камеры
+        console.log(`📷 Camera rotation applied:`, {
+          deviceOrientation: { alpha: e.alpha, beta: e.beta, gamma: e.gamma },
+          euler: { x: beta, y: alpha, z: -gamma },
+          cameraRotation: { x: camera.rotation.x, y: camera.rotation.y, z: camera.rotation.z },
+          cameraQuaternion: { x: camera.quaternion.x, y: camera.quaternion.y, z: camera.quaternion.z, w: camera.quaternion.w }
+        });
+        
         // Принудительно обновляем информацию о камере
         setExtendedDebug(prev => ({
           ...prev,
@@ -873,7 +881,8 @@ export function ARQuest(): React.JSX.Element {
               background: "rgba(255,0,0,0.9)",
               border: "2px solid white",
               filter: "drop-shadow(0 0 4px rgba(0,0,0,0.9))",
-              margin: "0 auto"
+              margin: "0 auto",
+              animation: "glow 2s infinite"
             }}/>
             {/* Стрелка направления */}
             <div style={{
@@ -906,6 +915,113 @@ export function ARQuest(): React.JSX.Element {
               })()}
             </div>
           </div>
+        )}
+
+        {/* Новые визуальные индикации */}
+        {started && (
+          <>
+            {/* Стрелки направления по краям экрана */}
+            <div style={{
+              position: fullscreenMode ? "fixed" : "absolute",
+              top: "20px",
+              left: "20px",
+              zIndex: 10000,
+              pointerEvents: "none"
+            }}>
+              <div style={{
+                width: "40px",
+                height: "40px",
+                background: "rgba(0,255,0,0.7)",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "20px",
+                color: "white",
+                border: "2px solid white",
+                filter: "drop-shadow(0 0 4px rgba(0,0,0,0.9))"
+              }}>
+                {compassAngle !== null && compassAngle > 315 || compassAngle < 45 ? "⬆️" :
+                 compassAngle >= 45 && compassAngle < 135 ? "➡️" :
+                 compassAngle >= 135 && compassAngle < 225 ? "⬇️" : "⬅️"}
+              </div>
+            </div>
+
+            {/* Мини-карта с позицией */}
+            <div style={{
+              position: fullscreenMode ? "fixed" : "absolute",
+              top: "20px",
+              right: "20px",
+              zIndex: 10000,
+              pointerEvents: "none",
+              background: "rgba(0,0,0,0.8)",
+              borderRadius: "8px",
+              padding: "8px",
+              color: "white",
+              fontSize: "10px",
+              minWidth: "120px"
+            }}>
+              <div style={{ fontWeight: "bold", marginBottom: "4px" }}>🗺️ Мини-карта</div>
+              <div>📍 Ты: ({extendedDebug.userGPS.lat.toFixed(6)}, {extendedDebug.userGPS.lon.toFixed(6)})</div>
+              <div>🎯 Шива: (53.691667, 87.432778)</div>
+              <div style={{ color: "#00ff00", marginTop: "4px" }}>
+                📏 Расстояние: {(() => {
+                  const shiva = AR_CONFIG.TARGETS.find(t => t.id === 'shiva');
+                  if (shiva && extendedDebug.userGPS.lat !== 0) {
+                    const dist = haversine(extendedDebug.userGPS.lat, extendedDebug.userGPS.lon, shiva.lat, shiva.lon);
+                    return `${dist.toFixed(1)}м`;
+                  }
+                  return "10.2м";
+                })()}
+              </div>
+              <div style={{ color: "#ffaa00", marginTop: "4px" }}>
+                🧭 Направление: {compassAngle !== null ? `${compassAngle.toFixed(0)}°` : "N/A"}
+              </div>
+            </div>
+
+            {/* Индикатор "Поверни телефон" */}
+            {compassAngle !== null && (
+              <div style={{
+                position: fullscreenMode ? "fixed" : "absolute",
+                bottom: "80px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 10000,
+                pointerEvents: "none",
+                background: "rgba(255,165,0,0.9)",
+                color: "white",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                fontSize: "12px",
+                fontWeight: "bold",
+                border: "2px solid white",
+                filter: "drop-shadow(0 0 4px rgba(0,0,0,0.9))",
+                animation: "pulse 2s infinite"
+              }}>
+                📱 Поверни телефон в направлении стрелки!
+              </div>
+            )}
+
+            {/* Индикатор видимости Шивы */}
+            <div style={{
+              position: fullscreenMode ? "fixed" : "absolute",
+              bottom: "120px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 10000,
+              pointerEvents: "none",
+              background: "rgba(0,255,0,0.9)",
+              color: "white",
+              padding: "6px 12px",
+              borderRadius: "16px",
+              fontSize: "11px",
+              fontWeight: "bold",
+              border: "2px solid white",
+              filter: "drop-shadow(0 0 4px rgba(0,0,0,0.9))"
+            }}>
+              🎯 Шива рядом! Ищи в направлении стрелки
+            </div>
+          </>
         )}
       </div>
       
@@ -981,7 +1097,7 @@ export function ARQuest(): React.JSX.Element {
             <div style={{ fontWeight: "bold", color: "#0066ff", marginBottom: "2px" }}>📷 Camera:</div>
             <div style={{ fontSize: "8px", color: "#cccccc" }}>
               Pos: ({extendedDebug.cameraInfo.position.x.toFixed(1)}, {extendedDebug.cameraInfo.position.y.toFixed(1)}, {extendedDebug.cameraInfo.position.z.toFixed(1)})<br/>
-              Rot: ({extendedDebug.cameraInfo.rotation.x.toFixed(1)}, {extendedDebug.cameraInfo.rotation.y.toFixed(1)}, {extendedDebug.cameraInfo.rotation.z.toFixed(1)})<br/>
+              Rot: ({extendedDebug.cameraInfo.rotation.x.toFixed(3)}, {extendedDebug.cameraInfo.rotation.y.toFixed(3)}, {extendedDebug.cameraInfo.rotation.z.toFixed(3)})<br/>
               <div style={{ color: extendedDebug.cameraInfo.position.x === 0 && extendedDebug.cameraInfo.position.y === 0 && extendedDebug.cameraInfo.position.z === 0 ? "#ff6666" : "#00ff00", marginTop: "2px" }}>
                 <strong>Status:</strong> {extendedDebug.cameraInfo.position.x === 0 && extendedDebug.cameraInfo.position.y === 0 && extendedDebug.cameraInfo.position.z === 0 ? "❌ STUCK AT ORIGIN" : "✅ MOVING"}
               </div>
@@ -990,6 +1106,17 @@ export function ARQuest(): React.JSX.Element {
                 α: {deviceOrientationRef.current.alpha.toFixed(1)}°<br/>
                 β: {deviceOrientationRef.current.beta.toFixed(1)}°<br/>
                 γ: {deviceOrientationRef.current.gamma.toFixed(1)}°
+              </div>
+              <div style={{ color: "#ff6666", marginTop: "2px" }}>
+                <strong>Camera Rotation Status:</strong><br/>
+                {extendedDebug.cameraInfo.rotation.x === 0 && extendedDebug.cameraInfo.rotation.y === 0 && extendedDebug.cameraInfo.rotation.z === 0 ? 
+                  "❌ NOT ROTATING" : "✅ ROTATING"
+                }
+              </div>
+              <div style={{ color: "#00ff00", marginTop: "2px" }}>
+                <strong>Field of View:</strong><br/>
+                FOV: 75°, Near: 0.01, Far: 2000<br/>
+                Aspect: {(window.innerWidth / window.innerHeight).toFixed(2)}
               </div>
             </div>
           </div>
@@ -1026,7 +1153,7 @@ export function ARQuest(): React.JSX.Element {
                   return (
                     <div>
                       <div style={{ color: "#00ff00" }}>✅ Camera is MOVING!</div>
-                      <div style={{ color: "#ffaa00" }}>Shiva Visibility:</div>
+                      <div style={{ color: "#ffaa00" }}>Shiva Visibility Analysis:</div>
                       <div style={{ color: "#cccccc" }}>
                         Model is at ({shivaPos ? shivaPos.x.toFixed(1) : 'N/A'}, {shivaPos ? shivaPos.y.toFixed(1) : 'N/A'}, {shivaPos ? shivaPos.z.toFixed(1) : 'N/A'}).<br/>
                         Camera is at ({extendedDebug.cameraInfo.position.x.toFixed(1)}, {extendedDebug.cameraInfo.position.y.toFixed(1)}, {extendedDebug.cameraInfo.position.z.toFixed(1)}).<br/>
@@ -1036,10 +1163,47 @@ export function ARQuest(): React.JSX.Element {
                           <span style={{ color: "#ff6666" }}>Shiva too far vertically!</span>
                         }
                       </div>
-                      <div style={{ color: "#ffaa00", marginTop: "4px" }}>Distance Update:</div>
+                      <div style={{ color: "#ffaa00", marginTop: "4px" }}>Camera Rotation Analysis:</div>
                       <div style={{ color: "#cccccc" }}>
-                        UI distance (10.2m) is static.<br/>
-                        GPS distance (10.2m) is also static.
+                        Camera Rot: ({extendedDebug.cameraInfo.rotation.x.toFixed(3)}, {extendedDebug.cameraInfo.rotation.y.toFixed(3)}, {extendedDebug.cameraInfo.rotation.z.toFixed(3)})<br/>
+                        Device α: {deviceOrientationRef.current.alpha.toFixed(1)}°, β: {deviceOrientationRef.current.beta.toFixed(1)}°, γ: {deviceOrientationRef.current.gamma.toFixed(1)}°<br/>
+                        {extendedDebug.cameraInfo.rotation.x === 0 && extendedDebug.cameraInfo.rotation.y === 0 && extendedDebug.cameraInfo.rotation.z === 0 ? 
+                          <span style={{ color: "#ff6666" }}>❌ Camera NOT rotating with device!</span> : 
+                          <span style={{ color: "#00ff00" }}>✅ Camera rotating with device</span>
+                        }
+                      </div>
+                      <div style={{ color: "#ffaa00", marginTop: "4px" }}>Field of View Analysis:</div>
+                      <div style={{ color: "#cccccc" }}>
+                        FOV: 75°, Near: 0.01m, Far: 2000m<br/>
+                        Camera looking direction: {extendedDebug.cameraInfo.rotation.y > 0 ? "Right" : extendedDebug.cameraInfo.rotation.y < 0 ? "Left" : "Forward"}<br/>
+                        {shivaPos && Math.abs(shivaPos.x) < 50 && Math.abs(shivaPos.z) < 50 ? 
+                          <span style={{ color: "#00ff00" }}>✅ Shiva within FOV range</span> : 
+                          <span style={{ color: "#ff6666" }}>❌ Shiva outside FOV range</span>
+                        }
+                      </div>
+                      <div style={{ color: "#ffaa00", marginTop: "4px" }}>GPS vs 3D Analysis:</div>
+                      <div style={{ color: "#cccccc" }}>
+                        GPS Distance: {(() => {
+                          const shiva = AR_CONFIG.TARGETS.find(t => t.id === 'shiva');
+                          if (shiva && extendedDebug.userGPS.lat !== 0) {
+                            const dist = haversine(extendedDebug.userGPS.lat, extendedDebug.userGPS.lon, shiva.lat, shiva.lon);
+                            return `${dist.toFixed(1)}m`;
+                          }
+                          return 'N/A';
+                        })()}<br/>
+                        3D Distance: {shivaPos ? Math.sqrt(Math.pow(shivaPos.x - extendedDebug.cameraInfo.position.x, 2) + Math.pow(shivaPos.y - extendedDebug.cameraInfo.position.y, 2) + Math.pow(shivaPos.z - extendedDebug.cameraInfo.position.z, 2)).toFixed(1) : 'N/A'}m<br/>
+                        {(() => {
+                          const shiva = AR_CONFIG.TARGETS.find(t => t.id === 'shiva');
+                          if (shiva && extendedDebug.userGPS.lat !== 0 && shivaPos) {
+                            const gpsDist = haversine(extendedDebug.userGPS.lat, extendedDebug.userGPS.lon, shiva.lat, shiva.lon);
+                            const dist3D = Math.sqrt(Math.pow(shivaPos.x - extendedDebug.cameraInfo.position.x, 2) + Math.pow(shivaPos.y - extendedDebug.cameraInfo.position.y, 2) + Math.pow(shivaPos.z - extendedDebug.cameraInfo.position.z, 2));
+                            const diff = Math.abs(gpsDist - dist3D);
+                            return diff < 5 ? 
+                              <span style={{ color: "#00ff00" }}>✅ GPS and 3D distances match</span> : 
+                              <span style={{ color: "#ff6666" }}>❌ GPS and 3D distances differ by {diff.toFixed(1)}m</span>;
+                          }
+                          return 'N/A';
+                        })()}
                       </div>
                     </div>
                   );
@@ -1060,12 +1224,22 @@ export function ARQuest(): React.JSX.Element {
         </div>
       )}
 
-      {/* CSS анимация пульса для оверлея */}
+      {/* CSS анимации */}
       <style>{`
         @keyframes apulse {
           0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.9; }
           50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
           100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.9; }
+        }
+        @keyframes pulse {
+          0% { transform: translateX(-50%) scale(1); opacity: 0.9; }
+          50% { transform: translateX(-50%) scale(1.05); opacity: 1; }
+          100% { transform: translateX(-50%) scale(1); opacity: 0.9; }
+        }
+        @keyframes glow {
+          0% { box-shadow: 0 0 4px rgba(0,0,0,0.9); }
+          50% { box-shadow: 0 0 8px rgba(255,0,0,0.8); }
+          100% { box-shadow: 0 0 4px rgba(0,0,0,0.9); }
         }
       `}</style>
       
