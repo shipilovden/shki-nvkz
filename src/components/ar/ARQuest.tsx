@@ -133,7 +133,10 @@ export function ARQuest(): React.JSX.Element {
       
       console.log(`🧭 Compass ${target.name}: bearing=${bearingDeg.toFixed(1)}°, device=${deviceAlpha.toFixed(1)}°, adjusted=${adjustedBearing.toFixed(1)}°, distance=${distance.toFixed(1)}m`);
       
-      if (!closest || distance < closest.distance) closest = { id: target.id, angle: adjustedBearing, distance };
+      if (!closest || distance < closest.distance) {
+        closest = { id: target.id, angle: adjustedBearing, distance };
+        console.log(`🎯 New closest target: ${target.name} at ${distance.toFixed(1)}m, angle=${adjustedBearing.toFixed(1)}°`);
+      }
 
       // Обновляем позицию красного маркера над моделью
       if (marker) {
@@ -195,10 +198,13 @@ export function ARQuest(): React.JSX.Element {
       }
     });
     if (closest && typeof closest.angle === 'number') {
+      const oldAngle = compassAngle;
       setCompassAngle(closest.angle);
-      console.log(`🧭 Compass updated: ${closest.id} at ${closest.angle.toFixed(1)}°`);
+      console.log(`🧭 Compass updated: ${closest.id} at ${closest.angle.toFixed(1)}° (was ${oldAngle?.toFixed(1) || 'null'}°)`);
+    } else {
+      console.log(`🧭 No closest target found or invalid angle:`, closest);
     }
-  }, [markersVisible]);
+  }, [markersVisible, compassAngle]);
 
   const startAR = useCallback(async (userLat: number, userLon: number, userAlt: number) => {
     const canvas = canvasRef.current;
@@ -322,6 +328,7 @@ export function ARQuest(): React.JSX.Element {
       
       // Принудительно обновляем расстояние 10 раз в секунду
       if (Math.floor(time * 10) !== Math.floor((time - 0.001) * 10) && userPosRef.current.lat !== 0) {
+        console.log(`🔄 Forced update: userPos=(${userPosRef.current.lat.toFixed(6)}, ${userPosRef.current.lon.toFixed(6)}, ${userPosRef.current.alt.toFixed(1)})`);
         updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt);
       }
 
@@ -329,17 +336,21 @@ export function ARQuest(): React.JSX.Element {
       // Это гарантирует, что точка двигается при повороте телефона, даже если 3D-проекция недоступна.
       try {
         const overlayRoot = document.getElementById('overlay-markers');
+        console.log(`🔍 Overlay check: overlayRoot=${!!overlayRoot}, markersVisible=${markersVisibleRef.current}, compassAngle=${compassAngle}, useDirectional=${useDirectionalOverlayRef.current}`);
+        
         if (overlayRoot && markersVisibleRef.current && typeof compassAngle === 'number' && useDirectionalOverlayRef.current) {
           let dirDot = overlayRoot.querySelector('.dot-direction') as HTMLDivElement | null;
           if (!dirDot) {
             dirDot = document.createElement('div');
             dirDot.className = 'dot-direction';
             Object.assign(dirDot.style, {
-              position: 'absolute', width: '14px', height: '14px', borderRadius: '50%',
+              position: 'absolute', width: '20px', height: '20px', borderRadius: '50%',
               background: 'rgba(255,0,0,0.9)', transform: 'translate(-50%, -50%)',
-              filter: 'drop-shadow(0 0 4px rgba(0,0,0,0.8))', display: 'none', pointerEvents: 'none'
+              filter: 'drop-shadow(0 0 4px rgba(0,0,0,0.8))', display: 'none', pointerEvents: 'none',
+              border: '2px solid white', zIndex: '10000'
             } as CSSStyleDeclaration);
             overlayRoot.appendChild(dirDot);
+            console.log(`🔴 Created new direction dot`);
           }
 
           const canvas = canvasRef.current;
@@ -357,9 +368,16 @@ export function ARQuest(): React.JSX.Element {
             dirDot.style.left = `${x}px`;
             dirDot.style.top = `${y}px`;
             dirDot.style.display = 'block';
+            
+            // Логируем каждые 30 кадров
+            if (Math.floor(time * 30) % 30 === 0) {
+              console.log(`🔴 Direction dot: compass=${compassAngle.toFixed(1)}°, angleRad=${angleRad.toFixed(3)}, pos=(${x.toFixed(1)}, ${y.toFixed(1)}), radius=${radius.toFixed(1)}`);
+            }
           }
         }
-      } catch {}
+      } catch (e) {
+        console.error(`❌ Direction dot error:`, e);
+      }
       
       // Обновляем мировые матрицы перед проекцией в 2D
       if (sceneRef.current) {
