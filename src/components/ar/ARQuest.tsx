@@ -122,11 +122,22 @@ export function ARQuest(): React.JSX.Element {
           console.log(`🔴 Marker ${target.name} positioned above model: (${dx.toFixed(1)}, ${markerY.toFixed(1)}, ${dz.toFixed(1)})`);
           console.log(`🔴 GPS coordinates: ${target.lat}, ${target.lon}, ${target.alt}m`);
           console.log(`🔴 User GPS: ${userLat}, ${userLon}, ${userAlt}m`);
-          // вычисляем азимут для компаса
-          const y = Math.sin((target.lon - userLon) * Math.PI/180) * Math.cos(target.lat * Math.PI/180);
-          const x = Math.cos(userLat * Math.PI/180) * Math.sin(target.lat * Math.PI/180) - Math.sin(userLat * Math.PI/180) * Math.cos(target.lat * Math.PI/180) * Math.cos((target.lon - userLon) * Math.PI/180);
-          const bearingRad = Math.atan2(y, x);
-          const bearingDeg = (bearingRad * 180/Math.PI + 360) % 360; // 0..360
+          // вычисляем азимут для компаса (правильная формула)
+          const dLon = (target.lon - userLon) * Math.PI / 180;
+          const lat1 = userLat * Math.PI / 180;
+          const lat2 = target.lat * Math.PI / 180;
+          
+          const y = Math.sin(dLon) * Math.cos(lat2);
+          const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+          
+          let bearingRad = Math.atan2(y, x);
+          let bearingDeg = (bearingRad * 180 / Math.PI + 360) % 360;
+          
+          // Корректируем для компаса (0° = север, 90° = восток)
+          bearingDeg = (bearingDeg + 360) % 360;
+          
+          console.log(`🧭 Compass ${target.name}: bearing=${bearingDeg.toFixed(1)}°, distance=${distance.toFixed(1)}m`);
+          
           if (!closest || distance < closest.distance) closest = { id: target.id, angle: bearingDeg, distance };
         } else {
           // Скрываем маркер если далеко
@@ -179,7 +190,10 @@ export function ARQuest(): React.JSX.Element {
         console.log(`❌ Marker ${target.name} not found for position update`);
       }
     });
-    if (closest && typeof closest.angle === 'number') setCompassAngle(closest.angle);
+    if (closest && typeof closest.angle === 'number') {
+      setCompassAngle(closest.angle);
+      console.log(`🧭 Compass updated: ${closest.id} at ${closest.angle.toFixed(1)}°`);
+    }
   }, [markersVisible]);
 
   const startAR = useCallback(async (userLat: number, userLon: number, userAlt: number) => {
@@ -323,25 +337,39 @@ export function ARQuest(): React.JSX.Element {
               } as CSSStyleDeclaration);
               overlay.appendChild(dot);
             }
-            // 3D позиция: сначала модель, затем сам маркер, иначе точка по центру камеры
-            const world = new THREE.Vector3();
-            const modelObj = modelsRef.current[target.id];
-            if (modelObj) modelObj.getWorldPosition(world);
-            else if (marker) (marker as THREE.Object3D).getWorldPosition(world);
-            else world.set(0, 0, -5);
-            const v = world.project(camera);
-            const rectW = (canvasRef.current?.clientWidth || 1);
-            const rectH = (canvasRef.current?.clientHeight || 1);
-            const x = (v.x * 0.5 + 0.5) * rectW;
-            const y = (-v.y * 0.5 + 0.5) * rectH;
-            const inFront = v.z < 1 && v.z > -1;
-            if (markersVisibleRef.current && inFront && marker.visible) {
-              dot.style.left = `${x}px`;
-              dot.style.top = `${y}px`;
-              dot.style.display = 'block';
-              // пульсация (CSS-анимация для стабильности)
-              dot.style.animation = 'apulse 1s infinite ease-in-out';
-              dot.style.width = '16px'; dot.style.height = '16px';
+            
+            // Используем позицию маркера напрямую (он уже правильно позиционирован в updateModelPositionGPS)
+            if (marker && marker.visible && markersVisibleRef.current) {
+              const worldPosition = new THREE.Vector3();
+              marker.getWorldPosition(worldPosition);
+              
+              // Проекция 3D координат на 2D экран
+              const screenPosition = worldPosition.clone().project(camera);
+              
+              // Проверяем, что объект перед камерой
+              if (screenPosition.z < 1) {
+                const canvas = canvasRef.current;
+                if (canvas) {
+                  const rect = canvas.getBoundingClientRect();
+                  const x = (screenPosition.x * 0.5 + 0.5) * rect.width;
+                  const y = (-screenPosition.y * 0.5 + 0.5) * rect.height;
+                  
+                  // Проверяем, что точка в пределах экрана
+                  if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+                    dot.style.left = `${x}px`;
+                    dot.style.top = `${y}px`;
+                    dot.style.display = 'block';
+                    // пульсация (CSS-анимация для стабильности)
+                    dot.style.animation = 'apulse 1s infinite ease-in-out';
+                    dot.style.width = '16px'; 
+                    dot.style.height = '16px';
+                  } else {
+                    dot.style.display = 'none';
+                  }
+                }
+              } else {
+                dot.style.display = 'none';
+              }
             } else {
               dot.style.display = 'none';
             }
@@ -431,7 +459,8 @@ export function ARQuest(): React.JSX.Element {
           console.log("🔄 GPS Update received:", {
             lat: p.coords.latitude.toFixed(6),
             lon: p.coords.longitude.toFixed(6),
-            alt: (p.coords.altitude ?? 0).toFixed(1)
+            alt: (p.coords.altitude ?? 0).toFixed(1),
+            accuracy: p.coords.accuracy?.toFixed(1) + "m"
           });
           userPosRef.current = { lat: p.coords.latitude, lon: p.coords.longitude, alt: p.coords.altitude ?? 0 };
           updateModelPositionGPS(p.coords.latitude, p.coords.longitude, p.coords.altitude ?? 0);
@@ -441,7 +470,11 @@ export function ARQuest(): React.JSX.Element {
           console.error("❌ GPS Error:", err);
           if (err.code === 1) setStatus("Разрешите доступ к геолокации");
         },
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 }
+        { 
+          enableHighAccuracy: true, 
+          maximumAge: 1000, // Обновляем каждую секунду
+          timeout: 10000 
+        }
       );
     } catch (e) {
       console.error("❌ Start Quest Error:", e);
@@ -709,12 +742,12 @@ export function ARQuest(): React.JSX.Element {
             zIndex: 10001,
             width: 0,
             height: 0,
-            borderLeft: "10px solid transparent",
-            borderRight: "10px solid transparent",
-            borderBottom: "22px solid rgba(255,0,0,0.95)",
+            borderLeft: "6px solid transparent",
+            borderRight: "6px solid transparent",
+            borderBottom: "20px solid rgba(255,0,0,0.95)",
             transform: `rotate(${compassAngle}deg)`,
-            transformOrigin: "50% 80%",
-            filter: "drop-shadow(0 0 3px rgba(0,0,0,0.85))",
+            transformOrigin: "50% 100%",
+            filter: "drop-shadow(0 0 4px rgba(0,0,0,0.9))",
             pointerEvents: "none"
           }}/>
         )}
