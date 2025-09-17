@@ -110,7 +110,7 @@ export function ARQuest(): React.JSX.Element {
           const markerY = Math.max(dy + target.model.yOffset + 2, 2); // +2 метра над моделью
           marker.position.set(dx, markerY, dz);
           // Форс-показ маркера в радиусе; переключатель действует как доп. фильтр
-          marker.visible = true && markersVisibleRef.current;
+          marker.visible = markersVisibleRef.current; // уважает переключатель
           
           // Добавляем информацию о GPS координатах для отладки
           console.log(`🔴 Marker ${target.name} positioned above model: (${dx.toFixed(1)}, ${markerY.toFixed(1)}, ${dz.toFixed(1)})`);
@@ -302,7 +302,7 @@ export function ARQuest(): React.JSX.Element {
               console.log(`🔴 Marker ${target.name} pulsing: visible=${markersVisible}, scale=${pulseScale.toFixed(2)}, opacity=${opacity.toFixed(2)}, position=(${marker.position.x.toFixed(1)}, ${marker.position.y.toFixed(1)}, ${marker.position.z.toFixed(1)})`);
             }
           }
-          // HTML-оверлей: синхронизируем 2D-точку с 3D-маркером
+          // HTML-оверлей: синхронизируем 2D-точку с 3D-маркером (пульсация и видимость)
           const overlay = document.getElementById('overlay-markers');
           if (overlay && camera && renderer) {
             let dot = overlay.querySelector(`.dot-${target.id}`) as HTMLDivElement | null;
@@ -321,10 +321,13 @@ export function ARQuest(): React.JSX.Element {
             const x = (v.x * 0.5 + 0.5) * rectW;
             const y = (-v.y * 0.5 + 0.5) * rectH;
             const inFront = v.z < 1 && v.z > -1;
-            if (marker.visible && inFront) {
+            if (marker.visible && markersVisibleRef.current && inFront) {
               dot.style.left = `${x}px`;
               dot.style.top = `${y}px`;
               dot.style.display = 'block';
+              // пульсация
+              const size = 14 + Math.sin(time) * 6;
+              dot.style.width = `${size}px`; dot.style.height = `${size}px`;
             } else {
               dot.style.display = 'none';
             }
