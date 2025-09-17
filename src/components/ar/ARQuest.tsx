@@ -43,7 +43,7 @@ export function ARQuest(): React.JSX.Element {
   const recorderRef = useRef<MediaRecorder | null>(null);
   const watchIdRef = useRef<number | null>(null);
   const [fullscreenMode, setFullscreenMode] = useState(false);
-  const [markersVisible, setMarkersVisible] = useState(true);
+  const [markersVisible, setMarkersVisible] = useState(true); // По умолчанию маркеры видны
   const [objectInfo, setObjectInfo] = useState<{[key: string]: {distance: number, inRange: boolean, coordinates: {lat: number, lon: number, alt: number}}}>({});
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
@@ -172,15 +172,15 @@ export function ARQuest(): React.JSX.Element {
         opacity: 0.8 
       });
       const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-      marker.position.set(0, 0, -10); // Начальная позиция - 10 метров перед камерой
+      marker.position.set(0, 0, -5); // Начальная позиция - 5 метров перед камерой
       marker.visible = markersVisible; // Устанавливаем видимость
-      marker.userData.baseScale = 0.5; // Базовый размер
+      marker.userData.baseScale = 2.0; // Увеличиваем размер для видимости
       marker.userData.targetId = target.id; // Добавляем ID цели для отладки
       marker.name = `MARKER_${target.id}`; // Добавляем имя для отладки
       scene.add(marker);
       markersRef.current[target.id] = marker;
-      console.log(`🔴 Red marker for ${target.name} created and added to scene, visible: ${markersVisible}, position: (0,0,-10), inScene: ${scene.children.includes(marker)}`);
-      addDebugInfo(`🔴 Marker ${target.name} created, visible: ${markersVisible}`);
+      console.log(`🔴 Red marker for ${target.name} created and added to scene, visible: ${markersVisible}, position: (0,0,-5), inScene: ${scene.children.includes(marker)}`);
+      addDebugInfo(`🔴 Marker ${target.name} created, visible: ${markersVisible}, size: 2.0`);
     });
     
     console.log(`🔴 Total markers created: ${Object.keys(markersRef.current).length}`);
@@ -459,44 +459,50 @@ export function ARQuest(): React.JSX.Element {
         left: "50%", 
         transform: "translateX(-50%)", 
         zIndex: fullscreenMode ? 10000 : 9, 
-        gap: 8 
+        gap: 4,
+        overflowX: "auto",
+        padding: "0 10px",
+        maxWidth: "calc(100vw - 20px)",
+        boxSizing: "border-box",
+        justifyContent: "center"
       }}>
         <button 
           id="btn-photo" 
           onClick={capturePhoto}
-          style={{ padding: "8px 12px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}
+          style={{ padding: "6px 8px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px", whiteSpace: "nowrap" }}
         >
           📸 Фото
         </button>
         <button 
           id="btn-video" 
           onClick={startVideo}
-          style={{ padding: "8px 12px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}
+          style={{ padding: "6px 8px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px", whiteSpace: "nowrap" }}
         >
           🎥 Видео
         </button>
         <button 
           id="btn-stop" 
           onClick={stopVideo}
-          style={{ padding: "8px 12px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}
+          style={{ padding: "6px 8px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px", whiteSpace: "nowrap" }}
         >
           ⏹ Стоп
         </button>
         <button 
           id="btn-switch"
-          style={{ padding: "8px 12px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}
+          style={{ padding: "6px 8px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px", whiteSpace: "nowrap" }}
         >
           🔄 Камера
         </button>
         <button 
           onClick={toggleMarkers} 
           style={{ 
-            padding: "8px 12px", 
+            padding: "6px 8px", 
             background: markersVisible ? "rgba(255,0,0,0.7)" : "rgba(0,0,0,0.7)", 
             color: "white", 
             border: "none", 
             borderRadius: "4px", 
-            fontSize: "12px" 
+            fontSize: "10px",
+            whiteSpace: "nowrap"
           }}
         >
           🔴 Маркеры
@@ -504,19 +510,20 @@ export function ARQuest(): React.JSX.Element {
         <button 
           onClick={() => setShowDebug(!showDebug)} 
           style={{ 
-            padding: "8px 12px", 
+            padding: "6px 8px", 
             background: showDebug ? "rgba(0,255,0,0.7)" : "rgba(0,0,0,0.7)", 
             color: "white", 
             border: "none", 
             borderRadius: "4px", 
-            fontSize: "12px" 
+            fontSize: "10px",
+            whiteSpace: "nowrap"
           }}
         >
           🐛 Debug
         </button>
         <button 
           onClick={toggleFullscreen}
-          style={{ padding: "8px 12px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}
+          style={{ padding: "6px 8px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px", whiteSpace: "nowrap" }}
         >
           📱 Полный экран
         </button>
