@@ -57,6 +57,7 @@ export function ARQuest(): React.JSX.Element {
   const [showDebug, setShowDebug] = useState(false);
   const [showModelsInfo, setShowModelsInfo] = useState(false);
   const [showSystemInfo, setShowSystemInfo] = useState(false);
+  const [showMap, setShowMap] = useState(false);
   const [compassAngle, setCompassAngle] = useState<number | null>(null);
   const useDirectionalOverlayRef = useRef(true);
   const [useDebugCoords, setUseDebugCoords] = useState(false);
@@ -817,6 +818,7 @@ export function ARQuest(): React.JSX.Element {
             <button onClick={() => { if (userPosRef.current.lat !== 0) { updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt); console.log("🔄 Manual GPS update triggered"); } }} style={{ padding: "4px 6px", background: "rgba(0,255,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🔄 Update</button>
             <button onClick={() => setShowSystemInfo(!showSystemInfo)} style={{ padding: "4px 6px", background: showSystemInfo ? "rgba(0,100,255,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>📊 Info</button>
             <button onClick={() => setShowModelsInfo(!showModelsInfo)} style={{ padding: "4px 6px", background: showModelsInfo ? "rgba(255,0,255,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>📦 Модели</button>
+            <button onClick={() => setShowMap(!showMap)} style={{ padding: "4px 6px", background: showMap ? "rgba(0,255,255,0.7)" : "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "10px" }}>🗺️ Карта</button>
           </div>
         </div>
 
@@ -1440,6 +1442,68 @@ export function ARQuest(): React.JSX.Element {
               <div>Маркеры видны: {markersVisible ? "✅" : "❌"}</div>
               <div>Debug режим: {useDebugCoords ? "✅" : "❌"}</div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Окно карты - встроенное как debug панель */}
+      {showMap && (
+        <div style={{ 
+          position: fullscreenMode ? "fixed" : "absolute", 
+          top: 120, 
+          right: "10px",
+          zIndex: fullscreenMode ? 10000 : 9, 
+          padding: "8px 12px", 
+          borderRadius: 8, 
+          background: "rgba(0,0,0,0.9)", 
+          color: "#fff", 
+          fontSize: 9,
+          width: "300px",
+          height: "200px",
+          display: "flex",
+          flexDirection: "column"
+        }}>
+          <div style={{ fontWeight: "bold", marginBottom: "6px", color: "#00ffff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>🗺️ Карта</span>
+            <button 
+              onClick={() => setShowMap(false)}
+              style={{ 
+                background: "rgba(255,0,0,0.7)", 
+                color: "white", 
+                border: "none", 
+                borderRadius: "3px", 
+                fontSize: "8px",
+                padding: "2px 6px",
+                cursor: "pointer"
+              }}
+            >
+              ✕
+            </button>
+          </div>
+          
+          {/* Встроенная карта Yandex */}
+          <div style={{ flex: 1, borderRadius: "4px", overflow: "hidden" }}>
+            <iframe
+              src={`https://yandex.ru/maps/?ll=${extendedDebug.userGPS.lon},${extendedDebug.userGPS.lat}&z=16&pt=${extendedDebug.userGPS.lon},${extendedDebug.userGPS.lat},pm2rdm~${AR_CONFIG.TARGETS.find(t => t.id === 'shiva')?.lon},${AR_CONFIG.TARGETS.find(t => t.id === 'shiva')?.lat},pm2rdm`}
+              width="100%"
+              height="100%"
+              style={{ border: "none", borderRadius: "4px" }}
+              title="Yandex Map"
+            />
+          </div>
+          
+          {/* Информация о координатах */}
+          <div style={{ marginTop: "6px", fontSize: "8px", color: "#cccccc" }}>
+            <div>📍 Ты: {extendedDebug.userGPS.lat.toFixed(6)}, {extendedDebug.userGPS.lon.toFixed(6)}</div>
+            <div>🎯 Шива: {AR_CONFIG.TARGETS.find(t => t.id === 'shiva')?.lat.toFixed(6)}, {AR_CONFIG.TARGETS.find(t => t.id === 'shiva')?.lon.toFixed(6)}</div>
+            <div>📏 Расстояние: {(() => {
+              const shiva = AR_CONFIG.TARGETS.find(t => t.id === 'shiva');
+              if (shiva && extendedDebug.userGPS.lat !== 0) {
+                const dist = haversine(extendedDebug.userGPS.lat, extendedDebug.userGPS.lon, shiva.lat, shiva.lon);
+                return `${dist.toFixed(1)}м`;
+              }
+              return "N/A";
+            })()}</div>
           </div>
         </div>
       )}
