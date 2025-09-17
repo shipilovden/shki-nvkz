@@ -185,13 +185,15 @@ export function ARQuest(): React.JSX.Element {
           }
         }));
         
-        console.log(`🔴 Marker ${target.name} updated:`, { 
-          x: dx.toFixed(1), 
-          y: (dy + 3).toFixed(1), 
-          z: dz.toFixed(1),
+      console.log(`🔴 Marker ${target.name} updated:`, { 
+          user: { lat: userLat.toFixed(6), lon: userLon.toFixed(6), alt: userAlt.toFixed(1) },
+          target: { lat: target.lat, lon: target.lon, alt: target.alt },
+          dx: dx.toFixed(2), dy: dy.toFixed(2), dz: dz.toFixed(2),
+          markerY: (dy + target.model.yOffset + 2).toFixed(2),
           size: markerSize.toFixed(2),
           distance: distance.toFixed(1) + "m",
-          visible: markersVisible
+          markerVisible: marker.visible,
+          overlayVisible: markersVisibleRef.current
         });
       } else {
         console.log(`❌ Marker ${target.name} not found for position update`);
@@ -450,7 +452,7 @@ export function ARQuest(): React.JSX.Element {
                     
                     // Логируем позицию для отладки (реже, чтобы не спамить)
                     if (Math.floor(time * 30) % 30 === 0) { // каждые 30 кадров
-                      console.log(`🔴 Overlay ${target.name}: screen(${x.toFixed(1)}, ${y.toFixed(1)}), world(${worldPosition.x.toFixed(1)}, ${worldPosition.y.toFixed(1)}, ${worldPosition.z.toFixed(1)}), z=${screenPosition.z.toFixed(3)}`);
+                      console.log(`🔴 Overlay ${target.name}: screen(${x.toFixed(1)}, ${y.toFixed(1)}), world(${worldPosition.x.toFixed(1)}, ${worldPosition.y.toFixed(1)}, ${worldPosition.z.toFixed(1)}), z=${screenPosition.z.toFixed(3)}, markerVisible=${marker.visible}`);
                     }
                   } else {
                     dot.style.display = 'none';
@@ -492,6 +494,18 @@ export function ARQuest(): React.JSX.Element {
   const startQuest = useCallback(async () => {
     if (started) return;
     
+    // Диагностика окружения
+    try {
+      const ua = navigator.userAgent || "";
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+      console.log("🧪 Env:", {
+        userAgent: ua,
+        isMobile,
+        isSecureContext,
+        useDebugCoords
+      });
+    } catch {}
+
     console.log("🚀 Starting AR Quest...");
     setStatus("");
     addDebugInfo("🚀 Starting AR Quest...");
@@ -587,6 +601,7 @@ export function ARQuest(): React.JSX.Element {
       
       // Запускаем GPS отслеживание только если не используем debug координаты
       if (!useDebugCoords) {
+        let gpsTick = 0;
         watchIdRef.current = navigator.geolocation.watchPosition(
           (p) => {
             const newLat = p.coords.latitude;
@@ -594,11 +609,13 @@ export function ARQuest(): React.JSX.Element {
             const newAlt = p.coords.altitude ?? 0;
             
             // ВСЕГДА обновляем координаты без проверки изменений
+            gpsTick++;
             console.log("🔄 GPS Update received:", {
               lat: newLat.toFixed(6),
               lon: newLon.toFixed(6),
               alt: newAlt.toFixed(1),
-              accuracy: p.coords.accuracy?.toFixed(1) + "m"
+              accuracy: p.coords.accuracy?.toFixed(1) + "m",
+              tick: gpsTick
             });
             
             userPosRef.current = { lat: newLat, lon: newLon, alt: newAlt };
@@ -620,6 +637,7 @@ export function ARQuest(): React.JSX.Element {
         const debugInterval = setInterval(() => {
           if (userPosRef.current.lat !== 0) {
             updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt);
+            console.log("🧪 DEBUG: manual tick updateModelPositionGPS");
           }
         }, 1000);
         
