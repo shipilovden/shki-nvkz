@@ -339,67 +339,7 @@ export function ARQuest(): React.JSX.Element {
         updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt);
       }
 
-      // Обновляем 2D-направляющий маркер по азимуту ближайшей цели.
-      // Это гарантирует, что точка двигается при повороте телефона, даже если 3D-проекция недоступна.
-      try {
-        const overlayRoot = document.getElementById('overlay-markers');
-        console.log(`🔍 Overlay check: overlayRoot=${!!overlayRoot}, markersVisible=${markersVisibleRef.current}, compassAngle=${compassAngle}, useDirectional=${useDirectionalOverlayRef.current}`);
-        
-        if (overlayRoot && typeof compassAngle === 'number' && useDirectionalOverlayRef.current) {
-          let dirDot = overlayRoot.querySelector('.dot-direction') as HTMLDivElement | null;
-          if (!dirDot) {
-            dirDot = document.createElement('div');
-            dirDot.className = 'dot-direction';
-            Object.assign(dirDot.style, {
-              position: 'absolute', width: '20px', height: '20px', borderRadius: '50%',
-              background: 'rgba(255,0,0,0.9)', transform: 'translate(-50%, -50%)',
-              filter: 'drop-shadow(0 0 4px rgba(0,0,0,0.8))', display: 'none', pointerEvents: 'none',
-              border: '2px solid white', zIndex: '10000'
-            } as CSSStyleDeclaration);
-            overlayRoot.appendChild(dirDot);
-            console.log(`🔴 Created new direction dot`);
-          }
-          // Доп. подпись для мобильной отладки
-          let dirLabel = overlayRoot.querySelector('.dot-direction-label') as HTMLDivElement | null;
-          if (!dirLabel) {
-            dirLabel = document.createElement('div');
-            dirLabel.className = 'dot-direction-label';
-            Object.assign(dirLabel.style, {
-              position: 'absolute', color: '#0f0', fontSize: '10px', transform: 'translate(-50%, -120%)',
-              textShadow: '0 0 4px rgba(0,0,0,0.8)', pointerEvents: 'none', display: 'none', zIndex: '10001'
-            } as CSSStyleDeclaration);
-            overlayRoot.appendChild(dirLabel);
-          }
-
-          // гарантируем, что слой включен
-          (overlayRoot as HTMLElement).style.display = 'block';
-          const canvas = canvasRef.current;
-          if (canvas) {
-            const rect = canvas.getBoundingClientRect();
-            // Радиус круга для позиции точки (немного меньше половины меньшей из сторон)
-            const radius = Math.min(rect.width, rect.height) * 0.35;
-            // compassAngle уже скорректирован относительно ориентации устройства: 0 – прямо вперёд
-            const angleRad = (compassAngle as number) * Math.PI / 180;
-            // 0° — вверх. Для экранных координат: X вправо, Y вниз
-            const cx = rect.width / 2;
-            const cy = rect.height / 2;
-            // Для некоторых устройств оси могут быть инвертированы — используем синус/косинус как компас
-            const x = cx + radius * Math.sin(angleRad);
-            const y = cy - radius * Math.cos(angleRad);
-            dirDot.style.left = `${x}px`;
-            dirDot.style.top = `${y}px`;
-            dirDot.style.display = 'block';
-            if (dirLabel) { dirLabel.style.left = `${x}px`; dirLabel.style.top = `${y}px`; dirLabel.textContent = `${compassAngle?.toFixed(0)}°`; dirLabel.style.display = 'block'; }
-            
-            // Логируем каждые 30 кадров
-            if (Math.floor(time * 30) % 30 === 0) {
-              console.log(`🔴 DIR DOT compassXY: angle=${compassAngle.toFixed(1)}°, rad=${angleRad.toFixed(3)}, x=${x.toFixed(1)}, y=${y.toFixed(1)}, radius=${radius.toFixed(1)}, w=${rect.width}, h=${rect.height}`);
-            }
-          }
-        }
-      } catch (e) {
-        console.error(`❌ Direction dot error:`, e);
-      }
+      // УДАЛЕНО: 2D-направляющий маркер теперь реализован как React компонент выше
       
       // Обновляем мировые матрицы перед проекцией в 2D
       if (sceneRef.current) {
