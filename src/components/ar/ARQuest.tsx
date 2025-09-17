@@ -98,7 +98,7 @@ export function ARQuest(): React.JSX.Element {
       
       // Обновляем позицию красного маркера над моделью
       if (marker) {
-        marker.position.set(dx, dy + 3, dz); // 3 метра выше модели
+        marker.position.set(dx, Math.max(dy + target.model.yOffset + 1, 1), dz); // Над моделью, но не ниже 1м
         
         // Размер маркера зависит от расстояния (чем дальше, тем меньше)
         const maxDistance = 1000; // максимальное расстояние для расчета размера
@@ -112,9 +112,10 @@ export function ARQuest(): React.JSX.Element {
         marker.scale.setScalar(markerSize);
         marker.visible = markersVisible;
         
-        console.log(`🔴 Marker ${target.name} updated: position=(${dx.toFixed(1)}, ${(dy + 3).toFixed(1)}, ${dz.toFixed(1)}), size=${markerSize.toFixed(2)}, visible=${marker.visible}`);
+        const markerY = Math.max(dy + target.model.yOffset + 1, 1);
+        console.log(`🔴 Marker ${target.name} updated: position=(${dx.toFixed(1)}, ${markerY.toFixed(1)}, ${dz.toFixed(1)}), size=${markerSize.toFixed(2)}, visible=${marker.visible}`);
         console.log(`🔴 Marker ${target.name} distance from camera: ${Math.sqrt(dx*dx + dy*dy + dz*dz).toFixed(1)}m`);
-        addDebugInfo(`🔴 ${target.name}: pos=(${dx.toFixed(0)},${(dy + 3).toFixed(0)},${dz.toFixed(0)}) dist=${Math.sqrt(dx*dx + dy*dy + dz*dz).toFixed(0)}m`);
+        addDebugInfo(`🔴 ${target.name}: pos=(${dx.toFixed(0)},${markerY.toFixed(0)},${dz.toFixed(0)}) dist=${distance.toFixed(0)}m height=${markerY.toFixed(0)}m`);
         
         // Обновляем информацию об объекте
         setObjectInfo((prev: any) => ({
