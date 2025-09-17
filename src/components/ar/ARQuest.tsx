@@ -195,7 +195,7 @@ export function ARQuest(): React.JSX.Element {
       addDebugInfo(`🔴 TEST MODE: Markers rotating around camera at 10m distance`);
     
     // Создаем тестовый маркер прямо перед камерой для проверки видимости
-    const testMarkerGeometry = new THREE.SphereGeometry(1.0, 16, 16);
+    const testMarkerGeometry = new THREE.SphereGeometry(0.3, 16, 16); // Уменьшаем размер
     const testMarkerMaterial = new THREE.MeshBasicMaterial({ 
       color: 0x00ff00, // Зеленый цвет для отличия
       transparent: true, 
@@ -207,7 +207,7 @@ export function ARQuest(): React.JSX.Element {
     scene.add(testMarker);
     (window as any).testMarker = testMarker; // Сохраняем в глобальной переменной
     console.log(`🟢 Test marker created at position (0, 0, -5) - should be visible!`);
-    addDebugInfo(`🟢 Test marker created at (0,0,-5)`);
+    addDebugInfo(`🟢 Test marker created at (0,0,-5), size: 0.3`);
 
     // Загружаем все модели
     const loader = new GLTFLoader();
@@ -247,7 +247,7 @@ export function ARQuest(): React.JSX.Element {
       if (testMarker) {
         testMarker.rotation.y += 0.01; // Вращаем для видимости
         if (Math.floor(time * 100) % 100 === 0) {
-          console.log(`🟢 Test marker visible: ${testMarker.visible}, position: (${testMarker.position.x}, ${testMarker.position.y}, ${testMarker.position.z})`);
+          console.log(`🟢 Test marker visible: ${testMarker.visible}, position: (${testMarker.position.x}, ${testMarker.position.y}, ${testMarker.position.z}), size: 0.3`);
         }
       }
       
