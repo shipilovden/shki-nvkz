@@ -319,6 +319,15 @@ export function ARQuest(): React.JSX.Element {
 
     setStatus("GPS mode (~meters)");
     
+    // Очищаем старые HTML точки из overlay
+    const overlay = document.getElementById('overlay-markers');
+    if (overlay) {
+      // Удаляем все старые точки
+      const oldDots = overlay.querySelectorAll('.dot-rhino, .dot-shiva, .dot-direction');
+      oldDots.forEach(dot => dot.remove());
+      console.log(`🧹 Cleaned ${oldDots.length} old dots from overlay`);
+    }
+    
     // Отладочная информация о камере и сцене
     console.log(`📷 Camera position: (${camera.position.x}, ${camera.position.y}, ${camera.position.z})`);
     console.log(`📷 Camera rotation: (${camera.rotation.x}, ${camera.rotation.y}, ${camera.rotation.z})`);
@@ -363,76 +372,7 @@ export function ARQuest(): React.JSX.Element {
             
             // (лог ограничил, чтобы не спамить)
           }
-          // HTML-оверлей: синхронизируем 2D-точку с 3D-маркером (пульсация и видимость)
-          const overlay = document.getElementById('overlay-markers');
-          if (overlay && camera && renderer) {
-            let dot = overlay.querySelector(`.dot-${target.id}`) as HTMLDivElement | null;
-            if (!dot) {
-              dot = document.createElement('div');
-              dot.className = `dot-${target.id}`;
-              Object.assign(dot.style, {
-                position: 'absolute', width: '18px', height: '18px', borderRadius: '50%',
-                background: 'rgba(255,0,0,0.85)', transform: 'translate(-50%, -50%)', display: 'none'
-              } as CSSStyleDeclaration);
-              overlay.appendChild(dot);
-            }
-            
-            // Используем позицию маркера напрямую (он уже правильно позиционирован в updateModelPositionGPS)
-            if (marker && markersVisibleRef.current) {
-              // Обновляем мировые матрицы перед получением позиции
-              scene.updateMatrixWorld(true);
-              
-              const worldPosition = new THREE.Vector3();
-              marker.getWorldPosition(worldPosition);
-              
-              // Проекция 3D координат на 2D экран с учетом поворота камеры
-              const screenPosition = worldPosition.clone().project(camera);
-              
-              // Проверяем, что объект перед камерой (z < 1 означает перед камерой)
-              if (screenPosition.z < 1) {
-                const canvas = canvasRef.current;
-                if (canvas) {
-                  const rect = canvas.getBoundingClientRect();
-                  const x = (screenPosition.x * 0.5 + 0.5) * rect.width;
-                  const y = (-screenPosition.y * 0.5 + 0.5) * rect.height;
-                  
-                  // Проверяем, что точка в пределах экрана (с небольшим запасом)
-                  const margin = 50;
-                  const inViewport = x >= -margin && x <= rect.width + margin && 
-                                   y >= -margin && y <= rect.height + margin;
-                  
-                  if (inViewport && marker.visible) {
-                    dot.style.left = `${x}px`;
-                    dot.style.top = `${y}px`;
-                    dot.style.display = 'block';
-                    // пульсация (CSS-анимация для стабильности)
-                    dot.style.animation = 'apulse 1s infinite ease-in-out';
-                    dot.style.width = '16px'; 
-                    dot.style.height = '16px';
-                    
-                    // Логируем позицию для отладки (реже, чтобы не спамить)
-                    if (Math.floor(time * 30) % 30 === 0) { // каждые 30 кадров
-                      const logMsg = `🔴 MARKER screenXY: x=${x.toFixed(1)}, y=${y.toFixed(1)} | worldXYZ: ${worldPosition.x.toFixed(1)}, ${worldPosition.y.toFixed(1)}, ${worldPosition.z.toFixed(1)} | z=${screenPosition.z.toFixed(3)} | visible=${marker.visible}`;
-                      console.log(logMsg);
-                      addDebugInfo(logMsg);
-                    }
-                  } else {
-                    dot.style.display = 'none';
-                  }
-                }
-              } else {
-                dot.style.display = 'none';
-                // Логируем когда объект за камерой
-                if (Math.floor(time * 60) % 60 === 0) { // каждые 60 кадров
-                  const logMsg = `🔴 Overlay ${target.name}: behind camera, z=${screenPosition.z.toFixed(3)}`;
-                  console.log(logMsg);
-                  addDebugInfo(logMsg);
-                }
-              }
-            } else {
-              dot.style.display = 'none';
-            }
-          }
+          // УДАЛЕНО: старая логика 3D-проекции маркеров (не работала)
         } else {
           // Логируем каждые 100 кадров если маркер не найден
           if (Math.floor(time * 100) % 100 === 0) {
@@ -732,7 +672,7 @@ export function ARQuest(): React.JSX.Element {
           }} 
         />
 
-        {/* HTML-оверлей для маркеров (на случай, если WebGL-маркер не виден) */}
+        {/* HTML-оверлей для маркеров (очищен от старых точек) */}
         <div
           id="overlay-markers"
           style={{ position: "absolute", inset: 0, pointerEvents: "none", display: markersVisible ? 'block' : 'none' }}
