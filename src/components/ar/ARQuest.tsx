@@ -323,7 +323,10 @@ export function ARQuest(): React.JSX.Element {
       // Пульсирующий эффект для всех красных маркеров
       const time = Date.now() * 0.003;
       
-      // Тестовый маркер удалён
+      // Принудительно обновляем расстояние каждые 100 кадров (примерно каждые 1.5 секунды)
+      if (Math.floor(time * 100) % 100 === 0 && userPosRef.current.lat !== 0) {
+        updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt);
+      }
       
       // Обновляем мировые матрицы перед проекцией в 2D
       if (sceneRef.current) {
@@ -362,7 +365,7 @@ export function ARQuest(): React.JSX.Element {
             }
             
             // Используем позицию маркера напрямую (он уже правильно позиционирован в updateModelPositionGPS)
-            if (marker && marker.visible && markersVisibleRef.current) {
+            if (marker && markersVisibleRef.current) {
               // Обновляем мировые матрицы перед получением позиции
               scene.updateMatrixWorld(true);
               
@@ -385,7 +388,7 @@ export function ARQuest(): React.JSX.Element {
                   const inViewport = x >= -margin && x <= rect.width + margin && 
                                    y >= -margin && y <= rect.height + margin;
                   
-                  if (inViewport) {
+                  if (inViewport && marker.visible) {
                     dot.style.left = `${x}px`;
                     dot.style.top = `${y}px`;
                     dot.style.display = 'block';
@@ -572,8 +575,8 @@ export function ARQuest(): React.JSX.Element {
           },
           { 
             enableHighAccuracy: true, 
-            maximumAge: 0, // Не кэшируем, всегда получаем свежие данные
-            timeout: 10000 
+            maximumAge: 100, // Обновляем каждые 100мс
+            timeout: 5000 
           }
         );
       }
