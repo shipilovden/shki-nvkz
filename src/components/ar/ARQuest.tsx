@@ -327,13 +327,11 @@ export function ARQuest(): React.JSX.Element {
     console.log(`🎬 Scene children: ${scene.children.map(child => child.name || child.type).join(', ')}`);
 
     function tick() {
+      // КРИТИЧЕСКАЯ ОТЛАДКА: проверяем, что tick выполняется
+      console.log(`🔄 TICK START: compassAngle=${compassAngle}, markersVisible=${markersVisibleRef.current}`);
+      
       // Пульсирующий эффект для всех красных маркеров
       const time = Date.now() * 0.003;
-      
-      // Отладка: проверяем, что tick выполняется
-      if (Math.floor(time * 60) % 60 === 0) {
-        console.log(`🔄 TICK: time=${time.toFixed(1)}, compassAngle=${compassAngle}, markersVisible=${markersVisibleRef.current}`);
-      }
       
       // Принудительно обновляем расстояние 10 раз в секунду
       if (Math.floor(time * 10) !== Math.floor((time - 0.001) * 10) && userPosRef.current.lat !== 0) {
