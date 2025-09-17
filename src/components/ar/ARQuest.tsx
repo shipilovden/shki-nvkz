@@ -160,11 +160,11 @@ export function ARQuest(): React.JSX.Element {
       });
       const marker = new THREE.Mesh(markerGeometry, markerMaterial);
       marker.position.set(0, 0, 0); // Начальная позиция
-      marker.visible = true; // Всегда видимый при создании
+      marker.visible = markersVisible; // Устанавливаем видимость
       marker.userData.baseScale = 0.5; // Базовый размер
       scene.add(marker);
       markersRef.current[target.id] = marker;
-      console.log(`🔴 Red marker for ${target.name} created and added to scene`);
+      console.log(`🔴 Red marker for ${target.name} created and added to scene, visible: ${markersVisible}`);
     });
 
     // Загружаем все модели
@@ -328,28 +328,12 @@ export function ARQuest(): React.JSX.Element {
     try { recorderRef.current?.stop(); } catch {}
   }, []);
 
-  const toggleFullscreen = useCallback(async () => {
-    try {
-      if (!document.fullscreenElement) {
-        // Входим в полный экран
-        await document.documentElement.requestFullscreen();
-        setFullscreenMode(true);
-        console.log("📱 Fullscreen: ON");
-      } else {
-        // Выходим из полного экрана
-        await document.exitFullscreen();
-        setFullscreenMode(false);
-        console.log("📱 Fullscreen: OFF");
-      }
-    } catch (error) {
-      console.error("❌ Fullscreen error:", error);
-      // Fallback к старому способу
-      setFullscreenMode(prev => {
-        const newMode = !prev;
-        console.log("📱 Fullscreen toggle (fallback):", newMode ? "ON" : "OFF");
-        return newMode;
-      });
-    }
+  const toggleFullscreen = useCallback(() => {
+    setFullscreenMode(prev => {
+      const newMode = !prev;
+      console.log("📱 Camera Fullscreen toggle:", newMode ? "ON" : "OFF");
+      return newMode;
+    });
   }, []);
 
   const toggleMarkers = useCallback(() => {
@@ -370,17 +354,7 @@ export function ARQuest(): React.JSX.Element {
   }, []);
 
   useEffect(() => {
-    // Обработчик изменения состояния полного экрана
-    const handleFullscreenChange = () => {
-      const isFullscreen = !!document.fullscreenElement;
-      setFullscreenMode(isFullscreen);
-      console.log("📱 Fullscreen state changed:", isFullscreen ? "ON" : "OFF");
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
       try { if (watchIdRef.current != null) navigator.geolocation.clearWatch(watchIdRef.current); } catch {}
       try { stopCamera(); } catch {}
       try { rendererRef.current?.dispose(); } catch {}
@@ -397,9 +371,29 @@ export function ARQuest(): React.JSX.Element {
         Начать AR квест
       </button>
 
-      <canvas ref={canvasRef} id="ar-canvas" style={{ display: started ? "block" : "none", width: "100vw", height: "100vh" }} />
+      <canvas 
+        ref={canvasRef} 
+        id="ar-canvas" 
+        style={{ 
+          display: started ? "block" : "none", 
+          width: fullscreenMode ? "100vw" : "100%", 
+          height: fullscreenMode ? "100vh" : "auto",
+          position: fullscreenMode ? "fixed" : "relative",
+          top: fullscreenMode ? "0" : "auto",
+          left: fullscreenMode ? "0" : "auto",
+          zIndex: fullscreenMode ? 9999 : "auto"
+        }} 
+      />
 
-      <div id="ar-controls" style={{ display: uiVisible ? "flex" : "none", position: "absolute", bottom: 20, left: "50%", transform: "translateX(-50%)", zIndex: 9, gap: 8 }}>
+      <div id="ar-controls" style={{ 
+        display: uiVisible ? "flex" : "none", 
+        position: fullscreenMode ? "fixed" : "absolute", 
+        bottom: 20, 
+        left: "50%", 
+        transform: "translateX(-50%)", 
+        zIndex: fullscreenMode ? 10000 : 9, 
+        gap: 8 
+      }}>
         <button 
           id="btn-photo" 
           onClick={capturePhoto}
@@ -448,16 +442,28 @@ export function ARQuest(): React.JSX.Element {
         </button>
       </div>
 
-      <div id="status" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 9, padding: "6px 10px", borderRadius: 8, background: "rgba(0,0,0,.5)", color: "#fff", fontSize: 12, display: status ? "block" : "none" }}>{status}</div>
+      <div id="status" style={{ 
+        position: fullscreenMode ? "fixed" : "absolute", 
+        top: 12, 
+        left: "50%", 
+        transform: "translateX(-50%)", 
+        zIndex: fullscreenMode ? 10000 : 9, 
+        padding: "6px 10px", 
+        borderRadius: 8, 
+        background: "rgba(0,0,0,.5)", 
+        color: "#fff", 
+        fontSize: 12, 
+        display: status ? "block" : "none" 
+      }}>{status}</div>
       
       {/* Информация об объектах */}
       {started && (
         <div style={{ 
-          position: "absolute", 
+          position: fullscreenMode ? "fixed" : "absolute", 
           top: 60, 
           left: "50%", 
           transform: "translateX(-50%)", 
-          zIndex: 9, 
+          zIndex: fullscreenMode ? 10000 : 9, 
           padding: "8px 12px", 
           borderRadius: 8, 
           background: "rgba(0,0,0,0.7)", 
@@ -489,10 +495,10 @@ export function ARQuest(): React.JSX.Element {
         <button 
           onClick={toggleFullscreen}
           style={{ 
-            position: "absolute", 
+            position: "fixed", 
             top: 20, 
             right: 20, 
-            zIndex: 10, 
+            zIndex: 10001, 
             padding: "8px 12px", 
             background: "rgba(0,0,0,0.7)", 
             color: "white", 
