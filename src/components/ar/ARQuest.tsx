@@ -60,6 +60,23 @@ export function ARQuest(): React.JSX.Element {
   const [useDebugCoords, setUseDebugCoords] = useState(false);
   const userPosRef = useRef<{lat:number, lon:number, alt:number}>({lat:0,lon:0,alt:0});
   const deviceOrientationRef = useRef<{alpha: number, beta: number, gamma: number}>({alpha: 0, beta: 0, gamma: 0});
+  
+  // Расширенная отладочная информация
+  const [extendedDebug, setExtendedDebug] = useState<{
+    userGPS: {lat: number, lon: number, alt: number, accuracy?: number, timestamp: number},
+    modelsLoaded: {[key: string]: boolean},
+    cameraInfo: {position: {x: number, y: number, z: number}, rotation: {x: number, y: number, z: number}},
+    sceneInfo: {childrenCount: number, backgroundSet: boolean},
+    gpsUpdateCount: number,
+    lastUpdateTime: number
+  }>({
+    userGPS: {lat: 0, lon: 0, alt: 0, timestamp: 0},
+    modelsLoaded: {},
+    cameraInfo: {position: {x: 0, y: 0, z: 0}, rotation: {x: 0, y: 0, z: 0}},
+    sceneInfo: {childrenCount: 0, backgroundSet: false},
+    gpsUpdateCount: 0,
+    lastUpdateTime: 0
+  });
   // Авто-очистка статуса через 3 секунды, чтобы не залипал баннер
   useEffect(() => {
     if (!status) return;
@@ -86,10 +103,18 @@ export function ARQuest(): React.JSX.Element {
     return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
-  const updateModelPositionGPS = useCallback((userLat: number, userLon: number, userAlt: number) => {
+  const updateModelPositionGPS = useCallback((userLat: number, userLon: number, userAlt: number, accuracy?: number) => {
     const latRad = (userLat * Math.PI) / 180;
     const metersPerDegLat = 110574;
     const metersPerDegLon = 111320 * Math.cos(latRad);
+    
+    // Обновляем расширенную отладочную информацию
+    setExtendedDebug(prev => ({
+      ...prev,
+      userGPS: {lat: userLat, lon: userLon, alt: userAlt, accuracy, timestamp: Date.now()},
+      gpsUpdateCount: prev.gpsUpdateCount + 1,
+      lastUpdateTime: Date.now()
+    }));
     
     let closest: {id:string; angle:number; distance:number} | null = null as any;
     AR_CONFIG.TARGETS.forEach(target => {
@@ -310,10 +335,22 @@ export function ARQuest(): React.JSX.Element {
         model.scale.setScalar(target.model.scale);
         scene.add(model);
         modelsRef.current[target.id] = model;
+        
+        // Обновляем статус загрузки модели
+        setExtendedDebug(prev => ({
+          ...prev,
+          modelsLoaded: { ...prev.modelsLoaded, [target.id]: true }
+        }));
+        
         console.log(`🎯 Setting initial position for ${target.name}...`);
         updateModelPositionGPS(userLat, userLon, userAlt);
       }, undefined, (error) => {
         console.error(`❌ Model ${target.name} loading error:`, error);
+        // Обновляем статус загрузки модели (ошибка)
+        setExtendedDebug(prev => ({
+          ...prev,
+          modelsLoaded: { ...prev.modelsLoaded, [target.id]: false }
+        }));
       });
     });
 
@@ -338,6 +375,21 @@ export function ARQuest(): React.JSX.Element {
     function tick() {
       // КРИТИЧЕСКАЯ ОТЛАДКА: проверяем, что tick выполняется
       console.log(`🔄 TICK START: compassAngle=${compassAngle}, markersVisible=${markersVisibleRef.current}`);
+      
+      // Обновляем информацию о камере и сцене
+      if (camera && scene) {
+        setExtendedDebug(prev => ({
+          ...prev,
+          cameraInfo: {
+            position: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+            rotation: { x: camera.rotation.x, y: camera.rotation.y, z: camera.rotation.z }
+          },
+          sceneInfo: {
+            childrenCount: scene.children.length,
+            backgroundSet: !!scene.background
+          }
+        }));
+      }
       
       // Пульсирующий эффект для всех красных маркеров
       const time = Date.now() * 0.003;
@@ -523,7 +575,7 @@ export function ARQuest(): React.JSX.Element {
             });
             
             userPosRef.current = { lat: newLat, lon: newLon, alt: newAlt };
-            updateModelPositionGPS(newLat, newLon, newAlt);
+            updateModelPositionGPS(newLat, newLon, newAlt, p.coords.accuracy);
             setStatus(""); // очищаем статус при первом валидном апдейте
           },
           (err) => {
@@ -774,7 +826,7 @@ export function ARQuest(): React.JSX.Element {
         )}
       </div>
       
-      {/* Отладочная панель */}
+      {/* Расширенная отладочная панель */}
       {showDebug && (
         <div style={{ 
           position: fullscreenMode ? "fixed" : "absolute", 
@@ -784,20 +836,68 @@ export function ARQuest(): React.JSX.Element {
           zIndex: fullscreenMode ? 10000 : 9, 
           padding: "8px 12px", 
           borderRadius: 8, 
-          background: "rgba(0,0,0,0.8)", 
+          background: "rgba(0,0,0,0.9)", 
           color: "#fff", 
-          fontSize: 10,
-          maxHeight: "200px",
+          fontSize: 9,
+          maxHeight: "300px",
           overflowY: "auto"
         }}>
-          <div style={{ fontWeight: "bold", marginBottom: "4px", color: "#00ff00" }}>
-            🐛 Debug Info:
+          <div style={{ fontWeight: "bold", marginBottom: "6px", color: "#00ff00" }}>
+            🐛 Extended Debug Info:
           </div>
-          {debugInfo.map((info, index) => (
-            <div key={index} style={{ marginBottom: "2px", fontSize: "9px", color: "#cccccc" }}>
-              {info}
+          
+          {/* GPS информация */}
+          <div style={{ marginBottom: "8px", padding: "4px", background: "rgba(0,255,0,0.1)", borderRadius: "4px" }}>
+            <div style={{ fontWeight: "bold", color: "#00ff00", marginBottom: "2px" }}>📍 GPS:</div>
+            <div style={{ fontSize: "8px", color: "#cccccc" }}>
+              Lat: {extendedDebug.userGPS.lat.toFixed(6)}<br/>
+              Lon: {extendedDebug.userGPS.lon.toFixed(6)}<br/>
+              Alt: {extendedDebug.userGPS.alt.toFixed(1)}m<br/>
+              Accuracy: {extendedDebug.userGPS.accuracy?.toFixed(1) || 'N/A'}m<br/>
+              Updates: {extendedDebug.gpsUpdateCount}<br/>
+              Last: {new Date(extendedDebug.lastUpdateTime).toLocaleTimeString()}
             </div>
-          ))}
+          </div>
+          
+          {/* Модели */}
+          <div style={{ marginBottom: "8px", padding: "4px", background: "rgba(255,165,0,0.1)", borderRadius: "4px" }}>
+            <div style={{ fontWeight: "bold", color: "#ffa500", marginBottom: "2px" }}>📦 Models:</div>
+            <div style={{ fontSize: "8px", color: "#cccccc" }}>
+              {Object.entries(extendedDebug.modelsLoaded).map(([id, loaded]) => (
+                <div key={id} style={{ color: loaded ? "#00ff00" : "#ff6666" }}>
+                  {id}: {loaded ? "✅ Loaded" : "❌ Failed"}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Камера */}
+          <div style={{ marginBottom: "8px", padding: "4px", background: "rgba(0,100,255,0.1)", borderRadius: "4px" }}>
+            <div style={{ fontWeight: "bold", color: "#0066ff", marginBottom: "2px" }}>📷 Camera:</div>
+            <div style={{ fontSize: "8px", color: "#cccccc" }}>
+              Pos: ({extendedDebug.cameraInfo.position.x.toFixed(1)}, {extendedDebug.cameraInfo.position.y.toFixed(1)}, {extendedDebug.cameraInfo.position.z.toFixed(1)})<br/>
+              Rot: ({extendedDebug.cameraInfo.rotation.x.toFixed(1)}, {extendedDebug.cameraInfo.rotation.y.toFixed(1)}, {extendedDebug.cameraInfo.rotation.z.toFixed(1)})
+            </div>
+          </div>
+          
+          {/* Сцена */}
+          <div style={{ marginBottom: "8px", padding: "4px", background: "rgba(255,0,255,0.1)", borderRadius: "4px" }}>
+            <div style={{ fontWeight: "bold", color: "#ff00ff", marginBottom: "2px" }}>🎬 Scene:</div>
+            <div style={{ fontSize: "8px", color: "#cccccc" }}>
+              Children: {extendedDebug.sceneInfo.childrenCount}<br/>
+              Background: {extendedDebug.sceneInfo.backgroundSet ? "✅ Set" : "❌ Not Set"}
+            </div>
+          </div>
+          
+          {/* Старые логи */}
+          <div style={{ marginBottom: "4px", padding: "4px", background: "rgba(128,128,128,0.1)", borderRadius: "4px" }}>
+            <div style={{ fontWeight: "bold", color: "#808080", marginBottom: "2px" }}>📝 Logs:</div>
+            {debugInfo.slice(-5).map((info, index) => (
+              <div key={index} style={{ marginBottom: "1px", fontSize: "8px", color: "#cccccc" }}>
+                {info}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
