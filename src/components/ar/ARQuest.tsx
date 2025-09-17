@@ -108,6 +108,23 @@ export function ARQuest(): React.JSX.Element {
     const metersPerDegLat = 110574;
     const metersPerDegLon = 111320 * Math.cos(latRad);
     
+    // ВАЖНО: Позиционируем камеру в соответствии с GPS координатами пользователя
+    if (cameraRef.current) {
+      // Преобразуем GPS координаты пользователя в 3D координаты
+      const userLatRad = (userLat * Math.PI) / 180;
+      const metersPerDegLat = 110574;
+      const metersPerDegLon = 111320 * Math.cos(userLatRad);
+      
+      // Позиция камеры = позиция пользователя в 3D пространстве
+      const cameraX = 0; // Пользователь в центре своей системы координат
+      const cameraY = userAlt; // Высота пользователя
+      const cameraZ = 0; // Пользователь в центре своей системы координат
+      
+      cameraRef.current.position.set(cameraX, cameraY, cameraZ);
+      
+      console.log(`📷 Camera positioned at user location: (${cameraX}, ${cameraY}, ${cameraZ})`);
+    }
+    
     // Обновляем расширенную отладочную информацию
     setExtendedDebug(prev => ({
       ...prev,
