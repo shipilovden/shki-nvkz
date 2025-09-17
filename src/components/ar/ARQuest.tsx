@@ -45,6 +45,17 @@ export function ARQuest(): React.JSX.Element {
   const [fullscreenMode, setFullscreenMode] = useState(false);
   const [markersVisible, setMarkersVisible] = useState(true);
   const [objectInfo, setObjectInfo] = useState<{[key: string]: {distance: number, inRange: boolean, coordinates: {lat: number, lon: number, alt: number}}}>({});
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
+  const [showDebug, setShowDebug] = useState(false);
+
+  // Функция для добавления отладочной информации
+  const addDebugInfo = useCallback((message: string) => {
+    setDebugInfo(prev => {
+      const newInfo = [...prev, `${new Date().toLocaleTimeString()}: ${message}`];
+      // Ограничиваем количество сообщений
+      return newInfo.slice(-10);
+    });
+  }, []);
 
   const haversine = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -103,6 +114,7 @@ export function ARQuest(): React.JSX.Element {
         
         console.log(`🔴 Marker ${target.name} updated: position=(${dx.toFixed(1)}, ${(dy + 3).toFixed(1)}, ${dz.toFixed(1)}), size=${markerSize.toFixed(2)}, visible=${marker.visible}`);
         console.log(`🔴 Marker ${target.name} distance from camera: ${Math.sqrt(dx*dx + dy*dy + dz*dz).toFixed(1)}m`);
+        addDebugInfo(`🔴 ${target.name}: pos=(${dx.toFixed(0)},${(dy + 3).toFixed(0)},${dz.toFixed(0)}) dist=${Math.sqrt(dx*dx + dy*dy + dz*dz).toFixed(0)}m`);
         
         // Обновляем информацию об объекте
         setObjectInfo((prev: any) => ({
@@ -168,10 +180,12 @@ export function ARQuest(): React.JSX.Element {
       scene.add(marker);
       markersRef.current[target.id] = marker;
       console.log(`🔴 Red marker for ${target.name} created and added to scene, visible: ${markersVisible}, position: (0,0,-10), inScene: ${scene.children.includes(marker)}`);
+      addDebugInfo(`🔴 Marker ${target.name} created, visible: ${markersVisible}`);
     });
     
     console.log(`🔴 Total markers created: ${Object.keys(markersRef.current).length}`);
     console.log(`🔴 Scene children count: ${scene.children.length}`);
+    addDebugInfo(`🔴 Total markers: ${Object.keys(markersRef.current).length}`);
     
     // Создаем тестовый маркер прямо перед камерой для проверки видимости
     const testMarkerGeometry = new THREE.SphereGeometry(1.0, 16, 16);
@@ -186,6 +200,7 @@ export function ARQuest(): React.JSX.Element {
     scene.add(testMarker);
     (window as any).testMarker = testMarker; // Сохраняем в глобальной переменной
     console.log(`🟢 Test marker created at position (0, 0, -5) - should be visible!`);
+    addDebugInfo(`🟢 Test marker created at (0,0,-5)`);
 
     // Загружаем все модели
     const loader = new GLTFLoader();
@@ -279,6 +294,7 @@ export function ARQuest(): React.JSX.Element {
     
     console.log("🚀 Starting AR Quest...");
     setStatus("Проверяем локацию...");
+    addDebugInfo("🚀 Starting AR Quest...");
     
     try {
       const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
@@ -307,6 +323,9 @@ export function ARQuest(): React.JSX.Element {
         distances: distances.map(d => `${d.name}: ${d.distance.toFixed(1)}m (${d.inRange ? 'в радиусе' : 'далеко'})`),
         closest: `${closestTarget.name}: ${closestTarget.distance.toFixed(1)}m`
       });
+      
+      addDebugInfo(`📍 User: ${userLat.toFixed(6)}, ${userLon.toFixed(6)}, ${userAlt.toFixed(1)}m`);
+      addDebugInfo(`📍 Closest: ${closestTarget.name} ${closestTarget.distance.toFixed(0)}m`);
       
       // Показываем статус с обеими дистанциями
       const statusText = distances.map(d => `${d.name}: ${d.distance.toFixed(1)}м`).join(', ');
@@ -382,6 +401,7 @@ export function ARQuest(): React.JSX.Element {
     setMarkersVisible(prev => {
       const newMode = !prev;
       console.log("🔴 Markers toggle:", newMode ? "ON" : "OFF");
+      addDebugInfo(`🔴 Markers: ${newMode ? "ON" : "OFF"}`);
       
       // Обновляем видимость всех маркеров
       AR_CONFIG.TARGETS.forEach(target => {
@@ -482,6 +502,19 @@ export function ARQuest(): React.JSX.Element {
           🔴 Маркеры
         </button>
         <button 
+          onClick={() => setShowDebug(!showDebug)} 
+          style={{ 
+            padding: "8px 12px", 
+            background: showDebug ? "rgba(0,255,0,0.7)" : "rgba(0,0,0,0.7)", 
+            color: "white", 
+            border: "none", 
+            borderRadius: "4px", 
+            fontSize: "12px" 
+          }}
+        >
+          🐛 Debug
+        </button>
+        <button 
           onClick={toggleFullscreen}
           style={{ padding: "8px 12px", background: "rgba(0,0,0,0.7)", color: "white", border: "none", borderRadius: "4px", fontSize: "12px" }}
         >
@@ -534,6 +567,33 @@ export function ARQuest(): React.JSX.Element {
               </div>
             );
           })}
+        </div>
+      )}
+      
+      {/* Отладочная панель */}
+      {showDebug && (
+        <div style={{ 
+          position: fullscreenMode ? "fixed" : "absolute", 
+          top: 120, 
+          left: "10px", 
+          right: "10px",
+          zIndex: fullscreenMode ? 10000 : 9, 
+          padding: "8px 12px", 
+          borderRadius: 8, 
+          background: "rgba(0,0,0,0.8)", 
+          color: "#fff", 
+          fontSize: 10,
+          maxHeight: "200px",
+          overflowY: "auto"
+        }}>
+          <div style={{ fontWeight: "bold", marginBottom: "4px", color: "#00ff00" }}>
+            🐛 Debug Info:
+          </div>
+          {debugInfo.map((info, index) => (
+            <div key={index} style={{ marginBottom: "2px", fontSize: "9px", color: "#cccccc" }}>
+              {info}
+            </div>
+          ))}
         </div>
       )}
       
