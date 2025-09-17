@@ -960,7 +960,7 @@ export function ARQuest(): React.JSX.Element {
 
 
         {/* Компас - красная точка с индикацией направления и расстояния */}
-        {started && compassAngle !== null && (
+        {started && compassAngle !== null && markersVisible && (
           <div style={{
             position: fullscreenMode ? "fixed" : "absolute",
             top: "50%",
