@@ -483,34 +483,47 @@ export function ARQuest(): React.JSX.Element {
         Начать AR квест
       </button>
 
-      <canvas 
-        ref={canvasRef} 
-        id="ar-canvas" 
-        style={{ 
-          display: started ? "block" : "none", 
-          width: fullscreenMode ? "100vw" : "100%", 
-          height: fullscreenMode ? "100vh" : "auto",
+      {/* AR viewport контейнер: маленький рядом с кнопкой, полноэкранный при режиме */}
+      <div
+        id="ar-viewport"
+        style={{
+          display: started ? "block" : "none",
           position: fullscreenMode ? "fixed" : "relative",
-          top: fullscreenMode ? "0" : "auto",
-          left: fullscreenMode ? "0" : "auto",
-          zIndex: fullscreenMode ? 9999 : "auto"
-        }} 
-      />
+          top: fullscreenMode ? 0 : "auto",
+          left: fullscreenMode ? 0 : "auto",
+          width: fullscreenMode ? "100vw" : 360,
+          height: fullscreenMode ? "100vh" : 220,
+          marginTop: fullscreenMode ? 0 : 12,
+          zIndex: fullscreenMode ? 9999 : "auto",
+          borderRadius: fullscreenMode ? 0 : 8,
+          overflow: "hidden",
+          boxShadow: fullscreenMode ? "none" : "0 4px 18px rgba(0,0,0,0.3)",
+        }}
+      >
+        <canvas 
+          ref={canvasRef} 
+          id="ar-canvas" 
+          style={{ 
+            width: "100%", 
+            height: "100%",
+            display: "block"
+          }} 
+        />
 
-      <div id="ar-controls" style={{ 
-        display: uiVisible ? "flex" : "none", 
-        position: "fixed", 
-        bottom: 20, 
-        left: "50%", 
-        transform: "translateX(-50%)", 
-        zIndex: 10000, 
-        gap: 4,
-        overflowX: "hidden",
-        padding: "0 10px",
-        maxWidth: "calc(100vw - 20px)",
-        boxSizing: "border-box",
-        justifyContent: "center"
-      }}>
+        <div id="ar-controls" style={{ 
+          display: uiVisible ? "flex" : "none", 
+          position: fullscreenMode ? "fixed" : "absolute", 
+          bottom: 12, 
+          left: fullscreenMode ? "50%" : "50%", 
+          transform: "translateX(-50%)", 
+          zIndex: 10000, 
+          gap: 4,
+          overflowX: "hidden",
+          padding: "0 10px",
+          maxWidth: fullscreenMode ? "calc(100vw - 20px)" : "calc(100% - 20px)",
+          boxSizing: "border-box",
+          justifyContent: "center"
+        }}>
         <button 
           id="btn-photo" 
           onClick={capturePhoto}
@@ -572,70 +585,71 @@ export function ARQuest(): React.JSX.Element {
         >
           📱 Полный экран
         </button>
-      </div>
+        </div>
 
-      <div id="status" style={{ 
-        position: "fixed", 
-        top: 12, 
-        left: "50%", 
-        transform: "translateX(-50%)", 
-        zIndex: 10000, 
-        padding: "6px 10px", 
-        borderRadius: 8, 
-        background: "rgba(0,0,0,.5)", 
-        color: "#fff", 
-        fontSize: 12, 
-        display: status ? "block" : "none" 
-      }}>{status}</div>
-      
-      {/* Информация об объектах */}
-      {started && (
-        <div style={{ 
-          position: "fixed", 
-          top: 60, 
+        {/* Локальный статус поверх viewport */}
+        <div id="status" style={{ 
+          position: fullscreenMode ? "fixed" : "absolute", 
+          top: 12, 
           left: "50%", 
           transform: "translateX(-50%)", 
           zIndex: 10000, 
-          padding: "8px 12px", 
+          padding: "6px 10px", 
           borderRadius: 8, 
-          background: "rgba(0,0,0,0.7)", 
+          background: "rgba(0,0,0,.5)", 
           color: "#fff", 
-          fontSize: 11,
-          minWidth: "200px",
-          textAlign: "center"
-        }}>
-          {AR_CONFIG.TARGETS.map(target => {
-            const info = objectInfo[target.id];
-            if (!info) return null;
-            return (
-              <div key={target.id} style={{ marginBottom: "6px", fontSize: "10px" }}>
-                <div style={{ color: info.inRange ? "#00ff00" : "#ff6666", fontWeight: "bold" }}>
-                  {target.name}: {info.distance.toFixed(1)}м
-                  {info.inRange && <span style={{ color: "#00ff00", marginLeft: "8px" }}>✓</span>}
+          fontSize: 12, 
+          display: status ? "block" : "none" 
+        }}>{status}</div>
+
+        {/* Информация об объектах */}
+        {started && (
+          <div style={{ 
+            position: fullscreenMode ? "fixed" : "absolute", 
+            top: 60, 
+            left: "50%", 
+            transform: "translateX(-50%)", 
+            zIndex: 10000, 
+            padding: "8px 12px", 
+            borderRadius: 8, 
+            background: "rgba(0,0,0,0.7)", 
+            color: "#fff", 
+            fontSize: 11,
+            minWidth: 200,
+            textAlign: "center"
+          }}>
+            {AR_CONFIG.TARGETS.map(target => {
+              const info = objectInfo[target.id];
+              if (!info) return null;
+              return (
+                <div key={target.id} style={{ marginBottom: 6, fontSize: 10 }}>
+                  <div style={{ color: info.inRange ? "#00ff00" : "#ff6666", fontWeight: "bold" }}>
+                    {target.name}: {info.distance.toFixed(1)}м
+                    {info.inRange && <span style={{ color: "#00ff00", marginLeft: 8 }}>✓</span>}
+                  </div>
+                  <div style={{ color: "#cccccc", fontSize: 9, marginTop: 2 }}>
+                    {info.coordinates.lat.toFixed(6)}, {info.coordinates.lon.toFixed(6)}, {info.coordinates.alt.toFixed(1)}м
+                  </div>
                 </div>
-                <div style={{ color: "#cccccc", fontSize: "9px", marginTop: "2px" }}>
-                  {info.coordinates.lat.toFixed(6)}, {info.coordinates.lon.toFixed(6)}, {info.coordinates.alt.toFixed(1)}м
-                </div>
-              </div>
-            );
-          })}
-          {/* Компас: стрелка показывает направление на ближайшую цель */}
-          {compassAngle !== null && (
-            <div style={{
-              position: "absolute",
-              top: -40,
-              left: "50%",
-              transform: `translateX(-50%) rotate(${compassAngle}deg)`,
-              width: 0,
-              height: 0,
-              borderLeft: "8px solid transparent",
-              borderRight: "8px solid transparent",
-              borderBottom: "14px solid rgba(255,0,0,0.9)",
-              filter: "drop-shadow(0 0 2px rgba(0,0,0,0.8))"
-            }} />
-          )}
-        </div>
-      )}
+              );
+            })}
+            {compassAngle !== null && (
+              <div style={{
+                position: "absolute",
+                top: -40,
+                left: "50%",
+                transform: `translateX(-50%) rotate(${compassAngle}deg)`,
+                width: 0,
+                height: 0,
+                borderLeft: "8px solid transparent",
+                borderRight: "8px solid transparent",
+                borderBottom: "14px solid rgba(255,0,0,0.9)",
+                filter: "drop-shadow(0 0 2px rgba(0,0,0,0.8))"
+              }} />
+            )}
+          </div>
+        )}
+      </div>
       
       {/* Отладочная панель */}
       {showDebug && (
