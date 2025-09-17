@@ -375,7 +375,7 @@ export function ARQuest(): React.JSX.Element {
             
             // Логируем каждые 30 кадров
             if (Math.floor(time * 30) % 30 === 0) {
-              console.log(`🔴 Direction dot: compass=${compassAngle.toFixed(1)}°, angleRad=${angleRad.toFixed(3)}, pos=(${x.toFixed(1)}, ${y.toFixed(1)}), radius=${radius.toFixed(1)}`);
+              console.log(`🔴 DIR DOT compassXY: angle=${compassAngle.toFixed(1)}°, rad=${angleRad.toFixed(3)}, x=${x.toFixed(1)}, y=${y.toFixed(1)}, radius=${radius.toFixed(1)}, w=${rect.width}, h=${rect.height}`);
             }
           }
         }
@@ -454,7 +454,7 @@ export function ARQuest(): React.JSX.Element {
                     
                     // Логируем позицию для отладки (реже, чтобы не спамить)
                     if (Math.floor(time * 30) % 30 === 0) { // каждые 30 кадров
-                      console.log(`🔴 Overlay ${target.name}: screen(${x.toFixed(1)}, ${y.toFixed(1)}), world(${worldPosition.x.toFixed(1)}, ${worldPosition.y.toFixed(1)}, ${worldPosition.z.toFixed(1)}), z=${screenPosition.z.toFixed(3)}, markerVisible=${marker.visible}`);
+                      console.log(`🔴 MARKER screenXY: x=${x.toFixed(1)}, y=${y.toFixed(1)} | worldXYZ: ${worldPosition.x.toFixed(1)}, ${worldPosition.y.toFixed(1)}, ${worldPosition.z.toFixed(1)} | z=${screenPosition.z.toFixed(3)} | visible=${marker.visible}`);
                     }
                   } else {
                     dot.style.display = 'none';
@@ -649,6 +649,11 @@ export function ARQuest(): React.JSX.Element {
         (window as any).debugInterval = debugInterval;
       }
   }, [startAR, started, updateModelPositionGPS, useDebugCoords]);
+
+  // Лог: применённая раскладка контролов (двухрядная)
+  useEffect(() => {
+    console.log("🧰 UI controls applied (two-row)", { uiVisible, fullscreenMode });
+  }, [uiVisible, fullscreenMode]);
 
   const capturePhoto = useCallback(() => {
     const renderer = rendererRef.current;
