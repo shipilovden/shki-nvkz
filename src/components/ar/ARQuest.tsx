@@ -219,8 +219,9 @@ export function ARQuest(): React.JSX.Element {
       const markerMaterial = new THREE.MeshBasicMaterial({ 
         color: 0xff0000, 
         transparent: true, 
-        opacity: 0.8, 
-        depthTest: false // всегда поверх видео
+        opacity: 0.9, 
+        depthTest: false, // всегда поверх видео
+        depthWrite: false
       });
       const marker = new THREE.Mesh(markerGeometry, markerMaterial);
       marker.renderOrder = 9999;
@@ -334,7 +335,7 @@ export function ARQuest(): React.JSX.Element {
     try {
       const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
         navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true, timeout: 15000, maximumAge: 5000,
+          enableHighAccuracy: true, timeout: 30000, maximumAge: 0,
         })
       );
       
@@ -388,8 +389,11 @@ export function ARQuest(): React.JSX.Element {
           userPosRef.current = { lat: p.coords.latitude, lon: p.coords.longitude, alt: p.coords.altitude ?? 0 };
           updateModelPositionGPS(p.coords.latitude, p.coords.longitude, p.coords.altitude ?? 0);
         },
-        (err) => console.error("❌ GPS Error:", err),
-        { enableHighAccuracy: true, maximumAge: 3000 }
+        (err) => {
+          console.error("❌ GPS Error:", err);
+          if (err.code === 1) setStatus("Разрешите доступ к геолокации");
+        },
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 }
       );
     } catch (e) {
       console.error("❌ Start Quest Error:", e);
@@ -481,12 +485,12 @@ export function ARQuest(): React.JSX.Element {
         id="ar-canvas" 
         style={{ 
           display: started ? "block" : "none", 
-          width: "100vw", 
-          height: "100vh",
-          position: "fixed",
-          top: "0",
-          left: "0",
-          zIndex: 9999
+          width: fullscreenMode ? "100vw" : "100%", 
+          height: fullscreenMode ? "100vh" : "auto",
+          position: fullscreenMode ? "fixed" : "relative",
+          top: fullscreenMode ? "0" : "auto",
+          left: fullscreenMode ? "0" : "auto",
+          zIndex: fullscreenMode ? 9999 : "auto"
         }} 
       />
 
