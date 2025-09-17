@@ -98,13 +98,16 @@ export function ARQuest(): React.JSX.Element {
       
       // Обновляем позицию красного маркера над моделью
       if (marker) {
-        // Для тестирования делаем маркеры ближе к камере
-        const testDistance = 3; // 3 метра от камеры (ближе)
-        const testX = Math.sin(Date.now() * 0.001) * testDistance;
-        const testZ = Math.cos(Date.now() * 0.001) * testDistance;
-        const testY = 1; // 1 метр высоты (ниже)
-        
-        marker.position.set(testX, testY, testZ); // Тестовая позиция
+        // Маркер появляется только если пользователь близко к объекту (менее 50 метров)
+        if (distance <= target.activationRadiusM) {
+          // Позиционируем маркер над моделью
+          const markerY = Math.max(dy + target.model.yOffset + 1, 1);
+          marker.position.set(dx, markerY, dz);
+          marker.visible = markersVisible;
+        } else {
+          // Скрываем маркер если далеко
+          marker.visible = false;
+        }
         
         // Размер маркера зависит от расстояния (чем дальше, тем меньше)
         const maxDistance = 1000; // максимальное расстояние для расчета размера
@@ -118,9 +121,15 @@ export function ARQuest(): React.JSX.Element {
         marker.scale.setScalar(markerSize);
         marker.visible = markersVisible;
         
-        console.log(`🔴 Marker ${target.name} updated: position=(${testX.toFixed(1)}, ${testY.toFixed(1)}, ${testZ.toFixed(1)}), size=${markerSize.toFixed(2)}, visible=${marker.visible}`);
-        console.log(`🔴 Marker ${target.name} distance from camera: ${Math.sqrt(testX*testX + testY*testY + testZ*testZ).toFixed(1)}m`);
-        addDebugInfo(`🔴 ${target.name}: pos=(${testX.toFixed(0)},${testY.toFixed(0)},${testZ.toFixed(0)}) dist=${Math.sqrt(testX*testX + testY*testY + testZ*testZ).toFixed(0)}m TEST 3m`);
+        if (distance <= target.activationRadiusM) {
+          const markerY = Math.max(dy + target.model.yOffset + 1, 1);
+          console.log(`🔴 Marker ${target.name} updated: position=(${dx.toFixed(1)}, ${markerY.toFixed(1)}, ${dz.toFixed(1)}), size=${markerSize.toFixed(2)}, visible=${marker.visible}`);
+          console.log(`🔴 Marker ${target.name} distance from camera: ${Math.sqrt(dx*dx + dy*dy + dz*dz).toFixed(1)}m`);
+          addDebugInfo(`🔴 ${target.name}: pos=(${dx.toFixed(0)},${markerY.toFixed(0)},${dz.toFixed(0)}) dist=${distance.toFixed(0)}m VISIBLE`);
+        } else {
+          console.log(`🔴 Marker ${target.name} hidden: distance=${distance.toFixed(1)}m > ${target.activationRadiusM}m`);
+          addDebugInfo(`🔴 ${target.name}: HIDDEN (${distance.toFixed(0)}m > ${target.activationRadiusM}m)`);
+        }
         
         // Обновляем информацию об объекте
         setObjectInfo((prev: any) => ({
@@ -186,13 +195,13 @@ export function ARQuest(): React.JSX.Element {
       scene.add(marker);
       markersRef.current[target.id] = marker;
       console.log(`🔴 Red marker for ${target.name} created and added to scene, visible: ${markersVisible}, position: (0,0,-5), inScene: ${scene.children.includes(marker)}`);
-      addDebugInfo(`🔴 Marker ${target.name} created, visible: ${markersVisible}, size: 3.0, TEST MODE`);
+      addDebugInfo(`🔴 Marker ${target.name} created, visible: ${markersVisible}, size: 3.0, GPS MODE`);
     });
     
     console.log(`🔴 Total markers created: ${Object.keys(markersRef.current).length}`);
     console.log(`🔴 Scene children count: ${scene.children.length}`);
       addDebugInfo(`🔴 Total markers: ${Object.keys(markersRef.current).length}`);
-      addDebugInfo(`🔴 TEST MODE: Markers rotating around camera at 3m distance`);
+      addDebugInfo(`🔴 GPS MODE: Markers appear when distance < 50m`);
     
     // Создаем тестовый маркер прямо перед камерой для проверки видимости
     const testMarkerGeometry = new THREE.SphereGeometry(0.3, 16, 16); // Уменьшаем размер
