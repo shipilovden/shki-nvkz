@@ -321,7 +321,10 @@ export function ARQuest(): React.JSX.Element {
               } as CSSStyleDeclaration);
               overlay.appendChild(dot);
             }
-            const v = new THREE.Vector3(marker.position.x, marker.position.y, marker.position.z).project(camera);
+            // Для устойчивого поведения берём 3D позицию цели (модель) — маркер всегда над моделью
+            const v3 = new THREE.Vector3();
+            v3.setFromMatrixPosition(modelsRef.current[target.id]?.matrixWorld || new THREE.Matrix4());
+            const v = v3.project(camera);
             const rectW = (canvasRef.current?.clientWidth || 1);
             const rectH = (canvasRef.current?.clientHeight || 1);
             const x = (v.x * 0.5 + 0.5) * rectW;
@@ -332,7 +335,7 @@ export function ARQuest(): React.JSX.Element {
               dot.style.top = `${y}px`;
               dot.style.display = 'block';
               // пульсация
-              const size = 14 + Math.sin(time) * 6;
+              const size = 14 + Math.sin(time * 6) * 6; // ускорим чуть пульсацию
               dot.style.width = `${size}px`; dot.style.height = `${size}px`;
             } else {
               dot.style.display = 'none';
@@ -510,6 +513,9 @@ export function ARQuest(): React.JSX.Element {
         const marker = markersRef.current[target.id];
         if (marker) marker.visible = newMode;
       });
+      // Синхронизируем HTML-оверлей
+      const overlay = document.getElementById('overlay-markers');
+      if (overlay) overlay.style.display = newMode ? 'block' : 'none';
       return newMode;
     });
   }, []);
