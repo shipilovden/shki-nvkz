@@ -64,6 +64,9 @@ export function ARQuest(): JSX.Element {
     // Обновляем позицию красного маркера над моделью
     if (marker) {
       marker.position.set(dx, dy + 3, dz); // 3 метра выше модели
+      console.log("🔴 Marker position updated:", { x: dx.toFixed(1), y: (dy + 3).toFixed(1), z: dz.toFixed(1) });
+    } else {
+      console.log("❌ Marker not found for position update");
     }
   }, []);
 
@@ -98,8 +101,10 @@ export function ARQuest(): JSX.Element {
       opacity: 0.8 
     });
     const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+    marker.position.set(0, 0, 0); // Начальная позиция
     scene.add(marker);
     markerRef.current = marker;
+    console.log("🔴 Red marker created and added to scene");
 
     const loader = new GLTFLoader();
     console.log("📦 Loading model:", AR_CONFIG.MODEL.url);
@@ -124,8 +129,17 @@ export function ARQuest(): JSX.Element {
       // Пульсирующий эффект для красного маркера
       if (markerRef.current) {
         const time = Date.now() * 0.003;
-        markerRef.current.scale.setScalar(1 + Math.sin(time) * 0.3);
-        markerRef.current.material.opacity = 0.6 + Math.sin(time * 1.5) * 0.2;
+        const scale = 1 + Math.sin(time) * 0.3;
+        const opacity = 0.6 + Math.sin(time * 1.5) * 0.2;
+        markerRef.current.scale.setScalar(scale);
+        markerRef.current.material.opacity = opacity;
+        
+        // Логируем каждые 100 кадров (примерно раз в 2 секунды)
+        if (Math.floor(time * 100) % 100 === 0) {
+          console.log("🔴 Marker pulsing:", { scale: scale.toFixed(2), opacity: opacity.toFixed(2) });
+        }
+      } else {
+        console.log("❌ Marker ref is null in tick function");
       }
       
       renderer.render(scene, camera);
@@ -231,7 +245,11 @@ export function ARQuest(): JSX.Element {
   }, []);
 
   const toggleFullscreen = useCallback(() => {
-    setFullscreenMode(prev => !prev);
+    setFullscreenMode(prev => {
+      const newMode = !prev;
+      console.log("📱 Fullscreen toggle:", newMode ? "ON" : "OFF");
+      return newMode;
+    });
   }, []);
 
   useEffect(() => {
@@ -244,7 +262,13 @@ export function ARQuest(): JSX.Element {
 
   return (
     <div style={{ position: "relative", width: "100%" }}>
-      <button id="start-ar" onClick={startQuest}>Начать AR квест</button>
+      <button 
+        id="start-ar" 
+        onClick={startQuest}
+        style={{ display: started ? "none" : "block" }}
+      >
+        Начать AR квест
+      </button>
 
       <canvas ref={canvasRef} id="ar-canvas" style={{ display: started ? "block" : "none", width: "100vw", height: "100vh" }} />
 
