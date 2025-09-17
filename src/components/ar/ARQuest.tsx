@@ -342,7 +342,7 @@ export function ARQuest(): React.JSX.Element {
         const overlayRoot = document.getElementById('overlay-markers');
         console.log(`🔍 Overlay check: overlayRoot=${!!overlayRoot}, markersVisible=${markersVisibleRef.current}, compassAngle=${compassAngle}, useDirectional=${useDirectionalOverlayRef.current}`);
         
-        if (overlayRoot && markersVisibleRef.current && typeof compassAngle === 'number' && useDirectionalOverlayRef.current) {
+        if (overlayRoot && typeof compassAngle === 'number' && useDirectionalOverlayRef.current) {
           let dirDot = overlayRoot.querySelector('.dot-direction') as HTMLDivElement | null;
           if (!dirDot) {
             dirDot = document.createElement('div');
@@ -368,6 +368,8 @@ export function ARQuest(): React.JSX.Element {
             overlayRoot.appendChild(dirLabel);
           }
 
+          // гарантируем, что слой включен
+          (overlayRoot as HTMLElement).style.display = 'block';
           const canvas = canvasRef.current;
           if (canvas) {
             const rect = canvas.getBoundingClientRect();
@@ -378,6 +380,7 @@ export function ARQuest(): React.JSX.Element {
             // 0° — вверх. Для экранных координат: X вправо, Y вниз
             const cx = rect.width / 2;
             const cy = rect.height / 2;
+            // Для некоторых устройств оси могут быть инвертированы — используем синус/косинус как компас
             const x = cx + radius * Math.sin(angleRad);
             const y = cy - radius * Math.cos(angleRad);
             dirDot.style.left = `${x}px`;
