@@ -193,15 +193,16 @@ export function ARQuest(): React.JSX.Element {
         opacity: 0.8 
       });
       const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-      marker.position.set(0, 0, -5); // Начальная позиция - 5 метров перед камерой
-      marker.visible = markersVisible; // Устанавливаем видимость
+      // При создании не показываем маркер, пока не придёт первый GPS апдейт
+      marker.position.set(0, 0, -5); // Временная позиция
+      marker.visible = false;
       marker.userData.baseScale = 2.0; // Размер маркера
       marker.userData.targetId = target.id; // Добавляем ID цели для отладки
       marker.name = `MARKER_${target.id}`; // Добавляем имя для отладки
       scene.add(marker);
       markersRef.current[target.id] = marker;
-      console.log(`🔴 Red marker for ${target.name} created and added to scene, visible: ${markersVisible}, position: (0,0,-5), inScene: ${scene.children.includes(marker)}`);
-      addDebugInfo(`🔴 Marker ${target.name} created, visible: ${markersVisible}, size: 2.0, GPS MODE`);
+      console.log(`🔴 Red marker for ${target.name} created (hidden until GPS update), inScene: ${scene.children.includes(marker)}`);
+      addDebugInfo(`🔴 Marker ${target.name} created (hidden), size: 2.0, GPS MODE`);
     });
     
     console.log(`🔴 Total markers created: ${Object.keys(markersRef.current).length}`);
@@ -209,20 +210,7 @@ export function ARQuest(): React.JSX.Element {
       addDebugInfo(`🔴 Total markers: ${Object.keys(markersRef.current).length}`);
       addDebugInfo(`🔴 GPS MODE: Markers follow GPS coordinates when distance < 50m`);
     
-    // Создаем тестовый маркер прямо перед камерой для проверки видимости
-    const testMarkerGeometry = new THREE.SphereGeometry(0.3, 16, 16); // Уменьшаем размер
-    const testMarkerMaterial = new THREE.MeshBasicMaterial({ 
-      color: 0x00ff00, // Зеленый цвет для отличия
-      transparent: true, 
-      opacity: 1.0 
-    });
-    const testMarker = new THREE.Mesh(testMarkerGeometry, testMarkerMaterial);
-    testMarker.position.set(0, 0, -5); // 5 метров перед камерой
-    testMarker.name = "TEST_MARKER";
-    scene.add(testMarker);
-    (window as any).testMarker = testMarker; // Сохраняем в глобальной переменной
-    console.log(`🟢 Test marker created at position (0, 0, -5) - should be visible!`);
-    addDebugInfo(`🟢 Test marker created at (0,0,-5), size: 0.3`);
+    // Тестовый маркер больше не нужен
 
     // Загружаем все модели
     const loader = new GLTFLoader();
@@ -257,14 +245,7 @@ export function ARQuest(): React.JSX.Element {
       // Пульсирующий эффект для всех красных маркеров
       const time = Date.now() * 0.003;
       
-      // Проверяем тестовый маркер
-      const testMarker = scene.getObjectByName("TEST_MARKER");
-      if (testMarker) {
-        testMarker.rotation.y += 0.01; // Вращаем для видимости
-        if (Math.floor(time * 100) % 100 === 0) {
-          console.log(`🟢 Test marker visible: ${testMarker.visible}, position: (${testMarker.position.x}, ${testMarker.position.y}, ${testMarker.position.z}), size: 0.3`);
-        }
-      }
+      // Тестовый маркер удалён
       
       AR_CONFIG.TARGETS.forEach(target => {
         const marker = markersRef.current[target.id];
