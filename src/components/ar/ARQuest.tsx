@@ -339,9 +339,9 @@ export function ARQuest(): React.JSX.Element {
               dot.style.left = `${x}px`;
               dot.style.top = `${y}px`;
               dot.style.display = 'block';
-              // пульсация
-              const size = 14 + Math.sin(time * 6) * 6; // ускорим чуть пульсацию
-              dot.style.width = `${size}px`; dot.style.height = `${size}px`;
+              // пульсация (CSS-анимация для стабильности)
+              dot.style.animation = 'apulse 1s infinite ease-in-out';
+              dot.style.width = '16px'; dot.style.height = '16px';
             } else {
               dot.style.display = 'none';
             }
@@ -668,11 +668,11 @@ export function ARQuest(): React.JSX.Element {
           display: status ? "block" : "none" 
         }}>{status}</div>
 
-        {/* Информация об объектах + компас (в левом верхнем углу) */}
+        {/* Информация об объектах */}
         {started && (
           <div style={{ 
             position: fullscreenMode ? "fixed" : "absolute", 
-            top: 12, 
+            top: 48, 
             left: 12, 
             zIndex: 10000, 
             padding: "8px 12px", 
@@ -697,21 +697,26 @@ export function ARQuest(): React.JSX.Element {
                 </div>
               );
             })}
-            {compassAngle !== null && (
-              <div style={{
-                position: "absolute",
-                top: -8,
-                left: -8,
-                transform: `rotate(${compassAngle}deg)`,
-                width: 0,
-                height: 0,
-                borderLeft: "8px solid transparent",
-                borderRight: "8px solid transparent",
-                borderBottom: "14px solid rgba(255,0,0,0.9)",
-                filter: "drop-shadow(0 0 2px rgba(0,0,0,0.8))"
-              }} />
-            )}
           </div>
+        )}
+
+        {/* Компас в левом верхнем углу (отдельно от блока инфо, чтобы не перекрывался) */}
+        {started && compassAngle !== null && (
+          <div style={{
+            position: fullscreenMode ? "fixed" : "absolute",
+            top: 10,
+            left: 10,
+            zIndex: 10001,
+            width: 0,
+            height: 0,
+            borderLeft: "10px solid transparent",
+            borderRight: "10px solid transparent",
+            borderBottom: "22px solid rgba(255,0,0,0.95)",
+            transform: `rotate(${compassAngle}deg)`,
+            transformOrigin: "50% 80%",
+            filter: "drop-shadow(0 0 3px rgba(0,0,0,0.85))",
+            pointerEvents: "none"
+          }}/>
         )}
       </div>
       
@@ -741,6 +746,15 @@ export function ARQuest(): React.JSX.Element {
           ))}
         </div>
       )}
+
+      {/* CSS анимация пульса для оверлея */}
+      <style>{`
+        @keyframes apulse {
+          0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.9; }
+          50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+          100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.9; }
+        }
+      `}</style>
       
       {/* Кнопка выхода из полного экрана */}
       {fullscreenMode && (
