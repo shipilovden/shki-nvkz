@@ -157,9 +157,11 @@ export function ARQuest(): React.JSX.Element {
       });
       const marker = new THREE.Mesh(markerGeometry, markerMaterial);
       marker.position.set(0, 0, 0); // Начальная позиция
+      marker.visible = markersVisible; // Устанавливаем видимость
+      marker.userData.baseScale = 0.5; // Базовый размер
       scene.add(marker);
       markersRef.current[target.id] = marker;
-      console.log(`🔴 Red marker for ${target.name} created and added to scene`);
+      console.log(`🔴 Red marker for ${target.name} created and added to scene, visible: ${markersVisible}`);
     });
 
     // Загружаем все модели
@@ -189,17 +191,19 @@ export function ARQuest(): React.JSX.Element {
       const time = Date.now() * 0.003;
       AR_CONFIG.TARGETS.forEach(target => {
         const marker = markersRef.current[target.id];
-        if (marker && markersVisible) {
-          // Получаем базовый размер из материала (сохраняем в userData)
-          if (!marker.userData.baseScale) {
-            marker.userData.baseScale = 0.5; // базовый размер маркера
+        if (marker) {
+          // Устанавливаем видимость маркера
+          marker.visible = markersVisible;
+          
+          if (markersVisible) {
+            // Получаем базовый размер из userData
+            const baseScale = marker.userData.baseScale || 0.5;
+            const pulseScale = baseScale * (1 + Math.sin(time) * 0.3);
+            const opacity = 0.6 + Math.sin(time * 1.5) * 0.2;
+            marker.scale.setScalar(pulseScale);
+            const material = (marker as THREE.Mesh).material as THREE.MeshBasicMaterial;
+            material.opacity = opacity;
           }
-          const baseScale = marker.userData.baseScale;
-          const pulseScale = baseScale * (1 + Math.sin(time) * 0.3);
-          const opacity = 0.6 + Math.sin(time * 1.5) * 0.2;
-          marker.scale.setScalar(pulseScale);
-          const material = (marker as THREE.Mesh).material as THREE.MeshBasicMaterial;
-          material.opacity = opacity;
         }
       });
       
@@ -316,12 +320,26 @@ export function ARQuest(): React.JSX.Element {
     try { recorderRef.current?.stop(); } catch {}
   }, []);
 
-  const toggleFullscreen = useCallback(() => {
-    setFullscreenMode(prev => {
-      const newMode = !prev;
-      console.log("📱 Fullscreen toggle:", newMode ? "ON" : "OFF");
-      return newMode;
-    });
+  const toggleFullscreen = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement) {
+        // Входим в полный экран
+        await document.documentElement.requestFullscreen();
+        console.log("📱 Fullscreen: ON");
+      } else {
+        // Выходим из полного экрана
+        await document.exitFullscreen();
+        console.log("📱 Fullscreen: OFF");
+      }
+    } catch (error) {
+      console.error("❌ Fullscreen error:", error);
+      // Fallback к старому способу
+      setFullscreenMode(prev => {
+        const newMode = !prev;
+        console.log("📱 Fullscreen toggle (fallback):", newMode ? "ON" : "OFF");
+        return newMode;
+      });
+    }
   }, []);
 
   const toggleMarkers = useCallback(() => {
@@ -361,7 +379,7 @@ export function ARQuest(): React.JSX.Element {
 
       <canvas ref={canvasRef} id="ar-canvas" style={{ display: started ? "block" : "none", width: "100vw", height: "100vh" }} />
 
-      <div id="ar-controls" style={{ display: uiVisible && !fullscreenMode ? "flex" : "none", position: "absolute", bottom: 20, left: "50%", transform: "translateX(-50%)", zIndex: 9, gap: 8 }}>
+      <div id="ar-controls" style={{ display: uiVisible ? "flex" : "none", position: "absolute", bottom: 20, left: "50%", transform: "translateX(-50%)", zIndex: 9, gap: 8 }}>
         <button 
           id="btn-photo" 
           onClick={capturePhoto}
@@ -410,10 +428,10 @@ export function ARQuest(): React.JSX.Element {
         </button>
       </div>
 
-      <div id="status" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 9, padding: "6px 10px", borderRadius: 8, background: "rgba(0,0,0,.5)", color: "#fff", fontSize: 12, display: status && !fullscreenMode ? "block" : "none" }}>{status}</div>
+      <div id="status" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 9, padding: "6px 10px", borderRadius: 8, background: "rgba(0,0,0,.5)", color: "#fff", fontSize: 12, display: status ? "block" : "none" }}>{status}</div>
       
       {/* Информация об объектах */}
-      {started && !fullscreenMode && (
+      {started && (
         <div style={{ 
           position: "absolute", 
           top: 60, 
@@ -441,27 +459,6 @@ export function ARQuest(): React.JSX.Element {
             );
           })}
         </div>
-      )}
-      
-      {/* Кнопка выхода из полного экрана */}
-      {fullscreenMode && (
-        <button 
-          onClick={toggleFullscreen}
-          style={{ 
-            position: "absolute", 
-            top: 20, 
-            right: 20, 
-            zIndex: 10, 
-            padding: "8px 12px", 
-            background: "rgba(0,0,0,0.7)", 
-            color: "white", 
-            border: "none", 
-            borderRadius: "4px",
-            fontSize: "12px"
-          }}
-        >
-          ✕ Выход
-        </button>
       )}
     </div>
   );
