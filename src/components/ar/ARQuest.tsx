@@ -101,12 +101,15 @@ export function ARQuest(): React.JSX.Element {
         // Маркер появляется только если пользователь близко к объекту (менее 50 метров)
         if (distance <= target.activationRadiusM) {
           // Позиционируем маркер над моделью в реальном мире
-          // Используем те же координаты что и модель, но выше
+          // Маркер должен следовать за GPS координатами объекта
           const markerY = Math.max(dy + target.model.yOffset + 2, 2); // +2 метра над моделью
           marker.position.set(dx, markerY, dz);
           marker.visible = markersVisible;
           
+          // Добавляем информацию о GPS координатах для отладки
           console.log(`🔴 Marker ${target.name} positioned above model: (${dx.toFixed(1)}, ${markerY.toFixed(1)}, ${dz.toFixed(1)})`);
+          console.log(`🔴 GPS coordinates: ${target.lat}, ${target.lon}, ${target.alt}m`);
+          console.log(`🔴 User GPS: ${userLat}, ${userLon}, ${userAlt}m`);
         } else {
           // Скрываем маркер если далеко
           marker.visible = false;
@@ -128,7 +131,7 @@ export function ARQuest(): React.JSX.Element {
           const markerY = Math.max(dy + target.model.yOffset + 2, 2);
           console.log(`🔴 Marker ${target.name} updated: position=(${dx.toFixed(1)}, ${markerY.toFixed(1)}, ${dz.toFixed(1)}), size=${markerSize.toFixed(2)}, visible=${marker.visible}`);
           console.log(`🔴 Marker ${target.name} distance from camera: ${Math.sqrt(dx*dx + dy*dy + dz*dz).toFixed(1)}m`);
-          addDebugInfo(`🔴 ${target.name}: pos=(${dx.toFixed(0)},${markerY.toFixed(0)},${dz.toFixed(0)}) dist=${distance.toFixed(0)}m VISIBLE`);
+          addDebugInfo(`🔴 ${target.name}: GPS(${target.lat.toFixed(6)},${target.lon.toFixed(6)}) dist=${distance.toFixed(0)}m VISIBLE`);
         } else {
           console.log(`🔴 Marker ${target.name} hidden: distance=${distance.toFixed(1)}m > ${target.activationRadiusM}m`);
           addDebugInfo(`🔴 ${target.name}: HIDDEN (${distance.toFixed(0)}m > ${target.activationRadiusM}m)`);
@@ -204,7 +207,7 @@ export function ARQuest(): React.JSX.Element {
     console.log(`🔴 Total markers created: ${Object.keys(markersRef.current).length}`);
     console.log(`🔴 Scene children count: ${scene.children.length}`);
       addDebugInfo(`🔴 Total markers: ${Object.keys(markersRef.current).length}`);
-      addDebugInfo(`🔴 GPS MODE: Markers appear when distance < 50m`);
+      addDebugInfo(`🔴 GPS MODE: Markers follow GPS coordinates when distance < 50m`);
     
     // Создаем тестовый маркер прямо перед камерой для проверки видимости
     const testMarkerGeometry = new THREE.SphereGeometry(0.3, 16, 16); // Уменьшаем размер
