@@ -6,8 +6,8 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { bindCameraUI, startCamera, stopCamera } from "./camera-block";
 
 const AR_CONFIG = {
-  TARGET: { lat: 53.759072, lon: 87.122719, alt: 280.0, activationRadiusM: 50 },
-  MODEL: { url: "/models/southern_white_rhino.glb", scale: 2.0, headingDeg: 0, yOffset: 0.0 },
+  TARGET: { lat: 53.691670, lon: 87.432858, alt: 389.0, activationRadiusM: 50 },
+  MODEL: { url: "/models/nataraja_shiva.glb", scale: 2.0, headingDeg: 0, yOffset: 0.0 },
 };
 
 export function ARQuest(): JSX.Element {
@@ -36,13 +36,25 @@ export function ARQuest(): JSX.Element {
 
   const updateModelPositionGPS = useCallback((userLat: number, userLon: number, userAlt: number) => {
     const model = modelRef.current;
-    if (!model) return;
+    if (!model) {
+      console.log("❌ Model not loaded yet");
+      return;
+    }
+    
     const latRad = (userLat * Math.PI) / 180;
     const metersPerDegLat = 110574;
     const metersPerDegLon = 111320 * Math.cos(latRad);
     const dx = (AR_CONFIG.TARGET.lon - userLon) * metersPerDegLon;
     const dz = (AR_CONFIG.TARGET.lat - userLat) * metersPerDegLat;
     const dy = (AR_CONFIG.TARGET.alt - userAlt) + AR_CONFIG.MODEL.yOffset;
+    
+    console.log("🎯 GPS Update:", {
+      user: { lat: userLat.toFixed(6), lon: userLon.toFixed(6), alt: userAlt.toFixed(1) },
+      target: { lat: AR_CONFIG.TARGET.lat, lon: AR_CONFIG.TARGET.lon, alt: AR_CONFIG.TARGET.alt },
+      position: { x: dx.toFixed(1), y: dy.toFixed(1), z: dz.toFixed(1) },
+      distance: haversine(userLat, userLon, AR_CONFIG.TARGET.lat, AR_CONFIG.TARGET.lon).toFixed(1) + "m"
+    });
+    
     model.position.set(dx, dy, dz);
     model.rotation.y = THREE.MathUtils.degToRad(AR_CONFIG.MODEL.headingDeg);
   }, []);
@@ -71,7 +83,9 @@ export function ARQuest(): JSX.Element {
     scene.add(dir);
 
     const loader = new GLTFLoader();
+    console.log("📦 Loading model:", AR_CONFIG.MODEL.url);
     loader.load(AR_CONFIG.MODEL.url, (gltf) => {
+      console.log("✅ Model loaded successfully:", gltf);
       const model = gltf.scene;
       model.traverse((o: any) => {
         if (o.isMesh) o.frustumCulled = false;
@@ -79,7 +93,10 @@ export function ARQuest(): JSX.Element {
       model.scale.setScalar(AR_CONFIG.MODEL.scale);
       scene.add(model);
       modelRef.current = model;
+      console.log("🎯 Setting initial model position...");
       updateModelPositionGPS(userLat, userLon, userAlt);
+    }, undefined, (error) => {
+      console.error("❌ Model loading error:", error);
     });
 
     setStatus("GPS mode (~meters)");
@@ -104,31 +121,56 @@ export function ARQuest(): JSX.Element {
       alert("Геолокация не поддерживается");
       return;
     }
+    
+    console.log("🚀 Starting AR Quest...");
     setStatus("Проверяем локацию...");
+    
     try {
       const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true, timeout: 15000, maximumAge: 5000,
         })
       );
+      
       const userLat = pos.coords.latitude;
       const userLon = pos.coords.longitude;
+      const userAlt = pos.coords.altitude ?? 0;
       const dist = haversine(userLat, userLon, AR_CONFIG.TARGET.lat, AR_CONFIG.TARGET.lon);
+      
+      console.log("📍 Location Check:", {
+        user: { lat: userLat.toFixed(6), lon: userLon.toFixed(6), alt: userAlt.toFixed(1) },
+        target: { lat: AR_CONFIG.TARGET.lat, lon: AR_CONFIG.TARGET.lon, alt: AR_CONFIG.TARGET.alt },
+        distance: dist.toFixed(1) + "m",
+        radius: AR_CONFIG.TARGET.activationRadiusM + "m",
+        inRange: dist <= AR_CONFIG.TARGET.activationRadiusM
+      });
+      
       if (dist > AR_CONFIG.TARGET.activationRadiusM) {
         setStatus(`Удалено: ${dist.toFixed(1)}м. Подойдите ближе (≤ ${AR_CONFIG.TARGET.activationRadiusM}м).`);
+        console.log("❌ Too far from target location");
         return;
       }
+      
+      console.log("✅ Location approved, starting AR...");
       setStatus("Запускаем камеру...");
       setStarted(true);
       setUiVisible(true);
-      await startAR(userLat, userLon, pos.coords.altitude ?? 0);
+      await startAR(userLat, userLon, userAlt);
+      
       watchIdRef.current = navigator.geolocation.watchPosition(
-        (p) => updateModelPositionGPS(p.coords.latitude, p.coords.longitude, p.coords.altitude ?? 0),
-        () => {},
+        (p) => {
+          console.log("🔄 GPS Update received:", {
+            lat: p.coords.latitude.toFixed(6),
+            lon: p.coords.longitude.toFixed(6),
+            alt: (p.coords.altitude ?? 0).toFixed(1)
+          });
+          updateModelPositionGPS(p.coords.latitude, p.coords.longitude, p.coords.altitude ?? 0);
+        },
+        (err) => console.error("❌ GPS Error:", err),
         { enableHighAccuracy: true, maximumAge: 3000 }
       );
     } catch (e) {
-      console.error(e);
+      console.error("❌ Start Quest Error:", e);
       setStatus("Разрешите доступ к геолокации");
       alert("Разрешите доступ к геолокации");
     }
