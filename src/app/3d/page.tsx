@@ -5,7 +5,6 @@ import {
 } from "@once-ui-system/core";
 import { baseURL, threeD, person } from "@/resources";
 import { ModelGallery } from "@/components/models/ModelGallery";
-import ARQuestSection from "@/components/ar/ARQuestSection";
 import { models3D } from "@/data/models";
 import { Metadata } from "next";
 
@@ -40,9 +39,6 @@ export default function ThreeDPage() {
       <ModelGallery 
         models={models3D}
       />
-
-      {/* AR Quest (GPS fallback) */}
-      <ARQuestSection />
     </Column>
   );
 }
