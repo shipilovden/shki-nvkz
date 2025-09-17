@@ -1481,14 +1481,14 @@ export function ARQuest(): React.JSX.Element {
             </button>
           </div>
           
-          {/* Встроенная карта Yandex */}
+          {/* Встроенная карта Google Maps */}
           <div style={{ flex: 1, borderRadius: "4px", overflow: "hidden" }}>
             <iframe
-              src={`https://yandex.ru/maps/?ll=${extendedDebug.userGPS.lon},${extendedDebug.userGPS.lat}&z=16&pt=${extendedDebug.userGPS.lon},${extendedDebug.userGPS.lat},pm2rdm~${AR_CONFIG.TARGETS.find(t => t.id === 'shiva')?.lon},${AR_CONFIG.TARGETS.find(t => t.id === 'shiva')?.lat},pm2rdm`}
+              src={`https://maps.google.com/maps?q=${extendedDebug.userGPS.lat},${extendedDebug.userGPS.lon}&z=16&t=m&output=embed`}
               width="100%"
               height="100%"
               style={{ border: "none", borderRadius: "4px" }}
-              title="Yandex Map"
+              title="Google Map"
             />
           </div>
           
