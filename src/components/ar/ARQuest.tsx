@@ -327,6 +327,42 @@ export function ARQuest(): React.JSX.Element {
       if (Math.floor(time * 100) % 100 === 0 && userPosRef.current.lat !== 0) {
         updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt);
       }
+
+      // Обновляем 2D-направляющий маркер по азимуту ближайшей цели.
+      // Это гарантирует, что точка двигается при повороте телефона, даже если 3D-проекция недоступна.
+      try {
+        const overlayRoot = document.getElementById('overlay-markers');
+        if (overlayRoot && markersVisibleRef.current && typeof compassAngle === 'number') {
+          let dirDot = overlayRoot.querySelector('.dot-direction') as HTMLDivElement | null;
+          if (!dirDot) {
+            dirDot = document.createElement('div');
+            dirDot.className = 'dot-direction';
+            Object.assign(dirDot.style, {
+              position: 'absolute', width: '14px', height: '14px', borderRadius: '50%',
+              background: 'rgba(255,0,0,0.9)', transform: 'translate(-50%, -50%)',
+              filter: 'drop-shadow(0 0 4px rgba(0,0,0,0.8))', display: 'none', pointerEvents: 'none'
+            } as CSSStyleDeclaration);
+            overlayRoot.appendChild(dirDot);
+          }
+
+          const canvas = canvasRef.current;
+          if (canvas) {
+            const rect = canvas.getBoundingClientRect();
+            // Радиус круга для позиции точки (немного меньше половины меньшей из сторон)
+            const radius = Math.min(rect.width, rect.height) * 0.35;
+            // compassAngle уже скорректирован относительно ориентации устройства: 0 – прямо вперёд
+            const angleRad = (compassAngle as number) * Math.PI / 180;
+            // 0° — вверх. Для экранных координат: X вправо, Y вниз
+            const cx = rect.width / 2;
+            const cy = rect.height / 2;
+            const x = cx + radius * Math.sin(angleRad);
+            const y = cy - radius * Math.cos(angleRad);
+            dirDot.style.left = `${x}px`;
+            dirDot.style.top = `${y}px`;
+            dirDot.style.display = 'block';
+          }
+        }
+      } catch {}
       
       // Обновляем мировые матрицы перед проекцией в 2D
       if (sceneRef.current) {
