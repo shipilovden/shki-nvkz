@@ -117,7 +117,7 @@ export function ARQuest(): React.JSX.Element {
       
       // Позиция камеры = позиция пользователя в 3D пространстве
       const cameraX = 0; // Пользователь в центре своей системы координат
-      const cameraY = userAlt; // Высота пользователя
+      const cameraY = 2.0; // Высота камеры = высота моделей (не высота пользователя!)
       const cameraZ = 0; // Пользователь в центре своей системы координат
       
       cameraRef.current.position.set(cameraX, cameraY, cameraZ);
@@ -846,22 +846,57 @@ export function ARQuest(): React.JSX.Element {
           </div>
         )}
 
-        {/* Компас - красная точка, которая двигается по экрану в направлении объекта */}
+        {/* Компас - красная точка с индикацией направления и расстояния */}
         {started && compassAngle !== null && (
           <div style={{
             position: fullscreenMode ? "fixed" : "absolute",
             top: "50%",
             left: "50%",
             zIndex: 10001,
-            width: "20px",
-            height: "20px",
-            borderRadius: "50%",
-            background: "rgba(255,0,0,0.9)",
-            border: "2px solid white",
             transform: `translate(-50%, -50%) translate(${Math.sin(compassAngle * Math.PI / 180) * 100}px, ${-Math.cos(compassAngle * Math.PI / 180) * 100}px)`,
-            filter: "drop-shadow(0 0 4px rgba(0,0,0,0.9))",
             pointerEvents: "none"
-          }}/>
+          }}>
+            {/* Красная точка */}
+            <div style={{
+              width: "20px",
+              height: "20px",
+              borderRadius: "50%",
+              background: "rgba(255,0,0,0.9)",
+              border: "2px solid white",
+              filter: "drop-shadow(0 0 4px rgba(0,0,0,0.9))",
+              margin: "0 auto"
+            }}/>
+            {/* Стрелка направления */}
+            <div style={{
+              width: "0",
+              height: "0",
+              borderLeft: "8px solid transparent",
+              borderRight: "8px solid transparent",
+              borderBottom: "16px solid rgba(255,0,0,0.8)",
+              margin: "2px auto 0",
+              transform: `rotate(${compassAngle}deg)`
+            }}/>
+            {/* Расстояние */}
+            <div style={{
+              background: "rgba(0,0,0,0.8)",
+              color: "white",
+              padding: "2px 6px",
+              borderRadius: "4px",
+              fontSize: "10px",
+              textAlign: "center",
+              marginTop: "4px",
+              whiteSpace: "nowrap"
+            }}>
+              {(() => {
+                const shiva = AR_CONFIG.TARGETS.find(t => t.id === 'shiva');
+                if (shiva && extendedDebug.userGPS.lat !== 0) {
+                  const dist = haversine(extendedDebug.userGPS.lat, extendedDebug.userGPS.lon, shiva.lat, shiva.lon);
+                  return `${dist.toFixed(1)}м`;
+                }
+                return "10.2м";
+              })()}
+            </div>
+          </div>
         )}
       </div>
       
