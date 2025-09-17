@@ -3,6 +3,7 @@ import * as THREE from "three";
 let currentFacing: "environment" | "user" = "environment";
 let stream: MediaStream | null = null;
 let video: HTMLVideoElement | null = null;
+let videoBgEl: HTMLVideoElement | null = null;
 let videoTexture: THREE.VideoTexture | null = null;
 let recorder: MediaRecorder | null = null;
 let sceneRef: THREE.Scene | null = null;
@@ -43,7 +44,31 @@ export async function startCamera(scene: THREE.Scene, facing: "environment" | "u
   videoTexture.magFilter = THREE.LinearFilter;
   videoTexture.encoding = THREE.sRGBEncoding;
 
-  if (scene) scene.background = videoTexture;
+  // Основной путь: используем видео как фон сцены
+  try {
+    if (scene) scene.background = videoTexture as any;
+  } catch {}
+
+  // Надёжный фоллбэк: HTMLVideo под канвасом (на случай, если видео-текстура не рисуется на некоторых устройствах)
+  try {
+    if (!videoBgEl) {
+      videoBgEl = document.createElement("video");
+      videoBgEl.setAttribute("playsinline", "");
+      videoBgEl.muted = true;
+      videoBgEl.autoplay = true;
+      videoBgEl.style.position = "fixed";
+      videoBgEl.style.top = "0";
+      videoBgEl.style.left = "0";
+      videoBgEl.style.width = "100vw";
+      videoBgEl.style.height = "100vh";
+      videoBgEl.style.objectFit = "cover";
+      videoBgEl.style.zIndex = "9998";
+      videoBgEl.id = "ar-bg-video";
+      document.body.appendChild(videoBgEl);
+    }
+    videoBgEl.srcObject = stream;
+    await videoBgEl.play();
+  } catch {}
   return stream;
 }
 
@@ -60,6 +85,13 @@ export function stopCamera(): void {
   stream = null;
   videoTexture = null;
   video = null;
+  try {
+    if (videoBgEl) {
+      videoBgEl.pause();
+      if (videoBgEl.parentElement) videoBgEl.parentElement.removeChild(videoBgEl);
+    }
+  } catch {}
+  videoBgEl = null;
 }
 
 export function capturePhoto(): void {
