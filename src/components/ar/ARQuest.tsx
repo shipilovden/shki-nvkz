@@ -308,10 +308,7 @@ export function ARQuest(): React.JSX.Element {
             const material = (marker as THREE.Mesh).material as THREE.MeshBasicMaterial;
             material.opacity = opacity;
             
-            // Логируем каждые 100 кадров для отладки
-            if (Math.floor(time * 100) % 100 === 0) {
-              console.log(`🔴 Marker ${target.name} pulsing: visible=${markersVisible}, scale=${pulseScale.toFixed(2)}, opacity=${opacity.toFixed(2)}, position=(${marker.position.x.toFixed(1)}, ${marker.position.y.toFixed(1)}, ${marker.position.z.toFixed(1)})`);
-            }
+            // (лог ограничил, чтобы не спамить)
           }
           // HTML-оверлей: синхронизируем 2D-точку с 3D-маркером (пульсация и видимость)
           const overlay = document.getElementById('overlay-markers');
@@ -671,21 +668,19 @@ export function ARQuest(): React.JSX.Element {
           display: status ? "block" : "none" 
         }}>{status}</div>
 
-        {/* Информация об объектах */}
+        {/* Информация об объектах + компас (в левом верхнем углу) */}
         {started && (
           <div style={{ 
             position: fullscreenMode ? "fixed" : "absolute", 
-            top: 60, 
-            left: "50%", 
-            transform: "translateX(-50%)", 
+            top: 12, 
+            left: 12, 
             zIndex: 10000, 
             padding: "8px 12px", 
             borderRadius: 8, 
             background: "rgba(0,0,0,0.7)", 
             color: "#fff", 
             fontSize: 11,
-            minWidth: 200,
-            textAlign: "center"
+            minWidth: 200
           }}>
             {AR_CONFIG.TARGETS.map(target => {
               const info = objectInfo[target.id];
@@ -705,9 +700,9 @@ export function ARQuest(): React.JSX.Element {
             {compassAngle !== null && (
               <div style={{
                 position: "absolute",
-                top: -40,
-                left: "50%",
-                transform: `translateX(-50%) rotate(${compassAngle}deg)`,
+                top: -8,
+                left: -8,
+                transform: `rotate(${compassAngle}deg)`,
                 width: 0,
                 height: 0,
                 borderLeft: "8px solid transparent",
