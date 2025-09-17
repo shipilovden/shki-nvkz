@@ -101,7 +101,7 @@ export function ARQuest(): React.JSX.Element {
         marker.scale.setScalar(markerSize);
         marker.visible = markersVisible;
         
-        console.log(`🔴 Marker ${target.name} visibility set to: ${markersVisible}, size: ${markerSize.toFixed(2)}`);
+        console.log(`🔴 Marker ${target.name} updated: position=(${dx.toFixed(1)}, ${(dy + 3).toFixed(1)}, ${dz.toFixed(1)}), size=${markerSize.toFixed(2)}, visible=${marker.visible}`);
         
         // Обновляем информацию об объекте
         setObjectInfo((prev: any) => ({
@@ -162,10 +162,14 @@ export function ARQuest(): React.JSX.Element {
       marker.position.set(0, 0, 0); // Начальная позиция
       marker.visible = markersVisible; // Устанавливаем видимость
       marker.userData.baseScale = 0.5; // Базовый размер
+      marker.userData.targetId = target.id; // Добавляем ID цели для отладки
       scene.add(marker);
       markersRef.current[target.id] = marker;
-      console.log(`🔴 Red marker for ${target.name} created and added to scene, visible: ${markersVisible}`);
+      console.log(`🔴 Red marker for ${target.name} created and added to scene, visible: ${markersVisible}, position: (0,0,0), inScene: ${scene.children.includes(marker)}`);
     });
+    
+    console.log(`🔴 Total markers created: ${Object.keys(markersRef.current).length}`);
+    console.log(`🔴 Scene children count: ${scene.children.length}`);
 
     // Загружаем все модели
     const loader = new GLTFLoader();
@@ -209,8 +213,13 @@ export function ARQuest(): React.JSX.Element {
             
             // Логируем каждые 100 кадров для отладки
             if (Math.floor(time * 100) % 100 === 0) {
-              console.log(`🔴 Marker ${target.name} pulsing: visible=${markersVisible}, scale=${pulseScale.toFixed(2)}, opacity=${opacity.toFixed(2)}`);
+              console.log(`🔴 Marker ${target.name} pulsing: visible=${markersVisible}, scale=${pulseScale.toFixed(2)}, opacity=${opacity.toFixed(2)}, position=(${marker.position.x.toFixed(1)}, ${marker.position.y.toFixed(1)}, ${marker.position.z.toFixed(1)})`);
             }
+          }
+        } else {
+          // Логируем каждые 100 кадров если маркер не найден
+          if (Math.floor(time * 100) % 100 === 0) {
+            console.log(`❌ Marker ${target.name} not found in markersRef!`);
           }
         }
       });
@@ -346,6 +355,9 @@ export function ARQuest(): React.JSX.Element {
         const marker = markersRef.current[target.id];
         if (marker) {
           marker.visible = newMode;
+          console.log(`🔴 Marker ${target.name} visibility set to: ${newMode}`);
+        } else {
+          console.log(`❌ Marker ${target.name} not found when toggling!`);
         }
       });
       
