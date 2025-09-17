@@ -875,20 +875,19 @@ export function ARQuest(): React.JSX.Element {
           </div>
         )}
 
-        {/* Компас в левом верхнем углу (отдельно от блока инфо, чтобы не перекрывался) */}
+        {/* Компас - красная точка, которая двигается по экрану в направлении объекта */}
         {started && compassAngle !== null && (
           <div style={{
             position: fullscreenMode ? "fixed" : "absolute",
-            top: 10,
-            left: 10,
+            top: "50%",
+            left: "50%",
             zIndex: 10001,
-            width: 0,
-            height: 0,
-            borderLeft: "6px solid transparent",
-            borderRight: "6px solid transparent",
-            borderBottom: "20px solid rgba(255,0,0,0.95)",
-            transform: `rotate(${compassAngle}deg)`,
-            transformOrigin: "50% 100%",
+            width: "20px",
+            height: "20px",
+            borderRadius: "50%",
+            background: "rgba(255,0,0,0.9)",
+            border: "2px solid white",
+            transform: `translate(-50%, -50%) translate(${Math.sin(compassAngle * Math.PI / 180) * 100}px, ${-Math.cos(compassAngle * Math.PI / 180) * 100}px)`,
             filter: "drop-shadow(0 0 4px rgba(0,0,0,0.9))",
             pointerEvents: "none"
           }}/>
