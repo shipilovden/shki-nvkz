@@ -469,22 +469,22 @@ export function ARQuest(): React.JSX.Element {
         id="ar-canvas" 
         style={{ 
           display: started ? "block" : "none", 
-          width: fullscreenMode ? "100vw" : "100%", 
-          height: fullscreenMode ? "100vh" : "auto",
-          position: fullscreenMode ? "fixed" : "relative",
-          top: fullscreenMode ? "0" : "auto",
-          left: fullscreenMode ? "0" : "auto",
-          zIndex: fullscreenMode ? 9999 : "auto"
+          width: "100vw", 
+          height: "100vh",
+          position: "fixed",
+          top: "0",
+          left: "0",
+          zIndex: 9999
         }} 
       />
 
       <div id="ar-controls" style={{ 
         display: uiVisible ? "flex" : "none", 
-        position: fullscreenMode ? "fixed" : "absolute", 
+        position: "fixed", 
         bottom: 20, 
         left: "50%", 
         transform: "translateX(-50%)", 
-        zIndex: fullscreenMode ? 10000 : 9, 
+        zIndex: 10000, 
         gap: 4,
         overflowX: "auto",
         padding: "0 10px",
@@ -556,11 +556,11 @@ export function ARQuest(): React.JSX.Element {
       </div>
 
       <div id="status" style={{ 
-        position: fullscreenMode ? "fixed" : "absolute", 
+        position: "fixed", 
         top: 12, 
         left: "50%", 
         transform: "translateX(-50%)", 
-        zIndex: fullscreenMode ? 10000 : 9, 
+        zIndex: 10000, 
         padding: "6px 10px", 
         borderRadius: 8, 
         background: "rgba(0,0,0,.5)", 
@@ -572,11 +572,11 @@ export function ARQuest(): React.JSX.Element {
       {/* Информация об объектах */}
       {started && (
         <div style={{ 
-          position: fullscreenMode ? "fixed" : "absolute", 
+          position: "fixed", 
           top: 60, 
           left: "50%", 
           transform: "translateX(-50%)", 
-          zIndex: fullscreenMode ? 10000 : 9, 
+          zIndex: 10000, 
           padding: "8px 12px", 
           borderRadius: 8, 
           background: "rgba(0,0,0,0.7)", 
