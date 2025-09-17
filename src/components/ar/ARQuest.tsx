@@ -20,9 +20,11 @@ export function ARQuest(): JSX.Element {
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const modelRef = useRef<THREE.Object3D | null>(null);
+  const markerRef = useRef<THREE.Object3D | null>(null);
   const videoStreamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const watchIdRef = useRef<number | null>(null);
+  const [fullscreenMode, setFullscreenMode] = useState(false);
 
   const haversine = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -36,6 +38,7 @@ export function ARQuest(): JSX.Element {
 
   const updateModelPositionGPS = useCallback((userLat: number, userLon: number, userAlt: number) => {
     const model = modelRef.current;
+    const marker = markerRef.current;
     if (!model) {
       console.log("❌ Model not loaded yet");
       return;
@@ -57,6 +60,11 @@ export function ARQuest(): JSX.Element {
     
     model.position.set(dx, dy, dz);
     model.rotation.y = THREE.MathUtils.degToRad(AR_CONFIG.MODEL.headingDeg);
+    
+    // Обновляем позицию красного маркера над моделью
+    if (marker) {
+      marker.position.set(dx, dy + 3, dz); // 3 метра выше модели
+    }
   }, []);
 
   const startAR = useCallback(async (userLat: number, userLon: number, userAlt: number) => {
@@ -82,6 +90,17 @@ export function ARQuest(): JSX.Element {
     dir.position.set(1, 2, 1);
     scene.add(dir);
 
+    // Создаём красный маркер-точку
+    const markerGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+    const markerMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0xff0000, 
+      transparent: true, 
+      opacity: 0.8 
+    });
+    const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+    scene.add(marker);
+    markerRef.current = marker;
+
     const loader = new GLTFLoader();
     console.log("📦 Loading model:", AR_CONFIG.MODEL.url);
     loader.load(AR_CONFIG.MODEL.url, (gltf) => {
@@ -102,6 +121,13 @@ export function ARQuest(): JSX.Element {
     setStatus("GPS mode (~meters)");
 
     function tick() {
+      // Пульсирующий эффект для красного маркера
+      if (markerRef.current) {
+        const time = Date.now() * 0.003;
+        markerRef.current.scale.setScalar(1 + Math.sin(time) * 0.3);
+        markerRef.current.material.opacity = 0.6 + Math.sin(time * 1.5) * 0.2;
+      }
+      
       renderer.render(scene, camera);
       requestAnimationFrame(tick);
     }
@@ -204,6 +230,10 @@ export function ARQuest(): JSX.Element {
     try { recorderRef.current?.stop(); } catch {}
   }, []);
 
+  const toggleFullscreen = useCallback(() => {
+    setFullscreenMode(prev => !prev);
+  }, []);
+
   useEffect(() => {
     return () => {
       try { if (watchIdRef.current != null) navigator.geolocation.clearWatch(watchIdRef.current); } catch {}
@@ -218,14 +248,36 @@ export function ARQuest(): JSX.Element {
 
       <canvas ref={canvasRef} id="ar-canvas" style={{ display: started ? "block" : "none", width: "100vw", height: "100vh" }} />
 
-      <div id="ar-controls" style={{ display: uiVisible ? "flex" : "none", position: "absolute", bottom: 20, left: "50%", transform: "translateX(-50%)", zIndex: 9, gap: 8 }}>
+      <div id="ar-controls" style={{ display: uiVisible && !fullscreenMode ? "flex" : "none", position: "absolute", bottom: 20, left: "50%", transform: "translateX(-50%)", zIndex: 9, gap: 8 }}>
         <button id="btn-photo" onClick={capturePhoto}>📸 Фото</button>
         <button id="btn-video" onClick={startVideo}>🎥 Видео</button>
         <button id="btn-stop" onClick={stopVideo}>⏹ Стоп</button>
         <button id="btn-switch">🔄 Камера</button>
+        <button onClick={toggleFullscreen}>📱 Полный экран</button>
       </div>
 
-      <div id="status" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 9, padding: "6px 10px", borderRadius: 8, background: "rgba(0,0,0,.5)", color: "#fff", fontSize: 12, display: status ? "block" : "none" }}>{status}</div>
+      <div id="status" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 9, padding: "6px 10px", borderRadius: 8, background: "rgba(0,0,0,.5)", color: "#fff", fontSize: 12, display: status && !fullscreenMode ? "block" : "none" }}>{status}</div>
+      
+      {/* Кнопка выхода из полного экрана */}
+      {fullscreenMode && (
+        <button 
+          onClick={toggleFullscreen}
+          style={{ 
+            position: "absolute", 
+            top: 20, 
+            right: 20, 
+            zIndex: 10, 
+            padding: "8px 12px", 
+            background: "rgba(0,0,0,0.7)", 
+            color: "white", 
+            border: "none", 
+            borderRadius: "4px",
+            fontSize: "12px"
+          }}
+        >
+          ✕ Выход
+        </button>
+      )}
     </div>
   );
 }
