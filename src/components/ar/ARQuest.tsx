@@ -56,6 +56,7 @@ export function ARQuest(): React.JSX.Element {
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
   const [compassAngle, setCompassAngle] = useState<number | null>(null);
+  const useDirectionalOverlayRef = useRef(true);
   const [useDebugCoords, setUseDebugCoords] = useState(false);
   const userPosRef = useRef<{lat:number, lon:number, alt:number}>({lat:0,lon:0,alt:0});
   const deviceOrientationRef = useRef<{alpha: number, beta: number, gamma: number}>({alpha: 0, beta: 0, gamma: 0});
@@ -136,23 +137,16 @@ export function ARQuest(): React.JSX.Element {
 
       // Обновляем позицию красного маркера над моделью
       if (marker) {
-        // Маркер появляется только если пользователь близко к объекту (менее 50 метров)
-        if (distance <= target.activationRadiusM) {
-          // Позиционируем маркер над моделью в реальном мире
-          // Маркер должен следовать за GPS координатами объекта
-          const markerY = Math.max(dy + target.model.yOffset + 2, 2); // +2 метра над моделью
-          marker.position.set(dx, markerY, dz);
-          // Форс-показ маркера в радиусе; переключатель действует как доп. фильтр
-          marker.visible = markersVisibleRef.current; // уважает переключатель
-          
-          // Добавляем информацию о GPS координатах для отладки
-          console.log(`🔴 Marker ${target.name} positioned above model: (${dx.toFixed(1)}, ${markerY.toFixed(1)}, ${dz.toFixed(1)})`);
-          console.log(`🔴 GPS coordinates: ${target.lat}, ${target.lon}, ${target.alt}m`);
-          console.log(`🔴 User GPS: ${userLat}, ${userLon}, ${userAlt}m`);
-        } else {
-          // Скрываем маркер если далеко
-          marker.visible = false;
-        }
+        // ВСЕГДА позиционируем маркер по GPS, даже если он скрыт.
+        const markerY = Math.max(dy + target.model.yOffset + 2, 2); // +2 метра над моделью
+        marker.position.set(dx, markerY, dz);
+        // Видимость — только как индикация близости
+        marker.visible = distance <= target.activationRadiusM && markersVisibleRef.current;
+        
+        // Добавляем информацию о GPS координатах для отладки
+        console.log(`🔴 Marker ${target.name} positioned above model: (${dx.toFixed(1)}, ${markerY.toFixed(1)}, ${dz.toFixed(1)})`);
+        console.log(`🔴 GPS coordinates: ${target.lat}, ${target.lon}, ${target.alt}m`);
+        console.log(`🔴 User GPS: ${userLat}, ${userLon}, ${userAlt}m`);
         
         // Размер маркера зависит от расстояния (чем дальше, тем меньше)
         const maxDistance = 1000; // максимальное расстояние для расчета размера
@@ -323,8 +317,8 @@ export function ARQuest(): React.JSX.Element {
       // Пульсирующий эффект для всех красных маркеров
       const time = Date.now() * 0.003;
       
-      // Принудительно обновляем расстояние каждые 100 кадров (примерно каждые 1.5 секунды)
-      if (Math.floor(time * 100) % 100 === 0 && userPosRef.current.lat !== 0) {
+      // Принудительно обновляем расстояние 10 раз в секунду
+      if (Math.floor(time * 10) !== Math.floor((time - 0.001) * 10) && userPosRef.current.lat !== 0) {
         updateModelPositionGPS(userPosRef.current.lat, userPosRef.current.lon, userPosRef.current.alt);
       }
 
@@ -332,7 +326,7 @@ export function ARQuest(): React.JSX.Element {
       // Это гарантирует, что точка двигается при повороте телефона, даже если 3D-проекция недоступна.
       try {
         const overlayRoot = document.getElementById('overlay-markers');
-        if (overlayRoot && markersVisibleRef.current && typeof compassAngle === 'number') {
+        if (overlayRoot && markersVisibleRef.current && typeof compassAngle === 'number' && useDirectionalOverlayRef.current) {
           let dirDot = overlayRoot.querySelector('.dot-direction') as HTMLDivElement | null;
           if (!dirDot) {
             dirDot = document.createElement('div');
