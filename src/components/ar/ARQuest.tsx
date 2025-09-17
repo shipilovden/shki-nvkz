@@ -37,6 +37,7 @@ export function ARQuest(): React.JSX.Element {
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const controlsRef = useRef<any | null>(null);
   const modelsRef = useRef<{[key: string]: THREE.Object3D}>({});
   const markersRef = useRef<{[key: string]: THREE.Object3D}>({});
   const videoStreamRef = useRef<MediaStream | null>(null);
@@ -44,9 +45,12 @@ export function ARQuest(): React.JSX.Element {
   const watchIdRef = useRef<number | null>(null);
   const [fullscreenMode, setFullscreenMode] = useState(false);
   const [markersVisible, setMarkersVisible] = useState(true); // По умолчанию маркеры видны
+  const markersVisibleRef = useRef(true);
   const [objectInfo, setObjectInfo] = useState<{[key: string]: {distance: number, inRange: boolean, coordinates: {lat: number, lon: number, alt: number}}}>({});
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
+  const [compassAngle, setCompassAngle] = useState<number | null>(null);
+  const userPosRef = useRef<{lat:number, lon:number, alt:number}>({lat:0,lon:0,alt:0});
 
   // Функция для добавления отладочной информации
   const addDebugInfo = useCallback((message: string) => {
@@ -72,6 +76,7 @@ export function ARQuest(): React.JSX.Element {
     const metersPerDegLat = 110574;
     const metersPerDegLon = 111320 * Math.cos(latRad);
     
+    let closest: {id:string; angle:number; distance:number} | null = null as any;
     AR_CONFIG.TARGETS.forEach(target => {
       const model = modelsRef.current[target.id];
       const marker = markersRef.current[target.id];
@@ -110,6 +115,12 @@ export function ARQuest(): React.JSX.Element {
           console.log(`🔴 Marker ${target.name} positioned above model: (${dx.toFixed(1)}, ${markerY.toFixed(1)}, ${dz.toFixed(1)})`);
           console.log(`🔴 GPS coordinates: ${target.lat}, ${target.lon}, ${target.alt}m`);
           console.log(`🔴 User GPS: ${userLat}, ${userLon}, ${userAlt}m`);
+          // вычисляем азимут для компаса
+          const y = Math.sin((target.lon - userLon) * Math.PI/180) * Math.cos(target.lat * Math.PI/180);
+          const x = Math.cos(userLat * Math.PI/180) * Math.sin(target.lat * Math.PI/180) - Math.sin(userLat * Math.PI/180) * Math.cos(target.lat * Math.PI/180) * Math.cos((target.lon - userLon) * Math.PI/180);
+          const bearingRad = Math.atan2(y, x);
+          const bearingDeg = (bearingRad * 180/Math.PI + 360) % 360; // 0..360
+          if (!closest || distance < closest.distance) closest = { id: target.id, angle: bearingDeg, distance };
         } else {
           // Скрываем маркер если далеко
           marker.visible = false;
@@ -159,6 +170,7 @@ export function ARQuest(): React.JSX.Element {
         console.log(`❌ Marker ${target.name} not found for position update`);
       }
     });
+    if (closest && typeof closest.angle === 'number') setCompassAngle(closest.angle);
   }, [markersVisible]);
 
   const startAR = useCallback(async (userLat: number, userLon: number, userAlt: number) => {
@@ -178,6 +190,23 @@ export function ARQuest(): React.JSX.Element {
     bindCameraUI(scene, renderer);
     const stream = await startCamera(scene, "environment");
     videoStreamRef.current = stream;
+
+    // Подключаем DeviceOrientation для того, чтобы камера
+    // вращалась при повороте телефона (не требуются гео-абсолютные сенсоры)
+    // Простейшее управление ориентацией камеры через события устройства
+    try {
+      const handleOrientation = (e: any) => {
+        const alpha = (e.alpha || 0) * (Math.PI/180);
+        const beta = (e.beta || 0) * (Math.PI/180);
+        const gamma = (e.gamma || 0) * (Math.PI/180);
+        // Преобразуем в кватернион камеры
+        const euler = new THREE.Euler(beta, alpha, -gamma, "YXZ");
+        camera.quaternion.setFromEuler(euler);
+      };
+      window.addEventListener("deviceorientation", handleOrientation, true);
+      controlsRef.current = { dispose: () => window.removeEventListener("deviceorientation", handleOrientation, true) };
+      addDebugInfo("🧭 DeviceOrientation активен");
+    } catch {}
 
     scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.0));
     const dir = new THREE.DirectionalLight(0xffffff, 0.6);
@@ -251,7 +280,7 @@ export function ARQuest(): React.JSX.Element {
         const marker = markersRef.current[target.id];
         if (marker) {
           // Устанавливаем видимость маркера
-          marker.visible = markersVisible;
+          marker.visible = markersVisibleRef.current;
           
           if (markersVisible) {
             // Получаем базовый размер из userData
@@ -275,6 +304,7 @@ export function ARQuest(): React.JSX.Element {
         }
       });
       
+      if (controlsRef.current) controlsRef.current.update();
       renderer.render(scene, camera);
       requestAnimationFrame(tick);
     }
@@ -309,6 +339,7 @@ export function ARQuest(): React.JSX.Element {
       const userLat = pos.coords.latitude;
       const userLon = pos.coords.longitude;
       const userAlt = pos.coords.altitude ?? 0;
+      userPosRef.current = { lat: userLat, lon: userLon, alt: userAlt };
       
       // Проверяем расстояние до всех точек
       const distances = AR_CONFIG.TARGETS.map(target => ({
@@ -352,6 +383,7 @@ export function ARQuest(): React.JSX.Element {
             lon: p.coords.longitude.toFixed(6),
             alt: (p.coords.altitude ?? 0).toFixed(1)
           });
+          userPosRef.current = { lat: p.coords.latitude, lon: p.coords.longitude, alt: p.coords.altitude ?? 0 };
           updateModelPositionGPS(p.coords.latitude, p.coords.longitude, p.coords.altitude ?? 0);
         },
         (err) => console.error("❌ GPS Error:", err),
@@ -403,22 +435,13 @@ export function ARQuest(): React.JSX.Element {
   const toggleMarkers = useCallback(() => {
     setMarkersVisible(prev => {
       const newMode = !prev;
-      console.log("🔴 Markers toggle:", newMode ? "ON" : "OFF");
-      addDebugInfo(`🔴 Markers: ${newMode ? "ON" : "OFF"}`);
-      
-      // Обновляем видимость всех маркеров
+      markersVisibleRef.current = newMode;
+      console.log("🔴 Маркеры:", newMode ? "ON" : "OFF");
+      addDebugInfo(`🔴 Маркеры: ${newMode ? "ON" : "OFF"}`);
       AR_CONFIG.TARGETS.forEach(target => {
         const marker = markersRef.current[target.id];
-        if (marker) {
-          marker.visible = newMode;
-          console.log(`🔴 Marker ${target.name} visibility set to: ${newMode}, position: (${marker.position.x.toFixed(1)}, ${marker.position.y.toFixed(1)}, ${marker.position.z.toFixed(1)})`);
-        } else {
-          console.log(`❌ Marker ${target.name} not found when toggling!`);
-        }
+        if (marker) marker.visible = newMode;
       });
-      
-      // Тестовый маркер обновляется в функции tick
-      
       return newMode;
     });
   }, []);
@@ -577,6 +600,21 @@ export function ARQuest(): React.JSX.Element {
               </div>
             );
           })}
+          {/* Компас: стрелка показывает направление на ближайшую цель */}
+          {compassAngle !== null && (
+            <div style={{
+              position: "absolute",
+              top: -40,
+              left: "50%",
+              transform: `translateX(-50%) rotate(${compassAngle}deg)`,
+              width: 0,
+              height: 0,
+              borderLeft: "8px solid transparent",
+              borderRight: "8px solid transparent",
+              borderBottom: "14px solid rgba(255,0,0,0.9)",
+              filter: "drop-shadow(0 0 2px rgba(0,0,0,0.8))"
+            }} />
+          )}
         </div>
       )}
       
