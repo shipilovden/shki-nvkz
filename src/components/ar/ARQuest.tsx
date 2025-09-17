@@ -6,8 +6,26 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { bindCameraUI, startCamera, stopCamera } from "./camera-block";
 
 const AR_CONFIG = {
-  TARGET: { lat: 53.691670, lon: 87.432858, alt: 389.0, activationRadiusM: 50 },
-  MODEL: { url: "/models/nataraja_shiva.glb", scale: 2.0, headingDeg: 0, yOffset: 0.0 },
+  TARGETS: [
+    { 
+      id: "rhino", 
+      name: "носорог",
+      lat: 53.759072, 
+      lon: 87.122719, 
+      alt: 280.0, 
+      activationRadiusM: 50,
+      model: { url: "/models/southern_white_rhino.glb", scale: 2.0, headingDeg: 0, yOffset: 0.0 }
+    },
+    { 
+      id: "shiva", 
+      name: "Шива",
+      lat: 53.691670, 
+      lon: 87.432858, 
+      alt: 389.0, 
+      activationRadiusM: 50,
+      model: { url: "/models/nataraja_shiva.glb", scale: 2.0, headingDeg: 0, yOffset: 0.0 }
+    }
+  ]
 };
 
 export function ARQuest(): JSX.Element {
@@ -19,12 +37,13 @@ export function ARQuest(): JSX.Element {
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const modelRef = useRef<THREE.Object3D | null>(null);
-  const markerRef = useRef<THREE.Object3D | null>(null);
+  const modelsRef = useRef<{[key: string]: THREE.Object3D}>({});
+  const markersRef = useRef<{[key: string]: THREE.Object3D}>({});
   const videoStreamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const watchIdRef = useRef<number | null>(null);
   const [fullscreenMode, setFullscreenMode] = useState(false);
+  const [markersVisible, setMarkersVisible] = useState(true);
 
   const haversine = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -37,38 +56,60 @@ export function ARQuest(): JSX.Element {
   };
 
   const updateModelPositionGPS = useCallback((userLat: number, userLon: number, userAlt: number) => {
-    const model = modelRef.current;
-    const marker = markerRef.current;
-    if (!model) {
-      console.log("❌ Model not loaded yet");
-      return;
-    }
-    
     const latRad = (userLat * Math.PI) / 180;
     const metersPerDegLat = 110574;
     const metersPerDegLon = 111320 * Math.cos(latRad);
-    const dx = (AR_CONFIG.TARGET.lon - userLon) * metersPerDegLon;
-    const dz = (AR_CONFIG.TARGET.lat - userLat) * metersPerDegLat;
-    const dy = (AR_CONFIG.TARGET.alt - userAlt) + AR_CONFIG.MODEL.yOffset;
     
-    console.log("🎯 GPS Update:", {
-      user: { lat: userLat.toFixed(6), lon: userLon.toFixed(6), alt: userAlt.toFixed(1) },
-      target: { lat: AR_CONFIG.TARGET.lat, lon: AR_CONFIG.TARGET.lon, alt: AR_CONFIG.TARGET.alt },
-      position: { x: dx.toFixed(1), y: dy.toFixed(1), z: dz.toFixed(1) },
-      distance: haversine(userLat, userLon, AR_CONFIG.TARGET.lat, AR_CONFIG.TARGET.lon).toFixed(1) + "m"
+    AR_CONFIG.TARGETS.forEach(target => {
+      const model = modelsRef.current[target.id];
+      const marker = markersRef.current[target.id];
+      
+      if (!model) {
+        console.log(`❌ Model ${target.name} not loaded yet`);
+        return;
+      }
+      
+      const dx = (target.lon - userLon) * metersPerDegLon;
+      const dz = (target.lat - userLat) * metersPerDegLat;
+      const dy = (target.alt - userAlt) + target.model.yOffset;
+      const distance = haversine(userLat, userLon, target.lat, target.lon);
+      
+      console.log(`🎯 GPS Update ${target.name}:`, {
+        user: { lat: userLat.toFixed(6), lon: userLon.toFixed(6), alt: userAlt.toFixed(1) },
+        target: { lat: target.lat, lon: target.lon, alt: target.alt },
+        position: { x: dx.toFixed(1), y: dy.toFixed(1), z: dz.toFixed(1) },
+        distance: distance.toFixed(1) + "m"
+      });
+      
+      model.position.set(dx, dy, dz);
+      model.rotation.y = THREE.MathUtils.degToRad(target.model.headingDeg);
+      
+      // Обновляем позицию красного маркера над моделью
+      if (marker) {
+        marker.position.set(dx, dy + 3, dz); // 3 метра выше модели
+        
+        // Размер маркера зависит от расстояния (чем дальше, тем меньше)
+        const maxDistance = 1000; // максимальное расстояние для расчета размера
+        const minSize = 0.2;
+        const maxSize = 1.0;
+        const normalizedDistance = Math.min(distance / maxDistance, 1);
+        const markerSize = maxSize - (normalizedDistance * (maxSize - minSize));
+        
+        marker.scale.setScalar(markerSize);
+        marker.visible = markersVisible;
+        
+        console.log(`🔴 Marker ${target.name} updated:`, { 
+          x: dx.toFixed(1), 
+          y: (dy + 3).toFixed(1), 
+          z: dz.toFixed(1),
+          size: markerSize.toFixed(2),
+          distance: distance.toFixed(1) + "m"
+        });
+      } else {
+        console.log(`❌ Marker ${target.name} not found for position update`);
+      }
     });
-    
-    model.position.set(dx, dy, dz);
-    model.rotation.y = THREE.MathUtils.degToRad(AR_CONFIG.MODEL.headingDeg);
-    
-    // Обновляем позицию красного маркера над моделью
-    if (marker) {
-      marker.position.set(dx, dy + 3, dz); // 3 метра выше модели
-      console.log("🔴 Marker position updated:", { x: dx.toFixed(1), y: (dy + 3).toFixed(1), z: dz.toFixed(1) });
-    } else {
-      console.log("❌ Marker not found for position update");
-    }
-  }, []);
+  }, [markersVisible]);
 
   const startAR = useCallback(async (userLat: number, userLon: number, userAlt: number) => {
     const canvas = canvasRef.current;
@@ -93,54 +134,56 @@ export function ARQuest(): JSX.Element {
     dir.position.set(1, 2, 1);
     scene.add(dir);
 
-    // Создаём красный маркер-точку
-    const markerGeometry = new THREE.SphereGeometry(0.5, 16, 16);
-    const markerMaterial = new THREE.MeshBasicMaterial({ 
-      color: 0xff0000, 
-      transparent: true, 
-      opacity: 0.8 
-    });
-    const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-    marker.position.set(0, 0, 0); // Начальная позиция
-    scene.add(marker);
-    markerRef.current = marker;
-    console.log("🔴 Red marker created and added to scene");
-
-    const loader = new GLTFLoader();
-    console.log("📦 Loading model:", AR_CONFIG.MODEL.url);
-    loader.load(AR_CONFIG.MODEL.url, (gltf) => {
-      console.log("✅ Model loaded successfully:", gltf);
-      const model = gltf.scene;
-      model.traverse((o: any) => {
-        if (o.isMesh) o.frustumCulled = false;
+    // Создаём маркеры для каждой модели
+    AR_CONFIG.TARGETS.forEach(target => {
+      const markerGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+      const markerMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0xff0000, 
+        transparent: true, 
+        opacity: 0.8 
       });
-      model.scale.setScalar(AR_CONFIG.MODEL.scale);
-      scene.add(model);
-      modelRef.current = model;
-      console.log("🎯 Setting initial model position...");
-      updateModelPositionGPS(userLat, userLon, userAlt);
-    }, undefined, (error) => {
-      console.error("❌ Model loading error:", error);
+      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+      marker.position.set(0, 0, 0); // Начальная позиция
+      scene.add(marker);
+      markersRef.current[target.id] = marker;
+      console.log(`🔴 Red marker for ${target.name} created and added to scene`);
+    });
+
+    // Загружаем все модели
+    const loader = new GLTFLoader();
+    AR_CONFIG.TARGETS.forEach(target => {
+      console.log(`📦 Loading model: ${target.name} - ${target.model.url}`);
+      loader.load(target.model.url, (gltf) => {
+        console.log(`✅ Model ${target.name} loaded successfully:`, gltf);
+        const model = gltf.scene;
+        model.traverse((o: any) => {
+          if (o.isMesh) o.frustumCulled = false;
+        });
+        model.scale.setScalar(target.model.scale);
+        scene.add(model);
+        modelsRef.current[target.id] = model;
+        console.log(`🎯 Setting initial position for ${target.name}...`);
+        updateModelPositionGPS(userLat, userLon, userAlt);
+      }, undefined, (error) => {
+        console.error(`❌ Model ${target.name} loading error:`, error);
+      });
     });
 
     setStatus("GPS mode (~meters)");
 
     function tick() {
-      // Пульсирующий эффект для красного маркера
-      if (markerRef.current) {
-        const time = Date.now() * 0.003;
-        const scale = 1 + Math.sin(time) * 0.3;
-        const opacity = 0.6 + Math.sin(time * 1.5) * 0.2;
-        markerRef.current.scale.setScalar(scale);
-        markerRef.current.material.opacity = opacity;
-        
-        // Логируем каждые 100 кадров (примерно раз в 2 секунды)
-        if (Math.floor(time * 100) % 100 === 0) {
-          console.log("🔴 Marker pulsing:", { scale: scale.toFixed(2), opacity: opacity.toFixed(2) });
+      // Пульсирующий эффект для всех красных маркеров
+      const time = Date.now() * 0.003;
+      AR_CONFIG.TARGETS.forEach(target => {
+        const marker = markersRef.current[target.id];
+        if (marker && markersVisible) {
+          const baseScale = marker.scale.x; // сохраняем базовый размер
+          const pulseScale = baseScale * (1 + Math.sin(time) * 0.3);
+          const opacity = 0.6 + Math.sin(time * 1.5) * 0.2;
+          marker.scale.setScalar(pulseScale);
+          marker.material.opacity = opacity;
         }
-      } else {
-        console.log("❌ Marker ref is null in tick function");
-      }
+      });
       
       renderer.render(scene, camera);
       requestAnimationFrame(tick);
@@ -175,19 +218,30 @@ export function ARQuest(): JSX.Element {
       const userLat = pos.coords.latitude;
       const userLon = pos.coords.longitude;
       const userAlt = pos.coords.altitude ?? 0;
-      const dist = haversine(userLat, userLon, AR_CONFIG.TARGET.lat, AR_CONFIG.TARGET.lon);
+      
+      // Проверяем расстояние до всех точек
+      const distances = AR_CONFIG.TARGETS.map(target => ({
+        name: target.name,
+        distance: haversine(userLat, userLon, target.lat, target.lon),
+        inRange: haversine(userLat, userLon, target.lat, target.lon) <= target.activationRadiusM
+      }));
+      
+      const closestTarget = distances.reduce((closest, current) => 
+        current.distance < closest.distance ? current : closest
+      );
       
       console.log("📍 Location Check:", {
         user: { lat: userLat.toFixed(6), lon: userLon.toFixed(6), alt: userAlt.toFixed(1) },
-        target: { lat: AR_CONFIG.TARGET.lat, lon: AR_CONFIG.TARGET.lon, alt: AR_CONFIG.TARGET.alt },
-        distance: dist.toFixed(1) + "m",
-        radius: AR_CONFIG.TARGET.activationRadiusM + "m",
-        inRange: dist <= AR_CONFIG.TARGET.activationRadiusM
+        distances: distances.map(d => `${d.name}: ${d.distance.toFixed(1)}m (${d.inRange ? 'в радиусе' : 'далеко'})`),
+        closest: `${closestTarget.name}: ${closestTarget.distance.toFixed(1)}m`
       });
       
-      if (dist > AR_CONFIG.TARGET.activationRadiusM) {
-        setStatus(`Удалено: ${dist.toFixed(1)}м. Подойдите ближе (≤ ${AR_CONFIG.TARGET.activationRadiusM}м).`);
-        console.log("❌ Too far from target location");
+      // Показываем статус с обеими дистанциями
+      const statusText = distances.map(d => `${d.name}: ${d.distance.toFixed(1)}м`).join(', ');
+      
+      if (!distances.some(d => d.inRange)) {
+        setStatus(`Удалено от всех точек. ${statusText}. Подойдите ближе (≤ 50м).`);
+        console.log("❌ Too far from all target locations");
         return;
       }
       
@@ -252,6 +306,23 @@ export function ARQuest(): JSX.Element {
     });
   }, []);
 
+  const toggleMarkers = useCallback(() => {
+    setMarkersVisible(prev => {
+      const newMode = !prev;
+      console.log("🔴 Markers toggle:", newMode ? "ON" : "OFF");
+      
+      // Обновляем видимость всех маркеров
+      AR_CONFIG.TARGETS.forEach(target => {
+        const marker = markersRef.current[target.id];
+        if (marker) {
+          marker.visible = newMode;
+        }
+      });
+      
+      return newMode;
+    });
+  }, []);
+
   useEffect(() => {
     return () => {
       try { if (watchIdRef.current != null) navigator.geolocation.clearWatch(watchIdRef.current); } catch {}
@@ -277,6 +348,9 @@ export function ARQuest(): JSX.Element {
         <button id="btn-video" onClick={startVideo}>🎥 Видео</button>
         <button id="btn-stop" onClick={stopVideo}>⏹ Стоп</button>
         <button id="btn-switch">🔄 Камера</button>
+        <button onClick={toggleMarkers} style={{ backgroundColor: markersVisible ? "rgba(255,0,0,0.3)" : "rgba(0,0,0,0.3)" }}>
+          🔴 Маркеры
+        </button>
         <button onClick={toggleFullscreen}>📱 Полный экран</button>
       </div>
 
