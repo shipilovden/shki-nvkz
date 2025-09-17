@@ -44,7 +44,7 @@ export function ARQuest(): React.JSX.Element {
   const watchIdRef = useRef<number | null>(null);
   const [fullscreenMode, setFullscreenMode] = useState(false);
   const [markersVisible, setMarkersVisible] = useState(true);
-  const [objectInfo, setObjectInfo] = useState<{[key: string]: {distance: number, inRange: boolean}}>({});
+  const [objectInfo, setObjectInfo] = useState<{[key: string]: {distance: number, inRange: boolean, coordinates: {lat: number, lon: number, alt: number}}}>({});
 
   const haversine = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3;
@@ -104,11 +104,12 @@ export function ARQuest(): React.JSX.Element {
         console.log(`🔴 Marker ${target.name} visibility set to: ${markersVisible}, size: ${markerSize.toFixed(2)}`);
         
         // Обновляем информацию об объекте
-        setObjectInfo(prev => ({
+        setObjectInfo((prev: any) => ({
           ...prev,
           [target.id]: {
             distance: distance,
-            inRange: distance <= target.activationRadiusM
+            inRange: distance <= target.activationRadiusM,
+            coordinates: { lat: target.lat, lon: target.lon, alt: target.alt }
           }
         }));
         
@@ -159,11 +160,11 @@ export function ARQuest(): React.JSX.Element {
       });
       const marker = new THREE.Mesh(markerGeometry, markerMaterial);
       marker.position.set(0, 0, 0); // Начальная позиция
-      marker.visible = markersVisible; // Устанавливаем видимость
+      marker.visible = true; // Всегда видимый при создании
       marker.userData.baseScale = 0.5; // Базовый размер
       scene.add(marker);
       markersRef.current[target.id] = marker;
-      console.log(`🔴 Red marker for ${target.name} created and added to scene, visible: ${markersVisible}`);
+      console.log(`🔴 Red marker for ${target.name} created and added to scene`);
     });
 
     // Загружаем все модели
@@ -205,6 +206,11 @@ export function ARQuest(): React.JSX.Element {
             marker.scale.setScalar(pulseScale);
             const material = (marker as THREE.Mesh).material as THREE.MeshBasicMaterial;
             material.opacity = opacity;
+            
+            // Логируем каждые 100 кадров для отладки
+            if (Math.floor(time * 100) % 100 === 0) {
+              console.log(`🔴 Marker ${target.name} pulsing: visible=${markersVisible}, scale=${pulseScale.toFixed(2)}, opacity=${opacity.toFixed(2)}`);
+            }
           }
         }
       });
@@ -442,10 +448,10 @@ export function ARQuest(): React.JSX.Element {
         </button>
       </div>
 
-      <div id="status" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 9, padding: "6px 10px", borderRadius: 8, background: "rgba(0,0,0,.5)", color: "#fff", fontSize: 12, display: status && !fullscreenMode ? "block" : "none" }}>{status}</div>
+      <div id="status" style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 9, padding: "6px 10px", borderRadius: 8, background: "rgba(0,0,0,.5)", color: "#fff", fontSize: 12, display: status ? "block" : "none" }}>{status}</div>
       
       {/* Информация об объектах */}
-      {started && !fullscreenMode && (
+      {started && (
         <div style={{ 
           position: "absolute", 
           top: 60, 
@@ -464,11 +470,14 @@ export function ARQuest(): React.JSX.Element {
             const info = objectInfo[target.id];
             if (!info) return null;
             return (
-              <div key={target.id} style={{ marginBottom: "4px" }}>
-                <span style={{ color: info.inRange ? "#00ff00" : "#ff6666" }}>
+              <div key={target.id} style={{ marginBottom: "6px", fontSize: "10px" }}>
+                <div style={{ color: info.inRange ? "#00ff00" : "#ff6666", fontWeight: "bold" }}>
                   {target.name}: {info.distance.toFixed(1)}м
-                </span>
-                {info.inRange && <span style={{ color: "#00ff00", marginLeft: "8px" }}>✓</span>}
+                  {info.inRange && <span style={{ color: "#00ff00", marginLeft: "8px" }}>✓</span>}
+                </div>
+                <div style={{ color: "#cccccc", fontSize: "9px", marginTop: "2px" }}>
+                  {info.coordinates.lat.toFixed(6)}, {info.coordinates.lon.toFixed(6)}, {info.coordinates.alt.toFixed(1)}м
+                </div>
               </div>
             );
           })}
