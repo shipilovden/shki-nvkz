@@ -19,8 +19,8 @@ const AR_CONFIG = {
     { 
       id: "shiva", 
       name: "Шива",
-      lat: 53.691670, 
-      lon: 87.432858, 
+      lat: 53.691667, 
+      lon: 87.432778, 
       alt: 389.0, 
       activationRadiusM: 50,
       model: { url: "/models/nataraja_shiva.glb", scale: 4.0, headingDeg: 0, yOffset: 2.0 }
