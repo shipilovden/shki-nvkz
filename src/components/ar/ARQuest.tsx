@@ -835,7 +835,7 @@ export function ARQuest(): React.JSX.Element {
           display: status ? "block" : "none" 
         }}>{status}</div>
 
-        {/* Верхние индикации - ТОЧНО как нижние кнопки (два ряда) */}
+        {/* Верхние индикации - в том же стиле что и нижние кнопки (один ряд, компактные) */}
         {started && (
           <div style={{ 
             position: fullscreenMode ? "fixed" : "absolute", 
@@ -843,119 +843,113 @@ export function ARQuest(): React.JSX.Element {
             left: "50%", 
             transform: "translateX(-50%)", 
             zIndex: 10000, 
+            display: "flex",
             gap: 6,
             overflow: "hidden",
             padding: "6px 10px",
             maxWidth: fullscreenMode ? "calc(100vw - 20px)" : "calc(100% - 20px)",
             boxSizing: "border-box",
             justifyContent: "center",
-            display: "flex",
-            flexDirection: "column" // Принудительно в два ряда!
+            flexWrap: "wrap"
           }}>
-            {/* Первый ряд - основные индикации */}
-            <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
-              {/* Стрелка направления */}
-              <div style={{ 
-                padding: "4px 6px", 
-                background: "rgba(0,255,0,0.7)", 
-                color: "white", 
-                border: "none", 
-                borderRadius: "4px", 
-                fontSize: "10px",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px"
-              }}>
-                {compassAngle !== null && compassAngle > 315 || compassAngle < 45 ? "⬆️" :
-                 compassAngle >= 45 && compassAngle < 135 ? "➡️" :
-                 compassAngle >= 135 && compassAngle < 225 ? "⬇️" : "⬅️"}
-                <span>Направление</span>
-              </div>
-              
-              {/* Расстояние до Шивы */}
-              <div style={{ 
-                padding: "4px 6px", 
-                background: "rgba(0,100,255,0.7)", 
-                color: "white", 
-                border: "none", 
-                borderRadius: "4px", 
-                fontSize: "10px",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px"
-              }}>
-                📏 {(() => {
-                  const shiva = AR_CONFIG.TARGETS.find(t => t.id === 'shiva');
-                  if (shiva && extendedDebug.userGPS.lat !== 0) {
-                    const dist = haversine(extendedDebug.userGPS.lat, extendedDebug.userGPS.lon, shiva.lat, shiva.lon);
-                    return `${dist.toFixed(1)}м`;
-                  }
-                  return "10.2м";
-                })()}
-              </div>
-              
-              {/* Компас угол */}
-              <div style={{ 
-                padding: "4px 6px", 
-                background: "rgba(255,165,0,0.7)", 
-                color: "white", 
-                border: "none", 
-                borderRadius: "4px", 
-                fontSize: "10px",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px"
-              }}>
-                🧭 {compassAngle !== null ? `${compassAngle.toFixed(0)}°` : "N/A"}
-              </div>
+            {/* Стрелка направления */}
+            <div style={{ 
+              padding: "4px 6px", 
+              background: "rgba(0,255,0,0.7)", 
+              color: "white", 
+              border: "none", 
+              borderRadius: "4px", 
+              fontSize: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px"
+            }}>
+              {compassAngle !== null && compassAngle > 315 || compassAngle < 45 ? "⬆️" :
+               compassAngle >= 45 && compassAngle < 135 ? "➡️" :
+               compassAngle >= 135 && compassAngle < 225 ? "⬇️" : "⬅️"}
+              <span>Направление</span>
             </div>
             
-            {/* Второй ряд - дополнительная информация */}
-            <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
-              {/* GPS координаты пользователя */}
-              <div style={{ 
-                padding: "4px 6px", 
-                background: "rgba(0,0,0,0.7)", 
-                color: "white", 
-                border: "none", 
-                borderRadius: "4px", 
-                fontSize: "9px",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px"
-              }}>
-                📍 {extendedDebug.userGPS.lat.toFixed(4)}, {extendedDebug.userGPS.lon.toFixed(4)}
-              </div>
-              
-              {/* Статус камеры */}
-              <div style={{ 
-                padding: "4px 6px", 
-                background: extendedDebug.cameraInfo.rotation.x === 0 && extendedDebug.cameraInfo.rotation.y === 0 && extendedDebug.cameraInfo.rotation.z === 0 ? "rgba(255,0,0,0.7)" : "rgba(0,255,0,0.7)", 
-                color: "white", 
-                border: "none", 
-                borderRadius: "4px", 
-                fontSize: "9px",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px"
-              }}>
-                📷 {extendedDebug.cameraInfo.rotation.x === 0 && extendedDebug.cameraInfo.rotation.y === 0 && extendedDebug.cameraInfo.rotation.z === 0 ? "НЕ поворачивается" : "Поворачивается"}
-              </div>
-              
-              {/* Статус моделей */}
-              <div style={{ 
-                padding: "4px 6px", 
-                background: "rgba(255,0,255,0.7)", 
-                color: "white", 
-                border: "none", 
-                borderRadius: "4px", 
-                fontSize: "9px",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px"
-              }}>
-                📦 {Object.values(extendedDebug.modelsLoaded).filter(Boolean).length}/{Object.keys(extendedDebug.modelsLoaded).length} моделей
-              </div>
+            {/* Расстояние до Шивы */}
+            <div style={{ 
+              padding: "4px 6px", 
+              background: "rgba(0,100,255,0.7)", 
+              color: "white", 
+              border: "none", 
+              borderRadius: "4px", 
+              fontSize: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px"
+            }}>
+              📏 {(() => {
+                const shiva = AR_CONFIG.TARGETS.find(t => t.id === 'shiva');
+                if (shiva && extendedDebug.userGPS.lat !== 0) {
+                  const dist = haversine(extendedDebug.userGPS.lat, extendedDebug.userGPS.lon, shiva.lat, shiva.lon);
+                  return `${dist.toFixed(1)}м`;
+                }
+                return "10.2м";
+              })()}
+            </div>
+            
+            {/* Компас угол */}
+            <div style={{ 
+              padding: "4px 6px", 
+              background: "rgba(255,165,0,0.7)", 
+              color: "white", 
+              border: "none", 
+              borderRadius: "4px", 
+              fontSize: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px"
+            }}>
+              🧭 {compassAngle !== null ? `${compassAngle.toFixed(0)}°` : "N/A"}
+            </div>
+            
+            {/* GPS координаты пользователя */}
+            <div style={{ 
+              padding: "4px 6px", 
+              background: "rgba(0,0,0,0.7)", 
+              color: "white", 
+              border: "none", 
+              borderRadius: "4px", 
+              fontSize: "9px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px"
+            }}>
+              📍 {extendedDebug.userGPS.lat.toFixed(4)}, {extendedDebug.userGPS.lon.toFixed(4)}
+            </div>
+            
+            {/* Статус камеры */}
+            <div style={{ 
+              padding: "4px 6px", 
+              background: extendedDebug.cameraInfo.rotation.x === 0 && extendedDebug.cameraInfo.rotation.y === 0 && extendedDebug.cameraInfo.rotation.z === 0 ? "rgba(255,0,0,0.7)" : "rgba(0,255,0,0.7)", 
+              color: "white", 
+              border: "none", 
+              borderRadius: "4px", 
+              fontSize: "9px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px"
+            }}>
+              📷 {extendedDebug.cameraInfo.rotation.x === 0 && extendedDebug.cameraInfo.rotation.y === 0 && extendedDebug.cameraInfo.rotation.z === 0 ? "НЕ поворачивается" : "Поворачивается"}
+            </div>
+            
+            {/* Статус моделей */}
+            <div style={{ 
+              padding: "4px 6px", 
+              background: "rgba(255,0,255,0.7)", 
+              color: "white", 
+              border: "none", 
+              borderRadius: "4px", 
+              fontSize: "9px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px"
+            }}>
+              📦 {Object.values(extendedDebug.modelsLoaded).filter(Boolean).length}/{Object.keys(extendedDebug.modelsLoaded).length} моделей
             </div>
           </div>
         )}
