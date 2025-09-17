@@ -302,6 +302,33 @@ export function ARQuest(): React.JSX.Element {
               console.log(`🔴 Marker ${target.name} pulsing: visible=${markersVisible}, scale=${pulseScale.toFixed(2)}, opacity=${opacity.toFixed(2)}, position=(${marker.position.x.toFixed(1)}, ${marker.position.y.toFixed(1)}, ${marker.position.z.toFixed(1)})`);
             }
           }
+          // HTML-оверлей: синхронизируем 2D-точку с 3D-маркером
+          const overlay = document.getElementById('overlay-markers');
+          if (overlay && camera && renderer) {
+            let dot = overlay.querySelector(`.dot-${target.id}`) as HTMLDivElement | null;
+            if (!dot) {
+              dot = document.createElement('div');
+              dot.className = `dot-${target.id}`;
+              Object.assign(dot.style, {
+                position: 'absolute', width: '18px', height: '18px', borderRadius: '50%',
+                background: 'rgba(255,0,0,0.85)', transform: 'translate(-50%, -50%)', display: 'none'
+              } as CSSStyleDeclaration);
+              overlay.appendChild(dot);
+            }
+            const v = new THREE.Vector3(marker.position.x, marker.position.y, marker.position.z).project(camera);
+            const rectW = (canvasRef.current?.clientWidth || 1);
+            const rectH = (canvasRef.current?.clientHeight || 1);
+            const x = (v.x * 0.5 + 0.5) * rectW;
+            const y = (-v.y * 0.5 + 0.5) * rectH;
+            const inFront = v.z < 1 && v.z > -1;
+            if (marker.visible && inFront) {
+              dot.style.left = `${x}px`;
+              dot.style.top = `${y}px`;
+              dot.style.display = 'block';
+            } else {
+              dot.style.display = 'none';
+            }
+          }
         } else {
           // Логируем каждые 100 кадров если маркер не найден
           if (Math.floor(time * 100) % 100 === 0) {
@@ -521,6 +548,12 @@ export function ARQuest(): React.JSX.Element {
             height: "100%",
             display: "block"
           }} 
+        />
+
+        {/* HTML-оверлей для маркеров (на случай, если WebGL-маркер не виден) */}
+        <div
+          id="overlay-markers"
+          style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
         />
 
         <div id="ar-controls" style={{ 
