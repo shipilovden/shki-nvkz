@@ -51,6 +51,7 @@ export function ARQuest(): React.JSX.Element {
   const [showDebug, setShowDebug] = useState(false);
   const [compassAngle, setCompassAngle] = useState<number | null>(null);
   const userPosRef = useRef<{lat:number, lon:number, alt:number}>({lat:0,lon:0,alt:0});
+  const deviceOrientationRef = useRef<{alpha: number, beta: number, gamma: number}>({alpha: 0, beta: 0, gamma: 0});
   // Авто-очистка статуса через 3 секунды, чтобы не залипал баннер
   useEffect(() => {
     if (!status) return;
@@ -118,9 +119,13 @@ export function ARQuest(): React.JSX.Element {
       let bearingRad = Math.atan2(y, x);
       let bearingDeg = (bearingRad * 180 / Math.PI + 360) % 360;
       
-      console.log(`🧭 Compass ${target.name}: bearing=${bearingDeg.toFixed(1)}°, distance=${distance.toFixed(1)}m`);
+      // Учитываем поворот устройства для компаса
+      const deviceAlpha = deviceOrientationRef.current.alpha;
+      const adjustedBearing = (bearingDeg - deviceAlpha + 360) % 360;
       
-      if (!closest || distance < closest.distance) closest = { id: target.id, angle: bearingDeg, distance };
+      console.log(`🧭 Compass ${target.name}: bearing=${bearingDeg.toFixed(1)}°, device=${deviceAlpha.toFixed(1)}°, adjusted=${adjustedBearing.toFixed(1)}°, distance=${distance.toFixed(1)}m`);
+      
+      if (!closest || distance < closest.distance) closest = { id: target.id, angle: adjustedBearing, distance };
 
       // Обновляем позицию красного маркера над моделью
       if (marker) {
@@ -220,6 +225,14 @@ export function ARQuest(): React.JSX.Element {
         const alpha = (e.alpha || 0) * (Math.PI/180);
         const beta = (e.beta || 0) * (Math.PI/180);
         const gamma = (e.gamma || 0) * (Math.PI/180);
+        
+        // Сохраняем ориентацию устройства для компаса
+        deviceOrientationRef.current = {
+          alpha: e.alpha || 0,
+          beta: e.beta || 0,
+          gamma: e.gamma || 0
+        };
+        
         // Преобразуем в кватернион камеры
         const euler = new THREE.Euler(beta, alpha, -gamma, "YXZ");
         camera.quaternion.setFromEuler(euler);
@@ -344,10 +357,10 @@ export function ARQuest(): React.JSX.Element {
               const worldPosition = new THREE.Vector3();
               marker.getWorldPosition(worldPosition);
               
-              // Проекция 3D координат на 2D экран
+              // Проекция 3D координат на 2D экран с учетом поворота камеры
               const screenPosition = worldPosition.clone().project(camera);
               
-              // Проверяем, что объект перед камерой
+              // Проверяем, что объект перед камерой (z < 1 означает перед камерой)
               if (screenPosition.z < 1) {
                 const canvas = canvasRef.current;
                 if (canvas) {
@@ -355,22 +368,34 @@ export function ARQuest(): React.JSX.Element {
                   const x = (screenPosition.x * 0.5 + 0.5) * rect.width;
                   const y = (-screenPosition.y * 0.5 + 0.5) * rect.height;
                   
-                  // Показываем точку даже если она за пределами экрана (для отладки)
-                  dot.style.left = `${x}px`;
-                  dot.style.top = `${y}px`;
-                  dot.style.display = 'block';
-                  // пульсация (CSS-анимация для стабильности)
-                  dot.style.animation = 'apulse 1s infinite ease-in-out';
-                  dot.style.width = '16px'; 
-                  dot.style.height = '16px';
+                  // Проверяем, что точка в пределах экрана (с небольшим запасом)
+                  const margin = 50;
+                  const inViewport = x >= -margin && x <= rect.width + margin && 
+                                   y >= -margin && y <= rect.height + margin;
                   
-                  // Логируем позицию для отладки
-                  if (Math.floor(time * 10) % 10 === 0) { // каждые 10 кадров
-                    console.log(`🔴 Overlay ${target.name}: screen(${x.toFixed(1)}, ${y.toFixed(1)}), world(${worldPosition.x.toFixed(1)}, ${worldPosition.y.toFixed(1)}, ${worldPosition.z.toFixed(1)})`);
+                  if (inViewport) {
+                    dot.style.left = `${x}px`;
+                    dot.style.top = `${y}px`;
+                    dot.style.display = 'block';
+                    // пульсация (CSS-анимация для стабильности)
+                    dot.style.animation = 'apulse 1s infinite ease-in-out';
+                    dot.style.width = '16px'; 
+                    dot.style.height = '16px';
+                    
+                    // Логируем позицию для отладки (реже, чтобы не спамить)
+                    if (Math.floor(time * 30) % 30 === 0) { // каждые 30 кадров
+                      console.log(`🔴 Overlay ${target.name}: screen(${x.toFixed(1)}, ${y.toFixed(1)}), world(${worldPosition.x.toFixed(1)}, ${worldPosition.y.toFixed(1)}, ${worldPosition.z.toFixed(1)}), z=${screenPosition.z.toFixed(3)}`);
+                    }
+                  } else {
+                    dot.style.display = 'none';
                   }
                 }
               } else {
                 dot.style.display = 'none';
+                // Логируем когда объект за камерой
+                if (Math.floor(time * 60) % 60 === 0) { // каждые 60 кадров
+                  console.log(`🔴 Overlay ${target.name}: behind camera, z=${screenPosition.z.toFixed(3)}`);
+                }
               }
             } else {
               dot.style.display = 'none';
@@ -440,6 +465,7 @@ export function ARQuest(): React.JSX.Element {
       
       addDebugInfo(`📍 User: ${userLat.toFixed(6)}, ${userLon.toFixed(6)}, ${userAlt.toFixed(1)}m`);
       addDebugInfo(`📍 Closest: ${closestTarget.name} ${closestTarget.distance.toFixed(0)}m`);
+      addDebugInfo(`📍 Device orientation: α=${deviceOrientationRef.current.alpha.toFixed(1)}°`);
       
       // Показываем статус с обеими дистанциями
       const statusText = distances.map(d => `${d.name}: ${d.distance.toFixed(1)}м`).join(', ');
@@ -458,15 +484,36 @@ export function ARQuest(): React.JSX.Element {
       
       watchIdRef.current = navigator.geolocation.watchPosition(
         (p) => {
-          console.log("🔄 GPS Update received:", {
-            lat: p.coords.latitude.toFixed(6),
-            lon: p.coords.longitude.toFixed(6),
-            alt: (p.coords.altitude ?? 0).toFixed(1),
-            accuracy: p.coords.accuracy?.toFixed(1) + "m"
-          });
-          userPosRef.current = { lat: p.coords.latitude, lon: p.coords.longitude, alt: p.coords.altitude ?? 0 };
-          updateModelPositionGPS(p.coords.latitude, p.coords.longitude, p.coords.altitude ?? 0);
-          setStatus(""); // очищаем статус при первом валидном апдейте
+          const newLat = p.coords.latitude;
+          const newLon = p.coords.longitude;
+          const newAlt = p.coords.altitude ?? 0;
+          
+          // Проверяем, действительно ли координаты изменились
+          const prevPos = userPosRef.current;
+          const latChanged = Math.abs(newLat - prevPos.lat) > 0.000001; // ~0.1м
+          const lonChanged = Math.abs(newLon - prevPos.lon) > 0.000001; // ~0.1м
+          const altChanged = Math.abs(newAlt - prevPos.alt) > 0.5; // 0.5м
+          
+          if (latChanged || lonChanged || altChanged) {
+            console.log("🔄 GPS Update received:", {
+              lat: newLat.toFixed(6),
+              lon: newLon.toFixed(6),
+              alt: newAlt.toFixed(1),
+              accuracy: p.coords.accuracy?.toFixed(1) + "m",
+              changes: { lat: latChanged, lon: lonChanged, alt: altChanged }
+            });
+            
+            userPosRef.current = { lat: newLat, lon: newLon, alt: newAlt };
+            updateModelPositionGPS(newLat, newLon, newAlt);
+            setStatus(""); // очищаем статус при первом валидном апдейте
+          } else {
+            console.log("🔄 GPS Update received but no significant change:", {
+              lat: newLat.toFixed(6),
+              lon: newLon.toFixed(6),
+              alt: newAlt.toFixed(1),
+              accuracy: p.coords.accuracy?.toFixed(1) + "m"
+            });
+          }
         },
         (err) => {
           console.error("❌ GPS Error:", err);
@@ -474,8 +521,8 @@ export function ARQuest(): React.JSX.Element {
         },
         { 
           enableHighAccuracy: true, 
-          maximumAge: 500, // Обновляем каждые 500мс
-          timeout: 5000 
+          maximumAge: 0, // Не кэшируем, всегда получаем свежие данные
+          timeout: 10000 
         }
       );
     } catch (e) {
