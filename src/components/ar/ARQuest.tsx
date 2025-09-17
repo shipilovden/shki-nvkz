@@ -835,7 +835,7 @@ export function ARQuest(): React.JSX.Element {
           display: status ? "block" : "none" 
         }}>{status}</div>
 
-        {/* Верхние индикации - как кнопки внизу (два ряда) */}
+        {/* Верхние индикации - ТОЧНО как нижние кнопки (два ряда) */}
         {started && (
           <div style={{ 
             position: fullscreenMode ? "fixed" : "absolute", 
@@ -843,17 +843,17 @@ export function ARQuest(): React.JSX.Element {
             left: "50%", 
             transform: "translateX(-50%)", 
             zIndex: 10000, 
-            display: "flex",
             gap: 6,
             overflow: "hidden",
             padding: "6px 10px",
             maxWidth: fullscreenMode ? "calc(100vw - 20px)" : "calc(100% - 20px)",
             boxSizing: "border-box",
             justifyContent: "center",
-            flexWrap: "wrap"
+            display: "flex",
+            flexDirection: "column" // Принудительно в два ряда!
           }}>
             {/* Первый ряд - основные индикации */}
-            <div style={{ display: "flex", gap: 6 }}>
+            <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
               {/* Стрелка направления */}
               <div style={{ 
                 padding: "4px 6px", 
@@ -911,7 +911,7 @@ export function ARQuest(): React.JSX.Element {
             </div>
             
             {/* Второй ряд - дополнительная информация */}
-            <div style={{ display: "flex", gap: 6 }}>
+            <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
               {/* GPS координаты пользователя */}
               <div style={{ 
                 padding: "4px 6px", 
