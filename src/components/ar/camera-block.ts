@@ -42,7 +42,7 @@ export async function startCamera(scene: THREE.Scene, facing: "environment" | "u
   videoTexture = new THREE.VideoTexture(video);
   videoTexture.minFilter = THREE.LinearFilter;
   videoTexture.magFilter = THREE.LinearFilter;
-  videoTexture.encoding = THREE.sRGBEncoding;
+  videoTexture.colorSpace = THREE.SRGBColorSpace;
 
   // Основной путь: используем видео как фон сцены
   try {
